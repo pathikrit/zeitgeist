@@ -1,4 +1,4 @@
 
 ```python
-uvx marimo edit
+uv run marimo edit zeitgeist.py 
 ```
