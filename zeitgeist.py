@@ -38,7 +38,14 @@ def _():
 
 
 @app.cell
-async def _(pl, predictions):
+def _():
+    REASONING_MODEL = "openai:o3-2025-04-16"
+    DEFAULT_MODEL = "openai:gpt-4.1-2025-04-14"
+    return (DEFAULT_MODEL,)
+
+
+@app.cell
+async def _(DEFAULT_MODEL, pl, predictions):
     from pydantic_ai import Agent
     from pydantic import BaseModel, Field
 
@@ -68,13 +75,14 @@ async def _(pl, predictions):
         "</about_me>"
     )
 
+
     class RelevantPrediction(BaseModel):
         id: str = Field(description="original id from input")
         topics: list[str] = Field(description="public companies or investment sectors or broad alternatives impacted")
 
 
     relevant_prediction_agent = Agent(
-        model="openai:gpt-4.1",
+        model=DEFAULT_MODEL,
         output_type=list[RelevantPrediction],
         system_prompt=(
             "<task>"
@@ -90,7 +98,7 @@ async def _(pl, predictions):
             "    but major economies like Chinese, India, EU, MEA politics is likely to impact"
             "  - Media e.g. what song will be in top billboard this week"
             "  - Ignore memecoins and NFTs (but focus on major crypto themes like BTC, solana and ethereum etc)"
-            "  - Ignore essentially gambling bets on short term prices e.g. what will be USD/JPY today at 12pm"        
+            "  - Ignore essentially gambling bets on short term prices e.g. what will be USD/JPY today at 12pm"
             "Examine each question and return a subset of ids and related topics they may impact"
             "Topics be few must be short strings like sectors or tickers"
             "or short phrases that would be impacted by this question"
@@ -107,52 +115,58 @@ async def _(pl, predictions):
 
     tagged_predictions = await tag_predictions(predictions)
     tagged_predictions
-    return
+    return Agent, about_me, tagged_predictions
 
 
-app._unparsable_cell(
-    r"""
+@app.cell
+async def _(Agent, DEFAULT_MODEL, about_me, pl, tagged_predictions):
     import marimo as mo
     from datetime import date
 
 
     synthesizing_agent = Agent(
-        model=\"openai:o3-2025-04-16\",
+        model=DEFAULT_MODEL,
         output_type=str,
         system_prompt=(
-            f\"{about_me}\"
-            \"<task>\"
-            \"You will be provided an array of questions and probabilities from an online betting market\"
-            \"Consolidate and summarize into a 1-pager investment guideline thesis report\"
-            \"The provided topics column can serve as hints to explore but think deeply about 2nd and 3rd order effects\"
-            \"Take into account the probabilities and the fact that the topic is being discussed in the first place\"
-            \"but also keep in mind that prediction markets often have longshot bias i.e.\"
-            \"people sometime tend to overweight extreme low-probability outcomes and underweight high-probability ones\"
-            \"due to the non-linear probability weighting function in their model\"
-            \"</task>\"
-            \"<output_format>\"
-            \"Present in a markdown format with sections and sub-sections\"
-            \"Go from broad (e.g. macro) to narrow (e.g. sector) and finally individual names as top-level sections\"
-            f\"This is intended to be consumed daily as a news memo (today's date is {date.today().strftime(\"%d-%b-%Y\")})\"
-            \"So just use the title: Daily Memo (date)\"
-            \"Things to avoid:\"
-            \"  - Don't mention that your input was prediction markets; the reader is aware of that\"
-            \"  - Avoid putting the exact probabilities from the input; just use plain English to describe the prospects\"
-            \"  - Avoid general guidelines like 'review this quarterly'\"
-            \"</output_format>\"
+            f"{about_me}"
+            "<task>"
+            "You will be provided an array of questions and probabilities from an online betting market"
+            "Consolidate and summarize into a 1-pager investment guideline thesis report"
+            "The provided topics column can serve as hints to explore but think deeply about 2nd and 3rd order effects"
+            "Take into account the probabilities and the fact that the topic is being discussed in the first place"
+            "but also keep in mind that prediction markets often have longshot bias i.e."
+            "people sometime tend to overweight extreme low-probability outcomes and underweight high-probability ones"
+            "due to the non-linear probability weighting function in their model"
+            "</task>"
+            "<output_format>"
+            "Present in a markdown format with sections and sub-sections"
+            "Go from broad (e.g. macro) to narrow (e.g. sector) and finally individual names as top-level sections"
+            f"This is intended to be consumed daily as a news memo (today's date is {date.today().strftime('%d-%b-%Y')})"
+            "So just use the title: Daily Memo (date)"
+            "Things to avoid:"
+            "  - Don't mention that your input was prediction markets; the reader is aware of that"
+            "  - Avoid putting the exact probabilities from the input; just use plain English to describe the prospects"
+            "  - Avoid general guidelines like 'review this quarterly'"
+            "</output_format>"
         ),
     )
 
-    report_input = tagged_predictions.drop(\"id\").filter(pl.col(\"topics\").is_not_null())
+    report_input = tagged_predictions.drop("id").filter(pl.col("topics").is_not_null())
     report = await synthesizing_agent.run(report_input.write_json())
     mo.md(report.output)
+    return mo, report
 
 
-    git branch -M master
-    git push -u origin master
-    """,
-    name="_"
-)
+@app.cell
+def _(report):
+    print(report.output)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r""" """)
+    return
 
 
 if __name__ == "__main__":
