@@ -8,33 +8,72 @@ app = marimo.App(width="medium")
 def _():
     import requests
     import polars as pl
+    import json
 
 
     def fetch_from_kalshi() -> pl.DataFrame:
-        BASE = "https://api.elections.kalshi.com/trade-api/v2"
+        API_URL = "https://api.elections.kalshi.com/trade-api/v2"
         params = {"status": "open", "with_nested_markets": "true", "limit": 100, "cursor": None}
         predictions = []
 
         def simple_prediction(e):
-            obj = {"id": e["event_ticker"], "title": e["title"], "bets": []}
+            bets = []
             for m in e["markets"]:
-                obj["bets"].append({"prompt": m["yes_sub_title"], "probability": m["last_price"] / m["notional_value"]})
-            return obj
+                bets.append({"prompt": m["yes_sub_title"], "probability": m["last_price"] / m["notional_value"]})
+            return {"id": f"kalshi-{e['event_ticker']}", "title": e["title"], "bets": bets}
 
         while True:
-            print(f"Fetching from kalshi @ curor={params['cursor']} ...")
-            resp = requests.get(f"{BASE}/events", params=params)
+            print(f"Fetching from kalshi @ offset={len(predictions)} ...")
+            resp = requests.get(f"{API_URL}/events", params=params)
             resp.raise_for_status()
             data = resp.json()
             predictions.extend(data["events"])
             params["cursor"] = data.get("cursor")
             if not params["cursor"]:
+                print(f"Fetched {len(predictions)} from kalshi")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
 
-    predictions = fetch_from_kalshi()
-    predictions
-    return pl, predictions
+    kalshi_predictions = fetch_from_kalshi()
+    kalshi_predictions
+    return json, kalshi_predictions, pl, requests
+
+
+@app.cell
+def _(json, pl, requests):
+    def fetch_from_polymarket() -> pl.DataFrame:
+        API_URL = "https://gamma-api.polymarket.com"
+        predictions = []
+
+        def simple_prediction(p):
+            bets = []
+            for prompt, probability in zip(json.loads(p["outcomes"]), json.loads(p.get("outcomePrices", "[]"))):
+                bets.append({"prompt": prompt, "probability": float(probability)})
+            return {"id": f"pm-{p['id']}", "title": p["question"], "bets": bets}
+
+        while True:
+            params = {"active": "true", "closed": "false", "limit": 100, "offset": len(predictions)}
+            print(f"Fetching from polymarket @ offset={params['offset']} ...")
+            resp = requests.get(f"{API_URL}/markets", params=params)
+            resp.raise_for_status()
+            data = resp.json()
+            predictions.extend(data)
+            if not data:
+                print(f"Fetched {len(predictions)} from polymarket")
+                return pl.DataFrame([simple_prediction(p) for p in predictions])
+
+        return predictions
+
+
+    polymarket_predictions = fetch_from_polymarket()
+    return (polymarket_predictions,)
+
+
+@app.cell
+def _(kalshi_predictions, polymarket_predictions):
+    predictions = kalshi_predictions.extend(polymarket_predictions)
+    len(predictions)
+    return (predictions,)
 
 
 @app.cell
@@ -48,7 +87,9 @@ def _():
 async def _(DEFAULT_MODEL, pl, predictions):
     from pydantic_ai import Agent
     from pydantic import BaseModel, Field
+    from datetime import date
 
+    today_date = f"today's date is {date.today().strftime('%d-%b-%Y')}"
 
     about_me = (
         "<about_me>"
@@ -64,10 +105,11 @@ async def _(DEFAULT_MODEL, pl, predictions):
         "  - Public or private companies suing each other or M&A activities"
         "  - Foreign politics that would affect USD rates with major international currencies like JPY,CNY,EUR etc"
         "  - EV/climate legislatation and goals in short term (<5 years)"
-        "  - US policies and outlook on debt, budget, tax laws, tariffs, healthcare"
+        "  - US policies and outlook on debt, budget, tax laws, tariffs, healthcare, energy"
         "  - General major geopolitical events that can happen near future (<5 years)"
         "  - Specific public companies mentioned like Tesla, Apple, Nvidia etc"
         "  - Major natural disasters or crisis with high (>50%) probabilities"
+        f"FYI: {today_date}"
         "General instuctions:"
         "- Think deeply about second or third order effects"
         "- Don't restrict yourself or fixate on tickers or themes mentioned above"
@@ -115,13 +157,19 @@ async def _(DEFAULT_MODEL, pl, predictions):
 
     tagged_predictions = await tag_predictions(predictions)
     tagged_predictions
-    return Agent, about_me, tagged_predictions
+    return Agent, about_me, tagged_predictions, today_date
 
 
 @app.cell
-async def _(Agent, DEFAULT_MODEL, about_me, pl, tagged_predictions):
+async def _(
+    Agent,
+    DEFAULT_MODEL,
+    about_me,
+    pl,
+    tagged_predictions,
+    today_date,
+):
     import marimo as mo
-    from datetime import date
 
 
     synthesizing_agent = Agent(
@@ -141,12 +189,14 @@ async def _(Agent, DEFAULT_MODEL, about_me, pl, tagged_predictions):
             "<output_format>"
             "Present in a markdown format with sections and sub-sections"
             "Go from broad (e.g. macro) to narrow (e.g. sector) and finally individual names as top-level sections"
-            f"This is intended to be consumed daily as a news memo (today's date is {date.today().strftime('%d-%b-%Y')})"
+            f"This is intended to be consumed daily as a news memo ({today_date})"
             "So just use the title: Daily Memo (date)"
             "Things to avoid:"
             "  - Don't mention that your input was prediction markets; the reader is aware of that"
             "  - Avoid putting the exact probabilities from the input; just use plain English to describe the prospects"
             "  - Avoid general guidelines like 'review this quarterly'"
+            "  - Unless it pertains to an individual company or currency"
+            "    avoid mentioning broad ETF tickers as I can figure that out from the sector or bond duration etc"
             "</output_format>"
         ),
     )
@@ -154,18 +204,6 @@ async def _(Agent, DEFAULT_MODEL, about_me, pl, tagged_predictions):
     report_input = tagged_predictions.drop("id").filter(pl.col("topics").is_not_null())
     report = await synthesizing_agent.run(report_input.write_json())
     mo.md(report.output)
-    return mo, report
-
-
-@app.cell
-def _(report):
-    print(report.output)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r""" """)
     return
 
 
