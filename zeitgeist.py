@@ -143,6 +143,7 @@ async def _(DEFAULT_MODEL, pl, predictions):
             "Examine each question and return a subset of ids and related topics they may impact"
             "Topics be few must be short strings like sectors or tickers"
             "or short phrases that would be impacted by this question"
+            "Generally be lenient when possible to decide whether to include an id or not"
         ),
     )
 
@@ -163,7 +164,7 @@ async def _(DEFAULT_MODEL, pl, predictions):
 def _(pl):
     from gnews import GNews
 
-    news = pl.DataFrame(GNews().get_top_news())
+    news = GNews().get_top_news()
     print(f"Fetched {len(news)} news headlines")
     news
     return (news,)
@@ -179,6 +180,8 @@ async def _(
     pl,
     tagged_predictions,
 ):
+    import marimo as mo
+
     def to_xml_str(input: dict) -> str:
         from dicttoxml import dicttoxml
 
@@ -221,11 +224,11 @@ async def _(
         "prediction_markets": tagged_predictions.select("title", "bets", "topics")
         .filter(pl.col("topics").is_not_null())
         .to_dicts(),
-        "news_headlines": news.select("title", "description").to_dicts(),
+        "news_headlines": pl.DataFrame(news).select("title", "description").to_dicts() if news else [],
     }
 
     report = await synthesizing_agent.run(to_xml_str(report_input))
-    marimo.md(report.output)
+    mo.md(report.output)
     return (report,)
 
 
@@ -237,7 +240,8 @@ def _(date, report):
     output_dir = Path(f".reports/{today.strftime("%Y/%m/%d")}")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    html = f"""<!DOCTYPE html>
+    html = f"""
+    <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
@@ -249,7 +253,9 @@ def _(date, report):
     </html>
     """
 
+    print(f"Writing to {output_dir} ...")
     (output_dir / "index.html").write_text(html, encoding="utf-8")
+    print("Done!")
     html
     return
 
