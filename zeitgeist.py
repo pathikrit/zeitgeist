@@ -35,7 +35,6 @@ def _():
 
 
     kalshi_predictions = fetch_from_kalshi()
-    kalshi_predictions
     return json, kalshi_predictions, pl, requests
 
 
@@ -108,11 +107,11 @@ async def _(DEFAULT_MODEL, pl, predictions):
         "  - US policies and outlook on debt, budget, tax laws, tariffs, healthcare, energy"
         "  - General major geopolitical events that can happen near future (<5 years)"
         "  - Specific public companies mentioned like Tesla, Apple, Nvidia etc"
-        "  - Major natural disasters or crisis with high (>50%) probabilities"
+        "  - Major natural disasters, pandemics or crisis with high (>50%) probabilities"
         f"FYI: {today_date}"
         "General instuctions:"
         "- Think deeply about second or third order effects"
-        "- Don't restrict yourself or fixate on tickers or themes mentioned above"
+        "- Don't restrict yourself or fixate on only the tickers or themes mentioned above"
         "  since these are just examples I used to give you a general idea of how I can invest"
         "</about_me>"
     )
@@ -161,15 +160,31 @@ async def _(DEFAULT_MODEL, pl, predictions):
 
 
 @app.cell
+def _(pl):
+    from gnews import GNews
+    import marimo as mo
+
+    news = pl.DataFrame(GNews().get_top_news())
+    print(f"Fetched {len(news)} news headlines")
+    news
+    return mo, news
+
+
+@app.cell
 async def _(
     Agent,
     DEFAULT_MODEL,
     about_me,
+    mo,
+    news,
     pl,
     tagged_predictions,
     today_date,
 ):
-    import marimo as mo
+    def to_xml_str(input: dict) -> str:
+        from dicttoxml import dicttoxml
+
+        return dicttoxml(input, xml_declaration=False, root=False, attr_type=False, return_bytes=False)
 
 
     synthesizing_agent = Agent(
@@ -179,6 +194,7 @@ async def _(
             f"{about_me}"
             "<task>"
             "You will be provided an array of questions and probabilities from an online betting market"
+            f"along with today's ({today_date}) top news headlines"
             "Consolidate and summarize into a 1-pager investment guideline thesis report"
             "The provided topics column can serve as hints to explore but think deeply about 2nd and 3rd order effects"
             "Take into account the probabilities and the fact that the topic is being discussed in the first place"
@@ -189,7 +205,9 @@ async def _(
             "<output_format>"
             "Present in a markdown format with sections and sub-sections"
             "Go from broad (e.g. macro) to narrow (e.g. sector) and finally individual names as top-level sections"
-            f"This is intended to be consumed daily as a news memo ({today_date})"
+            "Also add and consolidate any important or relevant news items"
+            "in simple bullets at the top in a separate news section"
+            f"This is intended to be consumed daily as a news memo"
             "So just use the title: Daily Memo (date)"
             "Things to avoid:"
             "  - Don't mention that your input was prediction markets; the reader is aware of that"
@@ -201,8 +219,14 @@ async def _(
         ),
     )
 
-    report_input = tagged_predictions.drop("id").filter(pl.col("topics").is_not_null())
-    report = await synthesizing_agent.run(report_input.write_json())
+    report_input = {
+        "prediction_markets": tagged_predictions.select("title", "bets", "topics")
+        .filter(pl.col("topics").is_not_null())
+        .to_dicts(),
+        "news_headlines": news.select("title", "description").to_dicts(),
+    }
+
+    report = await synthesizing_agent.run(to_xml_str(report_input))
     mo.md(report.output)
     return
 

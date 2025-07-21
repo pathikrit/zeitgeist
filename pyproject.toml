@@ -1,11 +1,13 @@
 [project]
 name = "zeitgeist"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "dicttoxml>=1.7.16",
+    "gnews>=0.4.1",
     "marimo>=0.14.11",
+    "polars>=1.31.0",
     "pydantic-ai>=0.4.3",
     "requests>=2.32.4",
 ]
