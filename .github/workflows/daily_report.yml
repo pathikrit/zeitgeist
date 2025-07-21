@@ -24,6 +24,8 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Generate report
+        env:
+          OPENAI_API_KEY: ${{secrets.OPENAI_API_KEY}}
         run: uv run python zeitgeist.py
 
       - name: Publish report
