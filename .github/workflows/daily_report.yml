@@ -6,9 +6,11 @@ on:
     - cron: '0 12 * * *'  # daily at 7am ET (12pm UTC)
 
 jobs:
-  make-report:
-    name: python
+  report:
+    name: Make report
     runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{secrets.OPENAI_API_KEY}}
 
     steps:
       - uses: actions/checkout@v4
@@ -24,8 +26,6 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Generate report
-        env:
-          OPENAI_API_KEY: ${{secrets.OPENAI_API_KEY}}
         run: uv run python zeitgeist.py
 
       - name: Publish report
@@ -34,4 +34,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: .reports
-          clean: false      # ← preserve whatever’s already on gh‑pages
+          clean: false  # ← preserve whatever’s already on gh‑pages
