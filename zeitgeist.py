@@ -88,7 +88,7 @@ async def _(DEFAULT_MODEL, pl, predictions):
     from pydantic import BaseModel, Field
     from datetime import date
 
-    today_date = f"today's date is {date.today().strftime('%d-%b-%Y')}"
+    today = date.today()
 
     about_me = (
         "<about_me>"
@@ -108,7 +108,7 @@ async def _(DEFAULT_MODEL, pl, predictions):
         "  - General major geopolitical events that can happen near future (<5 years)"
         "  - Specific public companies mentioned like Tesla, Apple, Nvidia etc"
         "  - Major natural disasters, pandemics or crisis with high (>50%) probabilities"
-        f"FYI: {today_date}"
+        f"FYI: today's date is {today.strftime('%d-%b-%Y')}"
         "General instuctions:"
         "- Think deeply about second or third order effects"
         "- Don't restrict yourself or fixate on only the tickers or themes mentioned above"
@@ -156,18 +156,17 @@ async def _(DEFAULT_MODEL, pl, predictions):
 
     tagged_predictions = await tag_predictions(predictions)
     tagged_predictions
-    return Agent, about_me, tagged_predictions, today_date
+    return Agent, about_me, date, tagged_predictions
 
 
 @app.cell
 def _(pl):
     from gnews import GNews
-    import marimo as mo
 
     news = pl.DataFrame(GNews().get_top_news())
     print(f"Fetched {len(news)} news headlines")
     news
-    return mo, news
+    return (news,)
 
 
 @app.cell
@@ -175,11 +174,10 @@ async def _(
     Agent,
     DEFAULT_MODEL,
     about_me,
-    mo,
+    marimo,
     news,
     pl,
     tagged_predictions,
-    today_date,
 ):
     def to_xml_str(input: dict) -> str:
         from dicttoxml import dicttoxml
@@ -194,7 +192,7 @@ async def _(
             f"{about_me}"
             "<task>"
             "You will be provided an array of questions and probabilities from an online betting market"
-            f"along with today's ({today_date}) top news headlines"
+            f"along with today's top news headlines"
             "Consolidate and summarize into a 1-pager investment guideline thesis report"
             "The provided topics column can serve as hints to explore but think deeply about 2nd and 3rd order effects"
             "Take into account the probabilities and the fact that the topic is being discussed in the first place"
@@ -227,7 +225,32 @@ async def _(
     }
 
     report = await synthesizing_agent.run(to_xml_str(report_input))
-    mo.md(report.output)
+    marimo.md(report.output)
+    return (report,)
+
+
+@app.cell
+def _(date, report):
+    from pathlib import Path
+    from markdown_it import MarkdownIt
+
+    output_dir = Path(f".reports/{today.strftime("%Y/%m/%d")}")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    html = f"""<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>Report {today.strftime('%d-%b-%Y')}</title>
+    </head>
+    <body>
+    {MarkdownIt().render(report.output)}
+    </body>
+    </html>
+    """
+
+    (output_dir / "index.html").write_text(html, encoding="utf-8")
+    html
     return
 
 
