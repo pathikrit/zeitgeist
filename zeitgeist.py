@@ -235,16 +235,19 @@ async def _(Agent, DEFAULT_MODEL, about_me, mo, news, pl, tagged_predictions):
 def _(Path, report, today):
     from markdown_it import MarkdownIt
 
-    output_dir = Path(f".reports/{today.strftime("%Y/%m/%d")}")
+    output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     html = f"""<!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css">
         <title>Report {today.strftime('%d-%b-%Y')}</title>
     </head>
-    <body>{MarkdownIt().render(report.output)}</body>
+    <body>
+    <main>{MarkdownIt().render(report.output)}</main>
+    </body>
     </html>
     """
 
