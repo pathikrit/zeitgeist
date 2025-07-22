@@ -4,11 +4,20 @@ on:
   workflow_dispatch: # enables to manually trigger this job
   schedule:
     - cron: '0 12 * * *'  # daily at 7am ET (12pm UTC)
+  push:
+    branches:
+      - master
+
+
 
 jobs:
   report:
     name: Make report
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     env:
       OPENAI_API_KEY: ${{secrets.OPENAI_API_KEY}}
 
@@ -29,9 +38,8 @@ jobs:
         run: uv run python zeitgeist.py
 
       - name: Publish report
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          publish_branch: gh-pages
           publish_dir: .reports
           keep_files: true
