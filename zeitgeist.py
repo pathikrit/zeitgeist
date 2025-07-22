@@ -160,7 +160,7 @@ async def _(Agent, BaseModel, DEFAULT_MODEL, Field, pl, predictions, today):
     async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
         try:
             relevant_predictions = await relevant_prediction_agent.run(predictions.write_json())
-        except e:
+        except Exception as e:
             if e.__cause__:
                 print(f"Underlying error: {type(e.__cause__).__name__}: {str(e.__cause__)}")
             else:
