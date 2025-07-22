@@ -15,10 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Test OpenAI API Connectivity
-        run: |
-          curl https://api.openai.com/v1/models -H "Authorization: Bearer ${{secrets.OPENAI_API_KEY}}"
-
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
@@ -38,4 +34,4 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           publish_branch: gh-pages
           publish_dir: .reports
-          clean: false  # ← preserve whatever’s already on gh‑pages
+          keep_files: true
