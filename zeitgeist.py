@@ -6,11 +6,26 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import requests
-    import polars as pl
+    from datetime import date
     import json
+    from pathlib import Path
+    import os
+
+    import polars as pl
+    from pydantic import BaseModel, Field
+    from pydantic_ai import Agent
+    import requests
+    import marimo as mo
 
 
+    today = date.today()
+
+    assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found in env. Either add to .env file in this repo or export it in terminal"
+    return Agent, BaseModel, Field, Path, json, mo, pl, requests, today
+
+
+@app.cell
+def _(pl, requests):
     def fetch_from_kalshi() -> pl.DataFrame:
         API_URL = "https://api.elections.kalshi.com/trade-api/v2"
         params = {"status": "open", "with_nested_markets": "true", "limit": 100, "cursor": None}
@@ -35,7 +50,7 @@ def _():
 
 
     kalshi_predictions = fetch_from_kalshi()
-    return json, kalshi_predictions, pl, requests
+    return (kalshi_predictions,)
 
 
 @app.cell
@@ -83,13 +98,7 @@ def _():
 
 
 @app.cell
-async def _(DEFAULT_MODEL, pl, predictions):
-    from pydantic_ai import Agent
-    from pydantic import BaseModel, Field
-    from datetime import date
-
-    today = date.today()
-
+async def _(Agent, BaseModel, DEFAULT_MODEL, Field, pl, predictions, today):
     about_me = (
         "<about_me>"
         "I am an American equities investor and I am interested in topics"
@@ -157,11 +166,11 @@ async def _(DEFAULT_MODEL, pl, predictions):
 
     tagged_predictions = await tag_predictions(predictions)
     tagged_predictions
-    return Agent, about_me, date, tagged_predictions
+    return about_me, tagged_predictions
 
 
 @app.cell
-def _(pl):
+def _():
     from gnews import GNews
 
     news = GNews().get_top_news()
@@ -171,17 +180,7 @@ def _(pl):
 
 
 @app.cell
-async def _(
-    Agent,
-    DEFAULT_MODEL,
-    about_me,
-    marimo,
-    news,
-    pl,
-    tagged_predictions,
-):
-    import marimo as mo
-
+async def _(Agent, DEFAULT_MODEL, about_me, mo, news, pl, tagged_predictions):
     def to_xml_str(input: dict) -> str:
         from dicttoxml import dicttoxml
 
@@ -233,23 +232,19 @@ async def _(
 
 
 @app.cell
-def _(date, report):
-    from pathlib import Path
+def _(Path, report, today):
     from markdown_it import MarkdownIt
 
     output_dir = Path(f".reports/{today.strftime("%Y/%m/%d")}")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    html = f"""
-    <!DOCTYPE html>
+    html = f"""<!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
         <title>Report {today.strftime('%d-%b-%Y')}</title>
     </head>
-    <body>
-    {MarkdownIt().render(report.output)}
-    </body>
+    <body>{MarkdownIt().render(report.output)}</body>
     </html>
     """
 

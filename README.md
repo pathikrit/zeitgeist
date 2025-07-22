@@ -6,7 +6,6 @@ Simple script to go from prediction markets -> LLM -> news
 ```shell
 git clone git@github.com:pathikrit/zeitgeist.git
 cd zeitgeist
-export OPENAI_API_KEY=??? # or add this to the .env file
 uv run marimo edit zeitgeist.py
 ```
 
