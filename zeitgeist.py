@@ -158,7 +158,14 @@ async def _(Agent, BaseModel, DEFAULT_MODEL, Field, pl, predictions, today):
 
 
     async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
-        relevant_predictions = await relevant_prediction_agent.run(predictions.write_json())
+        try:
+            relevant_predictions = await relevant_prediction_agent.run(predictions.write_json())
+        except e:
+            if e.__cause__:
+                print(f"Underlying error: {type(e.__cause__).__name__}: {str(e.__cause__)}")
+            else:
+                print(f"Underlying error: {str(e)}")
+            raise
         relevant_predictions = pl.DataFrame(relevant_predictions.output)
         print(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
         return predictions.join(relevant_predictions, on="id", how="left")
