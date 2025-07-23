@@ -246,7 +246,12 @@ def _(Path, report, today):
         <title>Report {today.strftime('%d-%b-%Y')}</title>
     </head>
     <body>
-    <main>{MarkdownIt().render(report.output)}</main>
+    <main>
+    <a href="https://github.com/pathikrit/zeitgeist" target="_blank" rel="noopener" style="float: right;">
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="30" height="30">
+    </a>
+    {MarkdownIt().render(report.output)}
+    </main>
     </body>
     </html>
     """
