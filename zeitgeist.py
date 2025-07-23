@@ -20,7 +20,7 @@ def _():
 
     today = date.today()
 
-    assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found in env. Either add to .env file in this repo or export it in terminal"
+    assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found in env. Either add to .env file or run `export OPENAI_API_KEY=???`"
     return Agent, BaseModel, Field, Path, json, mo, pl, requests, today
 
 
@@ -75,9 +75,6 @@ def _(json, pl, requests):
             if not data:
                 print(f"Fetched {len(predictions)} from polymarket")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
-
-        return predictions
-
 
     polymarket_predictions = fetch_from_polymarket()
     return (polymarket_predictions,)

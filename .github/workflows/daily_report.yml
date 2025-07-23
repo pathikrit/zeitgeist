@@ -3,12 +3,7 @@ name: Daily Report
 on:
   workflow_dispatch: # enables to manually trigger this job
   schedule:
-    - cron: '0 12 * * *'  # daily at 7am ET (12pm UTC)
-  push:
-    branches:
-      - master
-
-
+    - cron: '0 */6 * * *'  # Every 6 hours at 7pm ET (-5 UTC), 1am ET, 7am ET and 1pm ET
 
 jobs:
   report:
