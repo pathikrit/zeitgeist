@@ -89,8 +89,7 @@ def _(kalshi_predictions, polymarket_predictions):
 
 @app.cell
 def _():
-    REASONING_MODEL = "openai:o3-2025-04-16"
-    DEFAULT_MODEL = "openai:gpt-4.1-2025-04-14"
+    DEFAULT_MODEL = "openai:gpt-5-2025-08-07"
     return (DEFAULT_MODEL,)
 
 
