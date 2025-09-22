@@ -89,7 +89,7 @@ def _(kalshi_predictions, polymarket_predictions):
 
 @app.cell
 def _():
-    DEFAULT_MODEL = "openai:gpt-5-2025-08-07"
+    DEFAULT_MODEL = "openai:gpt-4.1-2025-04-14"  # gpt5 has 400k token limit
     return (DEFAULT_MODEL,)
 
 
