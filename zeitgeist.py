@@ -18,6 +18,9 @@ def _():
     import requests
     import marimo as mo
 
+    BATCH_SIZE = 1000
+    RETRIES = 3
+    DEFAULT_MODEL = "openai:gpt-5-2025-08-07"
 
     today = date.today()
 
@@ -26,9 +29,12 @@ def _():
     )
     return (
         Agent,
+        BATCH_SIZE,
         BaseModel,
+        DEFAULT_MODEL,
         Field,
         Path,
+        RETRIES,
         asyncio,
         json,
         mo,
@@ -103,17 +109,13 @@ def _(kalshi_predictions, polymarket_predictions):
 
 
 @app.cell
-def _():
-    DEFAULT_MODEL = "openai:gpt-5-2025-08-07"
-    return (DEFAULT_MODEL,)
-
-
-@app.cell
 async def _(
     Agent,
+    BATCH_SIZE,
     BaseModel,
     DEFAULT_MODEL,
     Field,
+    RETRIES,
     asyncio,
     pl,
     predictions,
@@ -174,11 +176,12 @@ async def _(
             "or short phrases that would be impacted by this question"
             "Generally be lenient when possible to decide whether to include an id or not"
         ),
+        retries=RETRIES,
     )
 
 
-    async def tag_predictions(predictions: pl.DataFrame, batch_size: int = 1000) -> pl.DataFrame:
-        tasks = [relevant_prediction_agent.run(batch.write_json()) for batch in predictions.iter_slices(batch_size)]
+    async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
+        tasks = [relevant_prediction_agent.run(batch.write_json()) for batch in predictions.iter_slices(BATCH_SIZE)]
         results = await asyncio.gather(*tasks)
         relevant_predictions = pl.concat([pl.DataFrame(result.output) for result in results if result.output])
         print(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
@@ -201,7 +204,16 @@ def _():
 
 
 @app.cell
-async def _(Agent, DEFAULT_MODEL, about_me, mo, news, pl, tagged_predictions):
+async def _(
+    Agent,
+    DEFAULT_MODEL,
+    RETRIES,
+    about_me,
+    mo,
+    news,
+    pl,
+    tagged_predictions,
+):
     def to_xml_str(input: dict) -> str:
         from dicttoxml import dicttoxml
 
@@ -238,6 +250,7 @@ async def _(Agent, DEFAULT_MODEL, about_me, mo, news, pl, tagged_predictions):
             "    avoid mentioning broad ETF tickers as I can figure that out from the sector or bond duration etc"
             "</output_format>"
         ),
+        retries=RETRIES,
     )
 
     report_input = {
