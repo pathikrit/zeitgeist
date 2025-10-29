@@ -6,6 +6,7 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    import asyncio
     from datetime import date
     import json
     from pathlib import Path
@@ -20,8 +21,21 @@ def _():
 
     today = date.today()
 
-    assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found in env. Either add to .env file or run `export OPENAI_API_KEY=???`"
-    return Agent, BaseModel, Field, Path, json, mo, pl, requests, today
+    assert "OPENAI_API_KEY" in os.environ, (
+        "No OPENAI_API_KEY found in env. Either add to .env file or run `export OPENAI_API_KEY=???`"
+    )
+    return (
+        Agent,
+        BaseModel,
+        Field,
+        Path,
+        asyncio,
+        json,
+        mo,
+        pl,
+        requests,
+        today,
+    )
 
 
 @app.cell
@@ -76,6 +90,7 @@ def _(json, pl, requests):
                 print(f"Fetched {len(predictions)} from polymarket")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
+
     polymarket_predictions = fetch_from_polymarket()
     return (polymarket_predictions,)
 
@@ -89,12 +104,21 @@ def _(kalshi_predictions, polymarket_predictions):
 
 @app.cell
 def _():
-    DEFAULT_MODEL = "openai:gpt-4.1-2025-04-14"  # gpt5 has 400k token limit
+    DEFAULT_MODEL = "openai:gpt-5-2025-08-07"
     return (DEFAULT_MODEL,)
 
 
 @app.cell
-async def _(Agent, BaseModel, DEFAULT_MODEL, Field, pl, predictions, today):
+async def _(
+    Agent,
+    BaseModel,
+    DEFAULT_MODEL,
+    Field,
+    asyncio,
+    pl,
+    predictions,
+    today,
+):
     about_me = (
         "<about_me>"
         "I am an American equities investor and I am interested in topics"
@@ -153,9 +177,10 @@ async def _(Agent, BaseModel, DEFAULT_MODEL, Field, pl, predictions, today):
     )
 
 
-    async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
-        relevant_predictions = await relevant_prediction_agent.run(predictions.write_json())
-        relevant_predictions = pl.DataFrame(relevant_predictions.output)
+    async def tag_predictions(predictions: pl.DataFrame, batch_size: int = 5000) -> pl.DataFrame:
+        tasks = [relevant_prediction_agent.run(batch.write_json()) for batch in predictions.iter_slices(batch_size)]
+        results = await asyncio.gather(*tasks)
+        relevant_predictions = pl.concat([pl.DataFrame(result.output) for result in results if result.output])
         print(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
         return predictions.join(relevant_predictions, on="id", how="left")
 
@@ -190,7 +215,7 @@ async def _(Agent, DEFAULT_MODEL, about_me, mo, news, pl, tagged_predictions):
             f"{about_me}"
             "<task>"
             "You will be provided an array of questions and probabilities from an online betting market"
-            f"along with today's top news headlines"
+            "along with today's top news headlines"
             "Consolidate and summarize into a 1-pager investment guideline thesis report"
             "The provided topics column can serve as hints to explore but think deeply about 2nd and 3rd order effects"
             "Take into account the probabilities and the fact that the topic is being discussed in the first place"
@@ -203,7 +228,7 @@ async def _(Agent, DEFAULT_MODEL, about_me, mo, news, pl, tagged_predictions):
             "Go from broad (e.g. macro) to narrow (e.g. sector) and finally individual names as top-level sections"
             "Also add and consolidate any important or relevant news items"
             "in simple bullets at the top in a separate news section"
-            f"This is intended to be consumed daily as a news memo"
+            "This is intended to be consumed daily as a news memo"
             "So just use the title: Daily Memo (date)"
             "Things to avoid:"
             "  - Don't mention that your input was prediction markets; the reader is aware of that"
@@ -239,7 +264,7 @@ def _(Path, report, today):
     <head>
         <meta charset="utf-8">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css">
-        <title>Report {today.strftime('%d-%b-%Y')}</title>
+        <title>Report {today.strftime("%d-%b-%Y")}</title>
     </head>
     <body>
     <main>
