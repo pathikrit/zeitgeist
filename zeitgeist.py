@@ -177,7 +177,7 @@ async def _(
     )
 
 
-    async def tag_predictions(predictions: pl.DataFrame, batch_size: int = 5000) -> pl.DataFrame:
+    async def tag_predictions(predictions: pl.DataFrame, batch_size: int = 1000) -> pl.DataFrame:
         tasks = [relevant_prediction_agent.run(batch.write_json()) for batch in predictions.iter_slices(batch_size)]
         results = await asyncio.gather(*tasks)
         relevant_predictions = pl.concat([pl.DataFrame(result.output) for result in results if result.output])
