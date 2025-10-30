@@ -2,15 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Redirecting to Today's Report</title>
+  <title>Redirecting to Latest Report</title>
   <script>
-    (function() {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const target = `${year}/${month}/${day}/`;
-      window.location.replace(target);
+    (async function() {
+      const maxLookBackDays = 30;
+      for (let i = 0; i <= maxLookBackDays; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const url = `${year}/${month}/${day}/`
+        try {
+          const response = await fetch(url, {method: 'HEAD'});
+          if (response.ok) {
+            return window.location.replace(url);
+          }
+        } catch(e) {}
+      }
     })();
   </script>
 </head>
