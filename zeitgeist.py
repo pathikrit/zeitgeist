@@ -18,7 +18,7 @@ def _():
     import requests
     import marimo as mo
 
-    BATCH_SIZE = 1000
+    BATCH_SIZE = 500
     RETRIES = 3
     DEFAULT_MODEL = "openai:gpt-5-2025-08-07"
 
