@@ -20,7 +20,7 @@ def _():
 
     BATCH_SIZE = 500
     RETRIES = 3
-    DEFAULT_MODEL = "openai:gpt-5-mini-2025-08-07"
+    DEFAULT_MODEL = "openai:gpt-4.1-2025-04-14"
 
     today = date.today()
 
