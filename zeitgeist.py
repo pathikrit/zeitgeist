@@ -88,10 +88,14 @@ def _(json, pl, requests):
         while True:
             params = {"active": "true", "closed": "false", "limit": 100, "offset": len(predictions)}
             print(f"Fetching from polymarket @ offset={params['offset']} ...")
-            resp = requests.get(f"{API_URL}/markets", params=params)
-            resp.raise_for_status()
-            data = resp.json()
-            predictions.extend(data)
+            try:
+                resp = requests.get(f"{API_URL}/markets", params=params)
+                resp.raise_for_status()
+                data = resp.json()
+                predictions.extend(data)
+            except Exception as e:
+                print(f"Stopping because of error from Polymarket: {e}")
+                data = None
             if not data:
                 print(f"Fetched {len(predictions)} from polymarket")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
@@ -102,8 +106,8 @@ def _(json, pl, requests):
 
 
 @app.cell
-def _(kalshi_predictions, polymarket_predictions):
-    predictions = kalshi_predictions.extend(polymarket_predictions)
+def _(kalshi_predictions, pl, polymarket_predictions):
+    predictions = pl.concat([kalshi_predictions, polymarket_predictions])
     len(predictions)
     return (predictions,)
 
@@ -181,9 +185,18 @@ async def _(
 
 
     async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
-        tasks = [relevant_prediction_agent.run(batch.write_json()) for batch in predictions.iter_slices(BATCH_SIZE)]
-        results = await asyncio.gather(*tasks)
-        relevant_predictions = pl.concat([pl.DataFrame(result.output) for result in results if result.output])
+        # Although this is more elegant, this can lead to "too many requests"
+        # tasks = [relevant_prediction_agent.run(batch.write_json()) for batch in predictions.iter_slices(BATCH_SIZE)]
+        # results = await asyncio.gather(*tasks)
+
+        results = []
+        for i, batch in enumerate(predictions.iter_slices(BATCH_SIZE)):
+            print(f"Processing batch {i} ...")
+            result = await relevant_prediction_agent.run(batch.write_json())
+            results.append(result.output)
+            await asyncio.sleep(1)
+    
+        relevant_predictions = pl.concat(results)
         print(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
         return predictions.join(relevant_predictions, on="id", how="left")
 
