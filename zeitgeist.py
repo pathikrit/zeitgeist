@@ -130,7 +130,7 @@ async def _(
         "I am an American equities investor and I am interested in topics"
         "that would impact the market in the relatively short term or could change how I invest"
         "Besides publicly listed equities, I can have exposure to broad indices (e.g. $SPY and $QQQ)"
-        "sectors (e.g. defense - $XAR, healthcare -  $XLV) and alternativles"
+        "sectors (e.g. defense: $XAR, healthcare: $XLV) and alternatives"
         "like gold, energy, commodities, crypto, bonds, TIPS, REITs, mortgage-backed securities etc"
         "through ETFs/vehicles like $IAU, $DBC, $BTC, $ZROZ, $TIPZ, $VNQ etc"
         "so pay particular attention to macroeconomic themes"
@@ -138,13 +138,13 @@ async def _(
         "  - Short term macroeconomic indicators like GDP, unemployment, CPI, trade deficit etc."
         "  - Public or private companies suing each other or M&A activities"
         "  - Foreign politics that would affect USD rates with major international currencies like JPY,CNY,EUR etc"
-        "  - EV/climate legislatation and goals in short term (<5 years)"
+        "  - EV/climate legislation and goals in short term (<5 years)"
         "  - US policies and outlook on debt, budget, tax laws, tariffs, healthcare, energy"
         "  - General major geopolitical events that can happen near future (<5 years)"
         "  - Specific public companies mentioned like Tesla, Apple, Nvidia etc"
         "  - Major natural disasters, pandemics or crisis with high (>50%) probabilities"
         f"FYI: today's date is {today.strftime('%d-%b-%Y')}"
-        "General instuctions:"
+        "General instructions:"
         "- Think deeply about second or third order effects"
         "- Don't restrict yourself or fixate on only the tickers or themes mentioned above"
         "  since these are just examples I used to give you a general idea of how I can invest"
@@ -189,14 +189,15 @@ async def _(
         # tasks = [relevant_prediction_agent.run(batch.write_json()) for batch in predictions.iter_slices(BATCH_SIZE)]
         # results = await asyncio.gather(*tasks)
 
-        results = []
+        dfs = []
         for i, batch in enumerate(predictions.iter_slices(BATCH_SIZE)):
             print(f"Processing batch {i} ...")
             result = await relevant_prediction_agent.run(batch.write_json())
-            results.append(result.output)
+            if result.output:
+                dfs.append(pl.DataFrame(result.output))
             await asyncio.sleep(1)
     
-        relevant_predictions = pl.concat(results)
+        relevant_predictions = pl.concat(dfs)
         print(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
         return predictions.join(relevant_predictions, on="id", how="left")
 
@@ -244,7 +245,7 @@ async def _(
             "Consolidate and summarize into a 1-pager investment guideline thesis report"
             "The provided topics column can serve as hints to explore but think deeply about 2nd and 3rd order effects"
             "Take into account the probabilities and the fact that the topic is being discussed in the first place"
-            "but also keep in mind that prediction markets often have longshot bias i.e."
+            "but also keep in mind that prediction markets often have moonshot bias i.e."
             "people sometime tend to overweight extreme low-probability outcomes and underweight high-probability ones"
             "due to the non-linear probability weighting function in their model"
             "</task>"
@@ -260,7 +261,7 @@ async def _(
             "  - Avoid putting the exact probabilities from the input; just use plain English to describe the prospects"
             "  - Avoid general guidelines like 'review this quarterly'"
             "  - Unless it pertains to an individual company or currency"
-            "    avoid mentioning broad ETF tickers as I can figure that out from the sector or bond duration etc"
+            "  - avoid mentioning broad ETF tickers as I can figure that out from the sector or bond duration etc"
             "</output_format>"
         ),
         retries=RETRIES,
