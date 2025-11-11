@@ -20,7 +20,8 @@ def _():
 
     BATCH_SIZE = 500
     RETRIES = 3
-    DEFAULT_MODEL = "openai:gpt-4.1-2025-04-14"
+    CLASSIFYING_MODEL = "openai:gpt-4.1-2025-04-14" #"openai:gpt-5-nano-2025-08-07"
+    SYNTHESIS_MODEL = "openai:gpt-4.1-2025-04-14"
 
     today = date.today()
 
@@ -31,10 +32,11 @@ def _():
         Agent,
         BATCH_SIZE,
         BaseModel,
-        DEFAULT_MODEL,
+        CLASSIFYING_MODEL,
         Field,
         Path,
         RETRIES,
+        SYNTHESIS_MODEL,
         asyncio,
         json,
         mo,
@@ -117,7 +119,7 @@ async def _(
     Agent,
     BATCH_SIZE,
     BaseModel,
-    DEFAULT_MODEL,
+    CLASSIFYING_MODEL,
     Field,
     RETRIES,
     asyncio,
@@ -158,7 +160,7 @@ async def _(
 
 
     relevant_prediction_agent = Agent(
-        model=DEFAULT_MODEL,
+        model=CLASSIFYING_MODEL,
         output_type=list[RelevantPrediction],
         system_prompt=(
             "<task>"
@@ -220,8 +222,8 @@ def _():
 @app.cell
 async def _(
     Agent,
-    DEFAULT_MODEL,
     RETRIES,
+    SYNTHESIS_MODEL,
     about_me,
     mo,
     news,
@@ -235,7 +237,7 @@ async def _(
 
 
     synthesizing_agent = Agent(
-        model=DEFAULT_MODEL,
+        model=SYNTHESIS_MODEL,
         output_type=str,
         system_prompt=(
             f"{about_me}"
