@@ -1,0 +1,57 @@
+name: Build and Push Image to DigitalOcean Container Registry
+
+on:
+  push:
+    branches: [main, stage]
+    paths:
+      - 'VERSION'
+      - 'Dockerfile'
+      - '.github/workflows/build-and-push.yml'
+
+jobs:
+  build:
+    name: Build and push to DOCR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from VERSION file
+        id: get-version
+        run: |
+          if [ -f VERSION ]; then
+            VERSION=$(cat VERSION)
+          else
+            echo "VERSION file not found. Exiting..."
+            exit 1
+          fi
+
+          BRANCH_NAME=${GITHUB_REF_NAME}
+
+          if [ "$BRANCH_NAME" = "main" ]; then
+            FINAL_VERSION="$VERSION"
+          else
+            FINAL_VERSION="${VERSION}-${BRANCH_NAME}"
+          fi
+
+          echo "Final version: $FINAL_VERSION"
+          echo "version=$FINAL_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to DigitalOcean Container Registry
+        run: echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" | docker login --username=docker --password-stdin registry.digitalocean.com
+
+      - name: Build Docker image
+        run: |
+          docker build -t registry.digitalocean.com/${{ secrets.DOCR_REGISTRY_NAME }}/${{ secrets.DOCR_REPOSITORY_NAME }}:${{ steps.get-version.outputs.version }} .
+
+      - name: Push Docker image to DOCR
+        run: |
+          docker push registry.digitalocean.com/${{ secrets.DOCR_REGISTRY_NAME }}/${{ secrets.DOCR_REPOSITORY_NAME }}:${{ steps.get-version.outputs.version }}
+
+      - name: Tag latest (optional, for auto-deploys)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker tag registry.digitalocean.com/${{ secrets.DOCR_REGISTRY_NAME }}/${{ secrets.DOCR_REPOSITORY_NAME }}:${{ steps.get-version.outputs.version }} \
+            registry.digitalocean.com/${{ secrets.DOCR_REGISTRY_NAME }}/${{ secrets.DOCR_REPOSITORY_NAME }}:latest
+          docker push registry.digitalocean.com/${{ secrets.DOCR_REGISTRY_NAME }}/${{ secrets.DOCR_REPOSITORY_NAME }}:latest
