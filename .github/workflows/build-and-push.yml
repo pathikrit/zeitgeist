@@ -2,7 +2,7 @@ name: Build and Push Image to DigitalOcean Container Registry
 
 on:
   push:
-    branches: [main, stage]
+    branches: [master, stage]
     paths:
       - 'VERSION'
       - 'Dockerfile'
