@@ -1,26 +1,26 @@
 # ---------- Stage 1: Builder ----------
-FROM python:3.11-slim AS builder
+FROM python:3.13-slim AS builder
 
-RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
-
-# Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    mv /root/.local/bin/uv /usr/local/bin/uv
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY . .
+COPY pyproject.toml .
 
-# Install all dependencies (cached into .venv but not required later)
-RUN uv sync --frozen
+# Install dependencies with pip
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir .
 
 # ---------- Stage 2: Runtime ----------
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
-# Copy uv and project
-COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
-COPY --from=builder /app /app
+# Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy application code
+COPY . .
 
 # Default command: run zeitgeist
-CMD ["uv", "run", "python", "zeitgeist.py"]
+CMD ["python3", "zeitgeist.py"]
