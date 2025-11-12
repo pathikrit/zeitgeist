@@ -10,6 +10,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 WORKDIR /app
 COPY . .
 
+# Install all dependencies (cached into .venv but not required later)
 RUN uv sync --frozen
 
 # ---------- Stage 2: Runtime ----------
@@ -17,13 +18,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy uv + app
+# Copy uv and project
 COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
 COPY --from=builder /app /app
 
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Either:
-# CMD ["uv", "run", "python", "zeitgeist.py"]
-# Or the simpler venv Python version:
-CMD ["/app/.venv/bin/python", "zeitgeist.py"]
+# Default command: run zeitgeist
+CMD ["uv", "run", "python", "zeitgeist.py"]
