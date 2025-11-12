@@ -13,6 +13,7 @@ def _():
     import os
 
     import polars as pl
+    
     from pydantic import BaseModel, Field
     from pydantic_ai import Agent
     import requests
