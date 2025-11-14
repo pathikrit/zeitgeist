@@ -235,7 +235,9 @@ async def _(Agent, BaseModel, EVENTS_MODEL, Field, RETRIES, about_me):
             f"{about_me}"
             "<task>"
             "List key macro events and catalysts that might impact me"
-            "e.g. FED meetings, rate cuts, govt shutdowns, major economic prints, major earnings calls or regulatory events etc"
+            "e.g. FED or FOMC meetings, rate cuts, govt shutdowns, major economic prints, major earnings calls, "
+            "investor days, 13F, regulatory events, diplomatic events & visits, trade talks, supreme court descisions
+            "tech days, demos, analyst events, headline numbers, trade talks etc"
             "Avoid generic events or ongoing events (like wars) without any concrete timelines or concrete resolutions"
             "Also avoid things that can happen far in the future (>1 yr from now)"
             "ALWAYS USE the web search tool call"
