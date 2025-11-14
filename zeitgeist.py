@@ -18,6 +18,8 @@ def _():
     import requests
     import marimo as mo
 
+    QUICK_TEST = False # If True, run quickly on first few predictions; useful for smoke-testing
+
     BATCH_SIZE = 200
     RETRIES = 3
 
@@ -27,9 +29,9 @@ def _():
 
     today = date.today()
 
-    assert "OPENAI_API_KEY" in os.environ, (
-        "No OPENAI_API_KEY found in env. Either add to .env file or run `export OPENAI_API_KEY=???`"
-    )
+    assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found; either add to .env file or run `export OPENAI_API_KEY=???`"
+
+    assert "GITHUB_ACTIONS" not in os.environ or not QUICK_TEST, "QUICK_TEST must be False in GitHub Actions"
     return (
         Agent,
         BATCH_SIZE,
@@ -38,7 +40,9 @@ def _():
         EVENTS_MODEL,
         Field,
         Path,
+        QUICK_TEST,
         RETRIES,
+        SYNTHESIS_MODEL,
         asyncio,
         json,
         mo,
@@ -49,10 +53,11 @@ def _():
 
 
 @app.cell
-def _(pl, requests):
+def _(QUICK_TEST, pl, requests):
     def fetch_from_kalshi() -> pl.DataFrame:
+        LIMIT = 100
         API_URL = "https://api.elections.kalshi.com/trade-api/v2"
-        params = {"status": "open", "with_nested_markets": "true", "limit": 100, "cursor": None}
+        params = {"status": "open", "with_nested_markets": "true", "limit": LIMIT, "cursor": None}
         predictions = []
 
         def simple_prediction(e):
@@ -68,7 +73,7 @@ def _(pl, requests):
             data = resp.json()
             predictions.extend(data["events"])
             params["cursor"] = data.get("cursor")
-            if not params["cursor"]:
+            if not params["cursor"] or (QUICK_TEST and len(predictions) > LIMIT):
                 print(f"Fetched {len(predictions)} from kalshi")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
@@ -78,8 +83,9 @@ def _(pl, requests):
 
 
 @app.cell
-def _(json, pl, requests):
+def _(QUICK_TEST, json, pl, requests):
     def fetch_from_polymarket() -> pl.DataFrame:
+        LIMIT = 100
         API_URL = "https://gamma-api.polymarket.com"
         predictions = []
 
@@ -90,7 +96,7 @@ def _(json, pl, requests):
             return {"id": f"pm-{p['id']}", "title": p["question"], "bets": bets}
 
         while True:
-            params = {"active": "true", "closed": "false", "limit": 100, "offset": len(predictions)}
+            params = {"active": "true", "closed": "false", "limit": LIMIT, "offset": len(predictions)}
             print(f"Fetching from polymarket @ offset={params['offset']} ...")
             try:
                 resp = requests.get(f"{API_URL}/markets", params=params)
@@ -100,7 +106,7 @@ def _(json, pl, requests):
             except Exception as e:
                 print(f"Stopping because of error from Polymarket: {e}")
                 data = None
-            if not data:
+            if not data or (QUICK_TEST and len(predictions) > LIMIT):
                 print(f"Fetched {len(predictions)} from polymarket")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
@@ -200,7 +206,7 @@ async def _(
             if result.output:
                 dfs.append(pl.DataFrame(result.output))
             await asyncio.sleep(1)
-    
+
         relevant_predictions = pl.concat(dfs)
         print(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
         return predictions.join(relevant_predictions, on="id", how="left")
