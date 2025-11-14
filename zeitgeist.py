@@ -18,9 +18,11 @@ def _():
     import requests
     import marimo as mo
 
-    BATCH_SIZE = 500
+    BATCH_SIZE = 200
     RETRIES = 3
-    CLASSIFYING_MODEL = "openai:gpt-4.1-2025-04-14" #"openai:gpt-5-nano-2025-08-07"
+
+    CLASSIFYING_MODEL = "openai:gpt-5-mini-2025-08-07"
+    EVENTS_MODEL = "openai:gpt-5.1-2025-11-13"
     SYNTHESIS_MODEL = "openai:gpt-4.1-2025-04-14"
 
     today = date.today()
@@ -33,10 +35,10 @@ def _():
         BATCH_SIZE,
         BaseModel,
         CLASSIFYING_MODEL,
+        EVENTS_MODEL,
         Field,
         Path,
         RETRIES,
-        SYNTHESIS_MODEL,
         asyncio,
         json,
         mo,
@@ -210,6 +212,35 @@ async def _(
 
 
 @app.cell
+async def _(Agent, BaseModel, EVENTS_MODEL, Field, RETRIES, about_me):
+    class Event(BaseModel):
+        event: str = Field(description="title of macro event or catalyst")
+        when: str = Field(description="approximately when; either specific date or stringy like '2025 Q2' or 'next month'")
+
+
+    events_agent = Agent(
+        model=EVENTS_MODEL,
+        output_type=list[Event],
+        system_prompt=(
+            f"{about_me}"
+            "<task>"
+            "List key macro events and catalysts that might impact me"
+            "e.g. FED meetings, rate cuts, govt shutdowns, major economic prints, major earnings calls etc"
+            "Avoid generic events without any concrete timelines"
+            "Also avoid things that can happen far in the future (>1 yr from now)"
+            "ALWAYS USE the web search tool call"
+            "</task>"        
+        ),
+        model_settings={"tools": [{"type": "web_search", "search_context_size": "high"}]},
+        retries=RETRIES,
+    )
+
+    events = await events_agent.run()
+    events.output
+    return (events,)
+
+
+@app.cell
 def _():
     from gnews import GNews
 
@@ -225,6 +256,7 @@ async def _(
     RETRIES,
     SYNTHESIS_MODEL,
     about_me,
+    events,
     mo,
     news,
     pl,
@@ -243,37 +275,43 @@ async def _(
             f"{about_me}"
             "<task>"
             "You will be provided an array of questions and probabilities from an online betting market"
-            "along with today's top news headlines"
+            "along with today's top news headlines and upcoming catalyst events"
             "Consolidate and summarize into a 1-pager investment guideline thesis report"
             "The provided topics column can serve as hints to explore but think deeply about 2nd and 3rd order effects"
+            "and if any upcoming events can impact these topics"
             "Take into account the probabilities and the fact that the topic is being discussed in the first place"
             "but also keep in mind that prediction markets often have moonshot bias i.e."
             "people sometime tend to overweight extreme low-probability outcomes and underweight high-probability ones"
             "due to the non-linear probability weighting function in their model"
+            "When appropriate or possible synthesize the betting market info with any relevant news or upcoming catalysts"
             "</task>"
             "<output_format>"
             "Present in a markdown format with sections and sub-sections"
             "Go from broad (e.g. macro) to narrow (e.g. sector) and finally individual names as top-level sections"
-            "Also add and consolidate any important or relevant news items"
-            "in simple bullets at the top in a separate news section"
-            "This is intended to be consumed daily as a news memo"
+            "Consolidate any important or relevant news items into simple bullets at the top in a separate news section"
+            "Consolidate all events and upcoming catalysts into a 'Upcoming Catalysts' section at the bottom'"        
+            "  - Skip generic things without any concrete timelines or dates"            
+            "  - Avoid general guidelines like 'watch for regulatory moves or geopolitical risks' as that is not helpful"
+            "This is intended to be consumed daily by a PM as a news memo"
             "So just use the title: Daily Memo (date)"
             "Things to avoid:"
             "  - Don't mention that your input was prediction markets; the reader is aware of that"
             "  - Avoid putting the exact probabilities from the input; just use plain English to describe the prospects"
-            "  - Avoid general guidelines like 'review this quarterly'"
-            "  - Unless it pertains to an individual company or currency"
-            "  - avoid mentioning broad ETF tickers as I can figure that out from the sector or bond duration etc"
+            "  - Avoid general guidelines like 'review this quarterly' or 'keep an eye'"
+            "  - Avoid mentioning broad ETF tickers as I can figure that out from the sector or bond duration etc"
+            "  - In general avoid any generic or broad statements. Be succinct and specific."
             "</output_format>"
         ),
         retries=RETRIES,
     )
 
     report_input = {
-        "prediction_markets": tagged_predictions.select("title", "bets", "topics")
-        .filter(pl.col("topics").is_not_null())
-        .to_dicts(),
+        "prediction_markets": tagged_predictions
+            .select("title", "bets", "topics")
+            .filter(pl.col("topics").is_not_null())
+            .to_dicts(),
         "news_headlines": pl.DataFrame(news).select("title", "description").to_dicts() if news else [],
+        "upcoming_catalysts": pl.DataFrame(events.output).to_dicts(),
     }
 
     report = await synthesizing_agent.run(to_xml_str(report_input))
