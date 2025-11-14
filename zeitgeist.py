@@ -18,7 +18,10 @@ def _():
     import requests
     import marimo as mo
 
-    QUICK_TEST = False # If True, run quickly on first few predictions; useful for smoke-testing
+    IS_PROD = "GITHUB_ACTIONS" in os.environ
+    IS_DEV = not IS_PROD
+
+    QUICK_TEST = IS_DEV # If True, run quickly on first few predictions; useful for smoke-testing
 
     BATCH_SIZE = 200
     RETRIES = 3
@@ -29,9 +32,9 @@ def _():
 
     today = date.today()
 
-    assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found; either add to .env file or run `export OPENAI_API_KEY=???`"
+    assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found; Either add to .env file or run `export OPENAI_API_KEY=???`"
 
-    assert "GITHUB_ACTIONS" not in os.environ or not QUICK_TEST, "QUICK_TEST must be False in GitHub Actions"
+    assert not(IS_PROD and QUICK_TEST), "QUICK_TEST must be False in GitHub Actions"
     return (
         Agent,
         BATCH_SIZE,
