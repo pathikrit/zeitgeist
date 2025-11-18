@@ -22,6 +22,7 @@ Consolidate all events and upcoming catalysts into a single 'Upcoming Catalysts'
   - Sort by soonest to furthest out
   - If possible, for each catalyst mention a short phrase how it may impact me
   - Avoid general guidelines like 'watch for regulatory moves or geopolitical risks' as that is not helpful
+  - Don't mention sorting or anything else; title for this section should just be 'Upcoming Catalysts'
 This is intended to be consumed daily by a PM as a news memo, so just use the title: Daily Memo (${today.strftime('%d-%b-%Y')})
 Things to avoid:
   - Don't mention that your input was prediction markets; the reader is aware of that

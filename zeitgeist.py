@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import os
 import traceback
+import logging
 
 import polars as pl
 from pydantic import BaseModel, Field
@@ -15,10 +16,14 @@ from mako.lookup import TemplateLookup
 from dotenv import load_dotenv
 load_dotenv()
 
+logging.getLogger().setLevel(logging.INFO)
+
 IS_PROD = "GITHUB_ACTIONS" in os.environ
 IS_DEV = not IS_PROD
 
 QUICK_TEST = IS_DEV # If True, run quickly on first few predictions; useful for smoke-testing
+
+BATCH_REQUEST_DELAY_SECONDS = 2
 
 BATCH_SIZE = 200
 RETRIES = 3
@@ -103,21 +108,25 @@ relevant_prediction_agent = Agent(
 )
 
 async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
-    # Although this is more elegant, this can lead to "too many requests"
-    # tasks = [relevant_prediction_agent.run(batch.write_json()) for batch in predictions.iter_slices(BATCH_SIZE)]
-    # results = await asyncio.gather(*tasks)
-
-    dfs = []
-    for i, batch in enumerate(predictions.iter_slices(BATCH_SIZE)):
-        print(f"Processing batch {i} ...")
+    async def process_batch_with_delay(i: int, batch: pl.DataFrame) -> pl.DataFrame | None:
+        await asyncio.sleep(i * BATCH_REQUEST_DELAY_SECONDS)
+        print(f"Submitting batch {i} ...")
         try:
             result = await relevant_prediction_agent.run(batch.write_json())
+            print(f"Completed batch {i}.")
             if result.output:
-                dfs.append(pl.DataFrame(result.output))
+                return pl.DataFrame(result.output)
         except Exception as e:
             print(f"Error in tagging batch {i}: {e}")
-        await asyncio.sleep(1)
+        return None
 
+    tasks = [
+        process_batch_with_delay(i, batch)
+        for i, batch in enumerate(predictions.iter_slices(BATCH_SIZE))
+    ]
+    results = await asyncio.gather(*tasks)
+    dfs = [df for df in results if df is not None]
+    assert dfs, "No relevant predictions found"
     relevant_predictions = pl.concat(dfs)
     print(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
     return predictions.join(relevant_predictions, on="id", how="left")
