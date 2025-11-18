@@ -5,8 +5,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "dicttoxml>=1.7.16",
+    "dotenv>=0.9.9",
     "gnews>=0.4.1",
-    "marimo>=0.14.11",
     "markdown-it-py>=3.0.0",
     "polars>=1.31.0",
     "pydantic-ai>=0.4.3",

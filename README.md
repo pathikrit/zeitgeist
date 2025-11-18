@@ -8,5 +8,5 @@ Simple script to go from prediction markets -> LLM -> Macro report
 ```shell
 git clone git@github.com:pathikrit/zeitgeist.git
 cd zeitgeist
-uv run marimo edit zeitgeist.py
+uv run python zeitgeist.py
 ```
