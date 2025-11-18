@@ -2,8 +2,8 @@
 I am an American equities investor and I am interested in topics
 that would impact the market in the relatively short term or could change how I invest
 Besides publicly listed equities, I can have exposure to broad indices (e.g. $SPY and $QQQ)
-sectors (e.g. defense: $XAR, healthcare: $XLV) and alternatives
-like gold, energy, commodities, crypto, bonds, TIPS, REITs, mortgage-backed securities etc
+sectors (e.g. defense: $XAR, healthcare: $XLV) and alternatives like
+gold, energy, commodities, crypto, bonds, TIPS, REITs, mortgage-backed securities etc
 through ETFs/vehicles like $IAU, $DBC, $BTC, $ZROZ, $TIPZ, $VNQ etc
 so pay particular attention to macroeconomic themes
 Some examples of things that are LIKELY to impact my investments:

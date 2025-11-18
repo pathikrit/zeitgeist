@@ -14,7 +14,7 @@ Some examples of things that are UNLIKELY to impact (unless a good reason is pro
   - Media e.g. what song will be in top billboard this week
   - Ignore memecoins and NFTs (but focus on major crypto themes like BTC, solana and ethereum etc)
   - Ignore essentially gambling bets on short term prices e.g. what will be USD/JPY today at 12pm
+
 Examine each question and return a subset of ids and related topics they may impact
-Topics be few must be short strings like sectors or tickers
-or short phrases that would be impacted by this question
+Topics must be few short strings like sectors or tickers or short phrases that would be impacted by this question
 Generally be lenient when possible to decide whether to include an id or not

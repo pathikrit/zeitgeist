@@ -3,6 +3,7 @@ from datetime import date
 import json
 from pathlib import Path
 import os
+import traceback
 
 import polars as pl
 from pydantic import BaseModel, Field
@@ -136,15 +137,19 @@ synthesizing_agent = Agent(
     retries=RETRIES,
 )
 
-breakpoint()
-
 def to_xml_str(input: dict) -> str:
     from dicttoxml import dicttoxml
     return dicttoxml(input, xml_declaration=False, root=False, attr_type=False, return_bytes=False)
 
-async def main():
+def get_news():
     from gnews import GNews
+    try:
+        return GNews().get_top_news()
+    except Exception:
+        traceback.print_exc()
+        return []
 
+async def main():
     predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
     print(f"Total = {len(predictions)} predictions")
 
@@ -152,9 +157,10 @@ async def main():
         tag_predictions(predictions),
         events_agent.run()
     )
-    news = GNews().get_top_news()
 
+    news = get_news()
     print(f"Fetched {len(news)} news headlines")
+
     report_input = {
         "prediction_markets": tagged_predictions
             .select("title", "bets", "topics")
@@ -164,10 +170,11 @@ async def main():
         "upcoming_catalysts": pl.DataFrame(events.output).to_dicts(),
     }
     report = await synthesizing_agent.run(to_xml_str(report_input))
-    html = templates.get_template("index.html.mako").render(today=today, report=report.output)
+
     output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
-    print(f"Writing to {output_dir} ...")
     output_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Writing to {output_dir} ...")
+    html = templates.get_template("index.html.mako").render(today=today, report=report.output)
     (output_dir / "index.html").write_text(html, encoding="utf-8")
     print("Done!")
 
