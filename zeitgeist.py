@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 import httpx
 
+from mako.lookup import TemplateLookup
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -26,111 +28,11 @@ SYNTHESIS_MODEL = "openai:gpt-4.1-2025-04-14"
 
 today = date.today()
 
+templates = TemplateLookup(directories=["templates"])
+
 assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found; Either add to .env file or run `export OPENAI_API_KEY=???`"
 
 assert not(IS_PROD and QUICK_TEST), "QUICK_TEST must be False in GitHub Actions"
-
-about_me = (
-    "<about_me>"
-    "I am an American equities investor and I am interested in topics"
-    "that would impact the market in the relatively short term or could change how I invest"
-    "Besides publicly listed equities, I can have exposure to broad indices (e.g. $SPY and $QQQ)"
-    "sectors (e.g. defense: $XAR, healthcare: $XLV) and alternatives"
-    "like gold, energy, commodities, crypto, bonds, TIPS, REITs, mortgage-backed securities etc"
-    "through ETFs/vehicles like $IAU, $DBC, $BTC, $ZROZ, $TIPZ, $VNQ etc"
-    "so pay particular attention to macroeconomic themes"
-    "Some examples of things that are LIKELY to impact my investments:"
-    "  - Short term macroeconomic indicators like GDP, unemployment, CPI, trade deficit etc."
-    "  - Public or private companies suing each other or M&A activities"
-    "  - Foreign politics that would affect USD rates with major international currencies like JPY, CNY, EUR etc"
-    "  - EV/climate legislation and goals in short term (<5 years)"
-    "  - US policies and outlook on debt, budget, tax laws, tariffs, healthcare, energy"
-    "  - General major geopolitical events that can happen near future (<2 years)"
-    "  - Specific major public companies mentioned like Tesla, Apple, Nvidia etc"
-    "  - Major natural disasters, pandemics or crisis with high (>50%) probabilities"
-    f"FYI: today's date is {today.strftime('%d-%b-%Y')}"
-    "General instructions:"
-    "- Think deeply about second or third order effects"
-    "- Don't restrict yourself or fixate on only the tickers or themes mentioned above"
-    "  since these are just examples I used to give you a general idea of how I can invest"
-    "</about_me>"
-)
-
-
-class RelevantPrediction(BaseModel):
-    id: str = Field(description="original id from input")
-    topics: list[str] = Field(description="public companies or investment sectors or broad alternatives impacted")
-
-
-relevant_prediction_agent = Agent(
-    model=CLASSIFYING_MODEL,
-    output_type=list[RelevantPrediction],
-    system_prompt=(
-        "<task>"
-        "You will be provided an array of questions from an online betting market"
-        "Your job is to return only the ids of questions relevant to me"
-        "</task>"
-        f"{about_me}"
-        "Some examples of things that are UNLIKELY to impact (unless a good reason is provided):"
-        "  - Celebrity gossips e.g. how many tweets would Elon tweet this month"
-        "  - Sports related e.g. Would Ronaldo be traded this season"
-        "  - Events far (10+ years) in the future: Would India host the Olympics by 2040"
-        "  - Geography e.g. election results in Kiribati is unlikely to impact my investments"
-        "    but major economies like Chinese, India, EU, MEA politics is likely to impact"
-        "  - Media e.g. what song will be in top billboard this week"
-        "  - Ignore memecoins and NFTs (but focus on major crypto themes like BTC, solana and ethereum etc)"
-        "  - Ignore essentially gambling bets on short term prices e.g. what will be USD/JPY today at 12pm"
-        "Examine each question and return a subset of ids and related topics they may impact"
-        "Topics be few must be short strings like sectors or tickers"
-        "or short phrases that would be impacted by this question"
-        "Generally be lenient when possible to decide whether to include an id or not"
-    ),
-    retries=RETRIES,
-)
-
-synthesizing_agent = Agent(
-    model=SYNTHESIS_MODEL,
-    output_type=str,
-    system_prompt=(
-        f"{about_me}"
-        "<task>"
-        "You will be provided an array of questions and probabilities from an online betting market"
-        "along with today's top news headlines and a list of upcoming catalyst events"
-        "Consolidate and summarize into a 1-pager investment guideline thesis report"
-        "The provided topics column can serve as hints to explore but think deeply about 2nd and 3rd order effects"
-        "and if any current news or upcoming events can impact these topics"
-        "Take into account the probabilities and the fact that the topic is being discussed in the first place"
-        "but also keep in mind that prediction markets often have moonshot bias i.e."
-        "people sometime tend to overweight extreme low-probability outcomes and underweight high-probability ones"
-        "Use critical thinking and self-reflection"
-        "When appropriate or possible synthesize the betting market info with any relevant news or upcoming catalysts"
-        "</task>"
-        "<output_format>"
-        "Present in a markdown format with sections and sub-sections"
-        "Go from broad (e.g. macro) to narrow (e.g. sector) and finally individual names as top-level sections"
-        "Consolidate any important or relevant news items into simple bullets at the top in a separate news section"
-        "Consolidate all events and upcoming catalysts into a 'Upcoming Catalysts' section at the bottom'"
-        "  - Skip generic things without any concrete timelines or dates"
-        "  - Sort by soonest to furthest out"
-        "  - If possible, for each catalyst mention a short phrase how it may impact me"
-        "  - Avoid general guidelines like 'watch for regulatory moves or geopolitical risks' as that is not helpful"
-        "This is intended to be consumed daily by a PM as a news memo, so just use the title: Daily Memo (date)"
-        "Things to avoid:"
-        "  - Don't mention that your input was prediction markets; the reader is aware of that"
-        "  - Avoid putting the exact probabilities from the input; just use plain English to describe the prospects"
-        "  - Avoid general guidelines like 'review this quarterly' or 'keep an eye'"
-        "  - Avoid mentioning broad ETF tickers as I can figure that out from the sector or bond duration etc."
-        "  - Avoid any generic or broad statements; be succinct and specific."
-        "  - No hallucinations: never fabricate nor use illustrative numbers, metrics, quotes, or sources"
-        "Writing style: "
-        "  - No fluff; get to the heart of the matter as quickly as possible"
-        "  - Be very careful to not be too verbose i.e. no essays; you'll waste time and lose attention"
-        "  - Use short bullet points; nest bullets in markdown if nessecary"
-        "  - Everything you say should sound wise and should stand up to scrutiny"
-        "</output_format>"
-    ),
-    retries=RETRIES,
-)
 
 async def fetch_from_kalshi() -> pl.DataFrame:
     LIMIT = 100
@@ -184,6 +86,17 @@ async def fetch_from_polymarket() -> pl.DataFrame:
                 print(f"Fetched {len(predictions)} from polymarket")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
+class RelevantPrediction(BaseModel):
+    id: str = Field(description="original id from input")
+    topics: list[str] = Field(description="public companies or investment sectors or broad alternatives impacted")
+
+relevant_prediction_agent = Agent(
+    model=CLASSIFYING_MODEL,
+    output_type=list[RelevantPrediction],
+    system_prompt=templates.get_template("relevant_prediction_prompt.mako").render(today=today),
+    retries=RETRIES,
+)
+
 async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
     # Although this is more elegant, this can lead to "too many requests"
     # tasks = [relevant_prediction_agent.run(batch.write_json()) for batch in predictions.iter_slices(BATCH_SIZE)]
@@ -211,55 +124,27 @@ class Event(BaseModel):
 events_agent = Agent(
     model=EVENTS_MODEL,
     output_type=list[Event],
-    system_prompt=(
-        f"{about_me}"
-        "<task>"
-        "List key macro events and catalysts that might impact me"
-        "e.g. FED or FOMC meetings, rate cuts, govt shutdowns, major economic prints, major earnings calls, "
-        "investor days, 13F, regulatory events, diplomatic events & visits, trade talks, supreme court descisions"
-        "tech days, demos, analyst events, headline numbers, trade talks etc"
-        "Avoid generic events or ongoing events (like wars) without any concrete timelines or concrete resolutions"
-        "Also avoid things that can happen far in the future (>1 yr from now)"
-        "ALWAYS USE the web search tool call"
-        "</task>"
-    ),
+    system_prompt=templates.get_template("events_prompt.mako").render(today=today),
     model_settings={"tools": [{"type": "web_search", "search_context_size": "high"}]},
     retries=RETRIES,
 )
 
+synthesizing_agent = Agent(
+    model=SYNTHESIS_MODEL,
+    output_type=str,
+    system_prompt=templates.get_template("synthesizing_prompt.mako").render(today=today),
+    retries=RETRIES,
+)
 
-def get_news():
-    from gnews import GNews
-    return GNews().get_top_news()
-
+breakpoint()
 
 def to_xml_str(input: dict) -> str:
     from dicttoxml import dicttoxml
     return dicttoxml(input, xml_declaration=False, root=False, attr_type=False, return_bytes=False)
 
-def to_html(report):
-    from markdown_it import MarkdownIt
-
-    return f"""<!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css">
-        <title>Report {today.strftime("%d-%b-%Y")}</title>
-    </head>
-    <body>
-    <main>
-    <a href="https://github.com/pathikrit/zeitgeist" target="_blank" rel="noopener" style="float: right;">
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="30" height="30">
-    </a>
-    {MarkdownIt().render(report)}
-    </main>
-    </body>
-    </html>
-    """
-
-
 async def main():
+    from gnews import GNews
+
     predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
     print(f"Total = {len(predictions)} predictions")
 
@@ -267,7 +152,7 @@ async def main():
         tag_predictions(predictions),
         events_agent.run()
     )
-    news = get_news()
+    news = GNews().get_top_news()
 
     print(f"Fetched {len(news)} news headlines")
     report_input = {
@@ -279,8 +164,7 @@ async def main():
         "upcoming_catalysts": pl.DataFrame(events.output).to_dicts(),
     }
     report = await synthesizing_agent.run(to_xml_str(report_input))
-
-    html = to_html(report.output)
+    html = templates.get_template("index.html.mako").render(today=today, report=report.output)
     output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
     print(f"Writing to {output_dir} ...")
     output_dir.mkdir(parents=True, exist_ok=True)
