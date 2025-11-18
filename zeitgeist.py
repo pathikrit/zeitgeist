@@ -7,7 +7,7 @@ import os
 import polars as pl
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
-import requests
+import httpx
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -132,7 +132,7 @@ synthesizing_agent = Agent(
     retries=RETRIES,
 )
 
-def fetch_from_kalshi() -> pl.DataFrame:
+async def fetch_from_kalshi() -> pl.DataFrame:
     LIMIT = 100
     API_URL = "https://api.elections.kalshi.com/trade-api/v2"
     params = {"status": "open", "with_nested_markets": "true", "limit": LIMIT, "cursor": None}
@@ -144,19 +144,20 @@ def fetch_from_kalshi() -> pl.DataFrame:
             bets.append({"prompt": m["yes_sub_title"], "probability": m["last_price"] / m["notional_value"]})
         return {"id": f"kalshi-{e['event_ticker']}", "title": e["title"], "bets": bets}
 
-    while True:
-        print(f"Fetching from kalshi @ offset={len(predictions)} ...")
-        resp = requests.get(f"{API_URL}/events", params=params)
-        resp.raise_for_status()
-        data = resp.json()
-        predictions.extend(data["events"])
-        params["cursor"] = data.get("cursor")
-        if not params["cursor"] or (QUICK_TEST and len(predictions) > LIMIT):
-            print(f"Fetched {len(predictions)} from kalshi")
-            return pl.DataFrame([simple_prediction(p) for p in predictions])
+    async with httpx.AsyncClient() as client:
+        while True:
+            print(f"Fetching from kalshi @ offset={len(predictions)} ...")
+            resp = await client.get(f"{API_URL}/events", params=params)
+            resp.raise_for_status()
+            data = resp.json()
+            predictions.extend(data["events"])
+            params["cursor"] = data.get("cursor")
+            if not params["cursor"] or (QUICK_TEST and len(predictions) > LIMIT):
+                print(f"Fetched {len(predictions)} from kalshi")
+                return pl.DataFrame([simple_prediction(p) for p in predictions])
 
 
-def fetch_from_polymarket() -> pl.DataFrame:
+async def fetch_from_polymarket() -> pl.DataFrame:
     LIMIT = 100
     API_URL = "https://gamma-api.polymarket.com"
     predictions = []
@@ -167,20 +168,21 @@ def fetch_from_polymarket() -> pl.DataFrame:
             bets.append({"prompt": prompt, "probability": float(probability)})
         return {"id": f"pm-{p['id']}", "title": p["question"], "bets": bets}
 
-    while True:
-        params = {"active": "true", "closed": "false", "limit": LIMIT, "offset": len(predictions)}
-        print(f"Fetching from polymarket @ offset={params['offset']} ...")
-        try:
-            resp = requests.get(f"{API_URL}/markets", params=params)
-            resp.raise_for_status()
-            data = resp.json()
-            predictions.extend(data)
-        except Exception as e:
-            print(f"Stopping because of error from Polymarket: {e}")
-            data = None
-        if not data or (QUICK_TEST and len(predictions) > LIMIT):
-            print(f"Fetched {len(predictions)} from polymarket")
-            return pl.DataFrame([simple_prediction(p) for p in predictions])
+    async with httpx.AsyncClient() as client:
+        while True:
+            params = {"active": "true", "closed": "false", "limit": LIMIT, "offset": len(predictions)}
+            print(f"Fetching from polymarket @ offset={params['offset']} ...")
+            try:
+                resp = await client.get(f"{API_URL}/markets", params=params)
+                resp.raise_for_status()
+                data = resp.json()
+                predictions.extend(data)
+            except Exception as e:
+                print(f"Stopping because of error from Polymarket: {e}")
+                data = None
+            if not data or (QUICK_TEST and len(predictions) > LIMIT):
+                print(f"Fetched {len(predictions)} from polymarket")
+                return pl.DataFrame([simple_prediction(p) for p in predictions])
 
 async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
     # Although this is more elegant, this can lead to "too many requests"
@@ -258,11 +260,13 @@ def to_html(report):
 
 
 async def main():
-    predictions = pl.concat([fetch_from_kalshi(), fetch_from_polymarket()])
+    predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
     print(f"Total = {len(predictions)} predictions")
 
-    tagged_predictions = await tag_predictions(predictions)
-    events = await events_agent.run()
+    tagged_predictions, events = await asyncio.gather(
+        tag_predictions(predictions),
+        events_agent.run()
+    )
     news = get_news()
 
     print(f"Fetched {len(news)} news headlines")
@@ -281,9 +285,10 @@ async def main():
     print(f"Writing to {output_dir} ...")
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "index.html").write_text(html, encoding="utf-8")
+    print("Done!")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-    print("Done!")
+
 

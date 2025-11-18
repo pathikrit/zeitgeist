@@ -1643,10 +1643,10 @@ dependencies = [
     { name = "dicttoxml" },
     { name = "dotenv" },
     { name = "gnews" },
+    { name = "httpx" },
     { name = "markdown-it-py" },
     { name = "polars" },
     { name = "pydantic-ai" },
-    { name = "requests" },
 ]
 
 [package.metadata]
@@ -1654,10 +1654,10 @@ requires-dist = [
     { name = "dicttoxml", specifier = ">=1.7.16" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "gnews", specifier = ">=0.4.1" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "markdown-it-py", specifier = ">=3.0.0" },
     { name = "polars", specifier = ">=1.31.0" },
     { name = "pydantic-ai", specifier = ">=0.4.3" },
-    { name = "requests", specifier = ">=2.32.4" },
 ]
 
 [[package]]
