@@ -50,11 +50,15 @@ async def fetch_from_kalshi() -> pl.DataFrame:
     async with httpx.AsyncClient() as client:
         while True:
             print(f"Fetching from kalshi @ offset={len(predictions)} ...")
-            resp = await client.get(f"{API_URL}/events", params=params)
-            resp.raise_for_status()
-            data = resp.json()
-            predictions.extend(data["events"])
-            params["cursor"] = data.get("cursor")
+            try:
+                resp = await client.get(f"{API_URL}/events", params=params)
+                resp.raise_for_status()
+                data = resp.json()
+                predictions.extend(data["events"])
+                params["cursor"] = data.get("cursor")
+            except Exception as e:
+                print(f"Stopping because of error from Kalshi: {e}")
+                params["cursor"] = None
             if not params["cursor"] or (QUICK_TEST and len(predictions) > LIMIT):
                 print(f"Fetched {len(predictions)} from kalshi")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
@@ -106,9 +110,12 @@ async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
     dfs = []
     for i, batch in enumerate(predictions.iter_slices(BATCH_SIZE)):
         print(f"Processing batch {i} ...")
-        result = await relevant_prediction_agent.run(batch.write_json())
-        if result.output:
-            dfs.append(pl.DataFrame(result.output))
+        try:
+            result = await relevant_prediction_agent.run(batch.write_json())
+            if result.output:
+                dfs.append(pl.DataFrame(result.output))
+        except Exception as e:
+            print(f"Error in tagging batch {i}: {e}")
         await asyncio.sleep(1)
 
     relevant_predictions = pl.concat(dfs)
