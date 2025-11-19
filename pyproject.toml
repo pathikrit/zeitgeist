@@ -4,7 +4,6 @@ version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "dicttoxml>=1.7.16",
     "dotenv>=0.9.9",
     "gnews>=0.4.1",
     "httpx>=0.28.1",
@@ -13,5 +12,3 @@ dependencies = [
     "polars>=1.31.0",
     "pydantic-ai>=0.4.3",
 ]
-[tool.marimo.runtime]
-dotenv = [".env"]

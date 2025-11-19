@@ -270,15 +270,6 @@ wheels = [
 ]
 
 [[package]]
-name = "dicttoxml"
-version = "1.7.16"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ee/c9/3132427f9e64d572688e6a1cbe3d542d1a03f676b81fb600f3d1fd7d2ec5/dicttoxml-1.7.16.tar.gz", hash = "sha256:6f36ce644881db5cd8940bee9b7cb3f3f6b7b327ba8a67d83d3e2caa0538bf9d", size = 39314, upload-time = "2022-12-23T16:07:17.189Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/09/40/9d521973cae7f7ef8b1f0d0e28a3db0f851c1f1dca45d4c2ed5360bb7246/dicttoxml-1.7.16-py3-none-any.whl", hash = "sha256:8677671496d0d38e66c7179f82a7e9059f94887777955dc71b0ac602ee637c26", size = 24155, upload-time = "2022-12-23T16:07:15.312Z" },
-]
-
-[[package]]
 name = "distro"
 version = "1.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1715,7 +1706,6 @@ name = "zeitgeist"
 version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
-    { name = "dicttoxml" },
     { name = "dotenv" },
     { name = "gnews" },
     { name = "httpx" },
@@ -1727,7 +1717,6 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dicttoxml", specifier = ">=1.7.16" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "gnews", specifier = ">=0.4.1" },
     { name = "httpx", specifier = ">=0.28.1" },

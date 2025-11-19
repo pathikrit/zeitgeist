@@ -21,9 +21,9 @@ IS_DEV = not IS_PROD
 
 QUICK_TEST = IS_DEV # If True, run quickly on first few predictions; useful for smoke-testing
 
-BATCH_REQUEST_DELAY_SECONDS = 2
+BATCH_REQUEST_DELAY_SECONDS = 5
 
-BATCH_SIZE = 200
+BATCH_SIZE = 100
 RETRIES = 3
 
 CLASSIFYING_MODEL = "openai:gpt-5-mini-2025-08-07"
@@ -161,10 +161,6 @@ def get_news():
         logging.error(f"Error in getting news from GNews: {e}")
         return []
 
-def to_xml_str(input: dict) -> str:
-    from dicttoxml import dicttoxml
-    return dicttoxml(input, xml_declaration=False, root=False, attr_type=False, return_bytes=False)
-
 async def main():
     predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
     log.info(f"Total = {len(predictions)} predictions")
@@ -185,7 +181,7 @@ async def main():
         "news_headlines": pl.DataFrame(news).select("title", "description").to_dicts() if news else [],
         "upcoming_catalysts": pl.DataFrame(events.output).to_dicts(),
     }
-    report = await synthesizing_agent.run(to_xml_str(report_input)) # TODO: just use JSON here instead of xml to save tokens?
+    report = await synthesizing_agent.run(json.dumps(report_input))
 
     output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
     output_dir.mkdir(parents=True, exist_ok=True)
