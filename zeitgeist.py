@@ -114,7 +114,7 @@ async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
         log.info(f"Submitting batch {i} ...")
         try:
             result = await relevant_prediction_agent.run(batch.write_json())
-            log.info(f"Completed batch {i}.")
+            log.info(f"Completed batch {i}")
             if result.output:
                 return pl.DataFrame(result.output)
         except Exception as e:
@@ -153,34 +153,35 @@ synthesizing_agent = Agent(
     retries=RETRIES,
 )
 
-def get_news():
+async def get_news() -> pl.DataFrame | None:
     from gnews import GNews
     try:
-        return GNews().get_top_news()
+        news = await asyncio.to_thread(GNews().get_top_news)
+        log.info(f"Fetched {len(news)} news headlines")
+        return pl.DataFrame(news)
     except Exception as e:
         logging.error(f"Error in getting news from GNews: {e}")
-        return []
+        return None
 
 async def main():
     predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
     log.info(f"Total = {len(predictions)} predictions")
 
-    tagged_predictions, events = await asyncio.gather(
+    tagged_predictions, events, news = await asyncio.gather(
         tag_predictions(predictions),
-        events_agent.run()
+        events_agent.run(),
+        get_news()
     )
-
-    news = get_news()
-    log.info(f"Fetched {len(news)} news headlines")
 
     report_input = {
         "prediction_markets": tagged_predictions
             .select("title", "bets", "topics")
             .filter(pl.col("topics").is_not_null())
             .to_dicts(),
-        "news_headlines": pl.DataFrame(news).select("title", "description").to_dicts() if news else [],
+        "news_headlines": news.select("title", "description").to_dicts() if news is not None else None,
         "upcoming_catalysts": pl.DataFrame(events.output).to_dicts(),
     }
+    log.info("Generating report...")
     report = await synthesizing_agent.run(json.dumps(report_input))
 
     output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
