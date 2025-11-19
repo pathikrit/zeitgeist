@@ -3,8 +3,7 @@ from datetime import date
 import json
 from pathlib import Path
 import os
-import traceback
-import logging
+import logging as log
 
 import polars as pl
 from pydantic import BaseModel, Field
@@ -14,9 +13,8 @@ import httpx
 from mako.lookup import TemplateLookup
 
 from dotenv import load_dotenv
-load_dotenv()
 
-logging.getLogger().setLevel(logging.INFO)
+########################################## Setup Configs #################################################
 
 IS_PROD = "GITHUB_ACTIONS" in os.environ
 IS_DEV = not IS_PROD
@@ -34,11 +32,14 @@ SYNTHESIS_MODEL = "openai:gpt-4.1-2025-04-14"
 
 today = date.today()
 
+load_dotenv()
+log.getLogger().setLevel(log.INFO)
 templates = TemplateLookup(directories=["templates"])
 
 assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found; Either add to .env file or run `export OPENAI_API_KEY=???`"
-
 assert not(IS_PROD and QUICK_TEST), "QUICK_TEST must be False in GitHub Actions"
+
+########################################################################################################
 
 async def fetch_from_kalshi() -> pl.DataFrame:
     LIMIT = 100
@@ -54,7 +55,7 @@ async def fetch_from_kalshi() -> pl.DataFrame:
 
     async with httpx.AsyncClient() as client:
         while True:
-            print(f"Fetching from kalshi @ offset={len(predictions)} ...")
+            log.info(f"Fetching from kalshi @ offset={len(predictions)} ...")
             try:
                 resp = await client.get(f"{API_URL}/events", params=params)
                 resp.raise_for_status()
@@ -62,12 +63,11 @@ async def fetch_from_kalshi() -> pl.DataFrame:
                 predictions.extend(data["events"])
                 params["cursor"] = data.get("cursor")
             except Exception as e:
-                print(f"Stopping because of error from Kalshi: {e}")
+                log.error(f"Stopping because of error from Kalshi: {e}")
                 params["cursor"] = None
             if not params["cursor"] or (QUICK_TEST and len(predictions) > LIMIT):
-                print(f"Fetched {len(predictions)} from kalshi")
+                log.info(f"Fetched {len(predictions)} from kalshi")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
-
 
 async def fetch_from_polymarket() -> pl.DataFrame:
     LIMIT = 100
@@ -83,18 +83,19 @@ async def fetch_from_polymarket() -> pl.DataFrame:
     async with httpx.AsyncClient() as client:
         while True:
             params = {"active": "true", "closed": "false", "limit": LIMIT, "offset": len(predictions)}
-            print(f"Fetching from polymarket @ offset={params['offset']} ...")
+            log.info(f"Fetching from polymarket @ offset={params['offset']} ...")
             try:
                 resp = await client.get(f"{API_URL}/markets", params=params)
                 resp.raise_for_status()
                 data = resp.json()
                 predictions.extend(data)
             except Exception as e:
-                print(f"Stopping because of error from Polymarket: {e}")
+                log.error(f"Stopping because of error from Polymarket: {e}")
                 data = None
             if not data or (QUICK_TEST and len(predictions) > LIMIT):
-                print(f"Fetched {len(predictions)} from polymarket")
+                log.info(f"Fetched {len(predictions)} from polymarket")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
+
 
 class RelevantPrediction(BaseModel):
     id: str = Field(description="original id from input")
@@ -110,14 +111,14 @@ relevant_prediction_agent = Agent(
 async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
     async def process_batch_with_delay(i: int, batch: pl.DataFrame) -> pl.DataFrame | None:
         await asyncio.sleep(i * BATCH_REQUEST_DELAY_SECONDS)
-        print(f"Submitting batch {i} ...")
+        log.info(f"Submitting batch {i} ...")
         try:
             result = await relevant_prediction_agent.run(batch.write_json())
-            print(f"Completed batch {i}.")
+            log.info(f"Completed batch {i}.")
             if result.output:
                 return pl.DataFrame(result.output)
         except Exception as e:
-            print(f"Error in tagging batch {i}: {e}")
+            log.error(f"Error in tagging batch {i}: {e}")
         return None
 
     tasks = [
@@ -128,7 +129,7 @@ async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
     dfs = [df for df in results if df is not None]
     assert dfs, "No relevant predictions found"
     relevant_predictions = pl.concat(dfs)
-    print(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
+    log.info(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
     return predictions.join(relevant_predictions, on="id", how="left")
 
 
@@ -136,7 +137,6 @@ class Event(BaseModel):
     event: str = Field(description="title of macro event or catalyst")
     when: str = Field(description="approximately when; either specific date or stringy like '2025 Q2' or 'next month'")
     impacts: list[str] = Field(description="list of short phrases or topics hinting at how this may impact me")
-
 
 events_agent = Agent(
     model=EVENTS_MODEL,
@@ -153,21 +153,21 @@ synthesizing_agent = Agent(
     retries=RETRIES,
 )
 
-def to_xml_str(input: dict) -> str:
-    from dicttoxml import dicttoxml
-    return dicttoxml(input, xml_declaration=False, root=False, attr_type=False, return_bytes=False)
-
 def get_news():
     from gnews import GNews
     try:
         return GNews().get_top_news()
-    except Exception:
-        traceback.print_exc()
+    except Exception as e:
+        logging.error(f"Error in getting news from GNews: {e}")
         return []
+
+def to_xml_str(input: dict) -> str:
+    from dicttoxml import dicttoxml
+    return dicttoxml(input, xml_declaration=False, root=False, attr_type=False, return_bytes=False)
 
 async def main():
     predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
-    print(f"Total = {len(predictions)} predictions")
+    log.info(f"Total = {len(predictions)} predictions")
 
     tagged_predictions, events = await asyncio.gather(
         tag_predictions(predictions),
@@ -175,7 +175,7 @@ async def main():
     )
 
     news = get_news()
-    print(f"Fetched {len(news)} news headlines")
+    log.info(f"Fetched {len(news)} news headlines")
 
     report_input = {
         "prediction_markets": tagged_predictions
@@ -185,14 +185,14 @@ async def main():
         "news_headlines": pl.DataFrame(news).select("title", "description").to_dicts() if news else [],
         "upcoming_catalysts": pl.DataFrame(events.output).to_dicts(),
     }
-    report = await synthesizing_agent.run(to_xml_str(report_input))
+    report = await synthesizing_agent.run(to_xml_str(report_input)) # TODO: just use JSON here instead of xml to save tokens?
 
     output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
     output_dir.mkdir(parents=True, exist_ok=True)
-    print(f"Writing to {output_dir} ...")
+    log.info(f"Writing to {output_dir} ...")
     html = templates.get_template("index.html.mako").render(today=today, report=report.output)
     (output_dir / "index.html").write_text(html, encoding="utf-8")
-    print("Done!")
+    log.info("Done!")
 
 
 if __name__ == "__main__":
