@@ -13,6 +13,9 @@
     <a href="https://github.com/pathikrit/zeitgeist" target="_blank" rel="noopener" style="float: right;">
         <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="30" height="30">
     </a>
+    <a href="https://pathikrit.github.io/zeitgeist/" style="float: right; text-decoration: none; font-size: 28px; margin-right: 10px;">
+        🔄
+    </a>
     ${MarkdownIt().render(report) | n}
 </main>
 </body>
