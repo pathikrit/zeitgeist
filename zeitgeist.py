@@ -137,19 +137,18 @@ def get_fred_data():
         return []
 
     fred_client = Fred(api_key=FRED_API_KEY)
+
     out = []
     for code, title in FRED_CODES.items():
         print(f"Fetching {title} ({code}) from FRED ...")
         try:
             series = fred_client.get_series_latest_release(code)
             log.info(f"Fetched {len(series)} data points for FRED {code=}")
-
             records = [
                 {"date": d.date().isoformat(), "value": float(v)}
                 for d, v in zip(series.index, series.values)
             ]
             out.append({"title": title, "data": records[-NUM_FRED_DATAPOINTS:]})
-
         except Exception as e:
             log.error(f"Failed to fetch FRED {code=}: {e}")
 
@@ -215,7 +214,7 @@ synthesizing_agent = Agent(
 def get_news() -> pl.DataFrame | None:
     from gnews import GNews
     try:
-        news = News().get_top_news()
+        news = GNews().get_top_news()
         log.info(f"Fetched {len(news)} news headlines")
         return pl.DataFrame(news)
     except Exception as e:
@@ -242,19 +241,19 @@ async def main():
         "upcoming_catalysts": pl.DataFrame(events.output).to_dicts(),
         "fred_data_points": fred_data
     }
-    breakpoint()
     log.info("Generating report...")
     report = await synthesizing_agent.run(json.dumps(report_input))
 
     output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
+    output_file = output_dir / "index.html"
+    log.info(f"Writing to {output_file} ...")
     output_dir.mkdir(parents=True, exist_ok=True)
-    log.info(f"Writing to {output_dir} ...")
     html = templates.get_template("index.html.mako").render(today=today, report=report.output)
-    (output_dir / "index.html").write_text(html, encoding="utf-8")
+    output_file.write_text(html, encoding="utf-8")
     log.info("Done!")
-
+    if IS_DEV:
+        import webbrowser
+        webbrowser.open(output_file.absolute().as_uri())
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
