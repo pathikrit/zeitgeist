@@ -129,7 +129,7 @@ async def fetch_from_polymarket() -> pl.DataFrame:
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
 
-async def get_fred_data():
+def get_fred_data():
     from fredapi import Fred
 
     if not FRED_API_KEY:
@@ -212,7 +212,7 @@ synthesizing_agent = Agent(
     retries=RETRIES,
 )
 
-async def get_news() -> pl.DataFrame | None:
+def get_news() -> pl.DataFrame | None:
     from gnews import GNews
     try:
         news = News().get_top_news()
@@ -229,8 +229,8 @@ async def main():
     tagged_predictions, events, news, fred_data = await asyncio.gather(
         tag_predictions(predictions),
         events_agent.run(),
-        get_news(),
-        get_fred_data(),
+        asyncio.to_thread(get_news),
+        asyncio.to_thread(get_fred_data),
     )
 
     report_input = {

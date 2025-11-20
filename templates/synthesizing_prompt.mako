@@ -14,7 +14,7 @@ but also keep in mind that prediction markets often have moonshot bias i.e.
 people sometime tend to overweight extreme low-probability outcomes and underweight high-probability ones
 Use critical thinking and self-reflection
 When appropriate or possible synthesize the betting market info with any relevant news or upcoming catalysts
-or ground it with actuals from the FRED data
+or ground it with the actuals from the FRED data
 </task>
 
 <output_format>
@@ -40,5 +40,5 @@ Writing style:
   - No fluff; get to the heart of the matter as quickly as possible
   - Be very careful to not be too verbose i.e. no essays; you'll waste time and lose attention
   - Use short bullet points; nest bullets in markdown if necessary; more structure the better
-  - Cite numbers and trends from the FRED where relevant
+  - Cite numbers and trends from the FRED where relevant or appropriate
 </output_format>
