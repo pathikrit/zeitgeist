@@ -36,6 +36,38 @@ load_dotenv()
 log.getLogger().setLevel(log.INFO)
 templates = TemplateLookup(directories=["templates"])
 
+FRED_API_KEY=os.getenv("FRED_API_KEY")
+NUM_FRED_DATAPOINTS = 15
+
+FRED_CODES = {
+    "CPILFESL": "CPI (Core)",
+    "CPIAUCSL": "CPI (Headline)",
+    "PCEPILFE": "PCE Price Index (Core)",
+    "PCEPI": "PCE Price Index (Headline)",
+    "PAYEMS": "Nonfarm Payrolls",
+    "UNRATE": "Unemployment Rate",
+    "ICSA": "Initial Jobless Claims",
+    "CCSA": "Continuing Jobless Claims",
+    "JTSJOL": "Job Openings (JOLTS)",
+    "INDPRO": "Industrial Production",
+    "RSAFS": "Retail Sales (Headline)",
+    "RSXFS": "Retail Sales (Retail Trade)",
+    "HOUST": "Housing Starts",
+    "PERMIT": "Building Permits",
+    "CSUSHPISA": "Case-Shiller U.S. Home Price Index",
+    "FEDFUNDS": "Fed Funds Rate",
+    "M2SL": "M2 Money Supply",
+    "DGS2": "2Y Treasury Yield",
+    "DGS10": "10Y Treasury Yield",
+    "T10Y2Y": "10Y–2Y Yield Spread",
+    "T10Y3M": "10Y–3M Yield Spread",
+    "NFCI": "Chicago Fed Financial Conditions Index",
+    "SP500": "S&P 500 Index",
+    "DTWEXBGS": "Trade-Weighted USD Index (Broad)",
+    "DCOILWTICO": "WTI Crude Oil Price",
+    "UMCSENT": "Michigan Consumer Sentiment",
+}
+
 assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found; Either add to .env file or run `export OPENAI_API_KEY=???`"
 assert not(IS_PROD and QUICK_TEST), "QUICK_TEST must be False in GitHub Actions"
 
@@ -97,6 +129,33 @@ async def fetch_from_polymarket() -> pl.DataFrame:
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
 
+async def get_fred_data():
+    from fredapi import Fred
+
+    if not FRED_API_KEY:
+        log.warning("No FRED API key found; skipping FRED data points ...")
+        return []
+
+    fred_client = Fred(api_key=FRED_API_KEY)
+    out = []
+    for code, title in FRED_CODES.items():
+        print(f"Fetching {title} ({code}) from FRED ...")
+        try:
+            series = fred_client.get_series_latest_release(code)
+            log.info(f"Fetched {len(series)} data points for FRED {code=}")
+
+            records = [
+                {"date": d.date().isoformat(), "value": float(v)}
+                for d, v in zip(series.index, series.values)
+            ]
+            out.append({"title": title, "data": records[-NUM_FRED_DATAPOINTS:]})
+
+        except Exception as e:
+            log.error(f"Failed to fetch FRED {code=}: {e}")
+
+    return out
+
+
 class RelevantPrediction(BaseModel):
     id: str = Field(description="original id from input")
     topics: list[str] = Field(description="public companies or investment sectors or broad alternatives impacted")
@@ -156,21 +215,22 @@ synthesizing_agent = Agent(
 async def get_news() -> pl.DataFrame | None:
     from gnews import GNews
     try:
-        news = await asyncio.to_thread(GNews().get_top_news)
+        news = News().get_top_news()
         log.info(f"Fetched {len(news)} news headlines")
         return pl.DataFrame(news)
     except Exception as e:
-        logging.error(f"Error in getting news from GNews: {e}")
+        log.error(f"Error in getting news from GNews: {e}")
         return None
 
 async def main():
     predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
     log.info(f"Total = {len(predictions)} predictions")
 
-    tagged_predictions, events, news = await asyncio.gather(
+    tagged_predictions, events, news, fred_data = await asyncio.gather(
         tag_predictions(predictions),
         events_agent.run(),
-        get_news()
+        get_news(),
+        get_fred_data(),
     )
 
     report_input = {
@@ -180,7 +240,9 @@ async def main():
             .to_dicts(),
         "news_headlines": news.select("title", "description").to_dicts() if news is not None else None,
         "upcoming_catalysts": pl.DataFrame(events.output).to_dicts(),
+        "fred_data_points": fred_data
     }
+    breakpoint()
     log.info("Generating report...")
     report = await synthesizing_agent.run(json.dumps(report_input))
 
