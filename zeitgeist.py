@@ -133,12 +133,12 @@ async def fetch_from_polymarket() -> pl.DataFrame:
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
 
-def get_fred_data() -> list[dict]:
+def get_fred_data() -> pl.DataFrame | None:
     from fredapi import Fred
 
     if not FRED_API_KEY:
         log.warning("No FRED API key found; skipping FRED data points ...")
-        return []
+        return None
 
     fred_client = Fred(api_key=FRED_API_KEY)
 
@@ -152,11 +152,15 @@ def get_fred_data() -> list[dict]:
                 {"date": d.date().isoformat(), "value": float(v)}
                 for d, v in zip(series.index, series.values)
             ]
-            out.append({"title": title, "data": records[-NUM_FRED_DATAPOINTS:]})
+            out.append({
+                "title": title,
+                "data": records[-NUM_FRED_DATAPOINTS:],
+                "url": f"https://fred.stlouisfed.org/series/{code}"
+            })
         except Exception as e:
             log.error(f"Failed to fetch FRED {code=}: {e}")
 
-    return out
+    return pl.DataFrame(out)
 
 
 class RelevantPrediction(BaseModel):
@@ -196,9 +200,10 @@ async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
 
 
 class Event(BaseModel):
-    event: str = Field(description="title of macro event or catalyst")
+    title: str = Field(description="title of macro event or catalyst")
     when: str = Field(description="approximately when; either specific date or stringy like '2025 Q2' or 'next month'")
-    impacts: str = Field(description="Very short phrase (1-3 words): public companies or investment sectors or broad alternatives impacted")
+    url: str | None = Field(description="web url linking to a page with details about the event - okay to skip if url is not available or too generic")
+    topics: str = Field(description="Very short phrase (1-3 words): public companies or investment sectors or broad alternatives impacted")
 
 events_agent = Agent(
     model=EVENTS_MODEL,
@@ -214,6 +219,10 @@ synthesizing_agent = Agent(
     system_prompt=templates.get_template("synthesizing_prompt.mako").render(today=today),
     retries=RETRIES,
 )
+
+async def get_events() -> pl.DataFrame:
+    res = await events_agent.run()
+    return pl.DataFrame(res.output)
 
 def get_news() -> pl.DataFrame | None:
     from gnews import GNews
@@ -231,7 +240,7 @@ async def main():
 
     tagged_predictions, events, news, fred_data = await asyncio.gather(
         tag_predictions(predictions.select("id", "title", "bets")),
-        events_agent.run(),
+        get_events(),
         asyncio.to_thread(get_news),
         asyncio.to_thread(get_fred_data),
     )
@@ -242,8 +251,8 @@ async def main():
             .filter(pl.col("topics").is_not_null())
             .to_dicts(),
         "news_headlines": news.select("title", "description").to_dicts() if news is not None else None,
-        "upcoming_catalysts": pl.DataFrame(events.output).to_dicts(),
-        "fred_data_points": fred_data
+        "upcoming_catalysts": events.select("title", "when", "topics").to_dicts(),
+        "fred_data_points": fred_data.select("title", "data").to_dicts() if fred_data is not None else None
     }
     log.info("Generating report...")
     report = await synthesizing_agent.run(json.dumps(report_input))
