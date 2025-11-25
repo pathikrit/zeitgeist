@@ -77,7 +77,12 @@ async def fetch_from_kalshi() -> pl.DataFrame:
         bets = []
         for m in e["markets"]:
             bets.append({"prompt": m["yes_sub_title"], "probability": m["last_price"] / m["notional_value"]})
-        return {"id": f"kalshi-{e['event_ticker']}", "title": e["title"], "bets": bets}
+        return {
+            "id": f"k-{e['event_ticker']}",
+            "title": e["title"],
+            "bets": bets,
+            "url": f"https://kalshi.com/markets/{e['series_ticker']}",
+        }
 
     async with httpx.AsyncClient() as client:
         while True:
@@ -104,7 +109,12 @@ async def fetch_from_polymarket() -> pl.DataFrame:
         bets = []
         for prompt, probability in zip(json.loads(p["outcomes"]), json.loads(p.get("outcomePrices", "[]"))):
             bets.append({"prompt": prompt, "probability": float(probability)})
-        return {"id": f"pm-{p['id']}", "title": p["question"], "bets": bets}
+        return {
+            "id": f"pm-{p['id']}",
+            "title": p["question"],
+            "bets": bets,
+            "url": f"https://polymarket.com/event/{p['slug']}"
+        }
 
     async with httpx.AsyncClient() as client:
         while True:
@@ -220,7 +230,7 @@ async def main():
     log.info(f"Total = {len(predictions)} predictions")
 
     tagged_predictions, events, news, fred_data = await asyncio.gather(
-        tag_predictions(predictions),
+        tag_predictions(predictions.select("id", "title", "bets")),
         events_agent.run(),
         asyncio.to_thread(get_news),
         asyncio.to_thread(get_fred_data),
