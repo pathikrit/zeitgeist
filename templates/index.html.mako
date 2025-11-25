@@ -18,5 +18,15 @@
     </a>
     ${MarkdownIt().render(report) | n}
 </main>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Force all markdown-generated links to open in a new tab
+    // TODO: In the future, experiment with CSS target-new once browser support improves.
+    document.querySelectorAll("a[href]").forEach(a => {
+        a.setAttribute("target", "_blank");
+        a.setAttribute("rel", "noopener noreferrer");
+    });
+});
+</script>
 </body>
 </html>
