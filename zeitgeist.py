@@ -37,23 +37,18 @@ log.getLogger().setLevel(log.INFO)
 templates = TemplateLookup(directories=["templates"])
 
 FRED_API_KEY=os.getenv("FRED_API_KEY")
-NUM_FRED_DATAPOINTS = 15
+NUM_FRED_DATAPOINTS = 10
 
 FRED_CODES = {
     "CPILFESL": "CPI (Core)",
-    "CPIAUCSL": "CPI (Headline)",
     "PCEPILFE": "PCE Price Index (Core)",
-    "PCEPI": "PCE Price Index (Headline)",
     "PAYEMS": "Nonfarm Payrolls",
     "UNRATE": "Unemployment Rate",
-    "ICSA": "Initial Jobless Claims",
     "CCSA": "Continuing Jobless Claims",
     "JTSJOL": "Job Openings (JOLTS)",
     "INDPRO": "Industrial Production",
     "RSAFS": "Retail Sales (Headline)",
-    "RSXFS": "Retail Sales (Retail Trade)",
     "HOUST": "Housing Starts",
-    "PERMIT": "Building Permits",
     "CSUSHPISA": "Case-Shiller U.S. Home Price Index",
     "FEDFUNDS": "Fed Funds Rate",
     "M2SL": "M2 Money Supply",
@@ -62,7 +57,6 @@ FRED_CODES = {
     "T10Y2Y": "10Y–2Y Yield Spread",
     "T10Y3M": "10Y–3M Yield Spread",
     "NFCI": "Chicago Fed Financial Conditions Index",
-    "SP500": "S&P 500 Index",
     "DTWEXBGS": "Trade-Weighted USD Index (Broad)",
     "DCOILWTICO": "WTI Crude Oil Price",
     "UMCSENT": "Michigan Consumer Sentiment",
@@ -129,7 +123,7 @@ async def fetch_from_polymarket() -> pl.DataFrame:
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
 
-def get_fred_data():
+def get_fred_data() -> list[dict]:
     from fredapi import Fred
 
     if not FRED_API_KEY:
@@ -157,7 +151,7 @@ def get_fred_data():
 
 class RelevantPrediction(BaseModel):
     id: str = Field(description="original id from input")
-    topics: list[str] = Field(description="public companies or investment sectors or broad alternatives impacted")
+    topics: str = Field(description="Very short phrase (1-3 words): public companies or investment sectors or broad alternatives impacted")
 
 relevant_prediction_agent = Agent(
     model=CLASSIFYING_MODEL,
@@ -194,7 +188,7 @@ async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
 class Event(BaseModel):
     event: str = Field(description="title of macro event or catalyst")
     when: str = Field(description="approximately when; either specific date or stringy like '2025 Q2' or 'next month'")
-    impacts: list[str] = Field(description="list of short phrases or topics hinting at how this may impact me")
+    impacts: str = Field(description="Very short phrase (1-3 words): public companies or investment sectors or broad alternatives impacted")
 
 events_agent = Agent(
     model=EVENTS_MODEL,

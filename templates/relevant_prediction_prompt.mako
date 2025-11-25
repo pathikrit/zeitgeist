@@ -17,4 +17,4 @@ Some examples of things that are UNLIKELY to impact (unless a good reason is pro
 
 Examine each question and return a subset of ids and related topics they may impact
 Topics must be few short strings like sectors or tickers or short phrases that would be impacted by this question
-Generally be lenient when possible to decide whether to include an id or not
+Generally be very strict and careful when possible to decide whether to include an id or not i.e. obvious impact on me
