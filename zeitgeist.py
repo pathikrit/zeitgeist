@@ -189,7 +189,7 @@ async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
 
     tasks = [
         process_batch_with_delay(i, batch)
-        for i, batch in enumerate(predictions.iter_slices(BATCH_SIZE))
+        for i, batch in enumerate(predictions.select("id", "title", "bets").iter_slices(BATCH_SIZE))
     ]
     results = await asyncio.gather(*tasks)
     dfs = [df for df in results if df is not None]
@@ -239,7 +239,7 @@ async def main():
     log.info(f"Total = {len(predictions)} predictions")
 
     tagged_predictions, events, news, fred_data = await asyncio.gather(
-        tag_predictions(predictions.select("id", "title", "bets")),
+        tag_predictions(predictions),
         get_events(),
         asyncio.to_thread(get_news),
         asyncio.to_thread(get_fred_data),
@@ -257,11 +257,29 @@ async def main():
     log.info("Generating report...")
     report = await synthesizing_agent.run(json.dumps(report_input))
 
+    log.info("Adding citations ...")
+    citation_agent = Agent(
+        model=SYNTHESIS_MODEL,
+        output_type=str,
+        system_prompt=templates.get_template("citation_prompt.mako").render(memo=report.output),
+        retries=RETRIES
+    )
+    citations = [
+        tagged_predictions.select("title", "url"),
+        events.select("title", "url"),
+        news.select("title", "url") if news is not None else None,
+        fred_data.select("title", "url") if fred_data is not None else None
+    ]
+    citations = [c for c in citations if c is not None]
+    citations = pl.concat(citations).filter(pl.col("url").is_not_null())
+    report = await citation_agent.run(citations.write_json())
+    report = report.output.removesuffix("```").removeprefix("```md").removeprefix("```markdown").removeprefix("```")
+
     output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
     output_file = output_dir / "index.html"
     log.info(f"Writing to {output_file} ...")
     output_dir.mkdir(parents=True, exist_ok=True)
-    html = templates.get_template("index.html.mako").render(today=today, report=report.output)
+    html = templates.get_template("index.html.mako").render(today=today, report=report)
     output_file.write_text(html, encoding="utf-8")
     log.info("Done!")
     if IS_DEV:
