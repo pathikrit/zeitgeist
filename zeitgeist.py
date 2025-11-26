@@ -196,7 +196,7 @@ async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
     assert dfs, "No relevant predictions found"
     relevant_predictions = pl.concat(dfs)
     log.info(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
-    return predictions.join(relevant_predictions, on="id", how="left")
+    return predictions.join(relevant_predictions, on="id", how="inner")
 
 
 class Event(BaseModel):
@@ -246,10 +246,7 @@ async def main():
     )
 
     report_input = {
-        "prediction_markets": tagged_predictions
-            .select("title", "bets", "topics")
-            .filter(pl.col("topics").is_not_null())
-            .to_dicts(),
+        "prediction_markets": tagged_predictions.select("title", "bets", "topics").to_dicts(),
         "news_headlines": news.select("title", "description").to_dicts() if news is not None else None,
         "upcoming_catalysts": events.select("title", "when", "topics").to_dicts(),
         "fred_data_points": fred_data.select("title", "data").to_dicts() if fred_data is not None else None
@@ -257,13 +254,6 @@ async def main():
     log.info("Generating report...")
     report = await synthesizing_agent.run(json.dumps(report_input))
 
-    log.info("Adding citations ...")
-    citation_agent = Agent(
-        model=SYNTHESIS_MODEL,
-        output_type=str,
-        system_prompt=templates.get_template("citation_prompt.mako").render(memo=report.output),
-        retries=RETRIES
-    )
     citations = [
         tagged_predictions.select("title", "url"),
         events.select("title", "url"),
@@ -272,8 +262,20 @@ async def main():
     ]
     citations = [c for c in citations if c is not None]
     citations = pl.concat(citations).filter(pl.col("url").is_not_null())
-    report = await citation_agent.run(citations.write_json())
-    report = report.output.removesuffix("```").removeprefix("```md").removeprefix("```markdown").removeprefix("```")
+    log.info(f"Adding citations from {len(citations)} sources ...")
+
+    citation_agent = Agent(
+        model=SYNTHESIS_MODEL,
+        output_type=str,
+        system_prompt=templates.get_template("citation_prompt.mako").render(memo=report.output),
+        retries=RETRIES
+    )
+    try:
+        report = await citation_agent.run(citations.write_json())
+        report = report.output.removesuffix("```").removeprefix("```md").removeprefix("```markdown").removeprefix("```")
+    except Exception as e:
+        log.error(f"Failed to insert citations: {e}")
+        report = report.output
 
     output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
     output_file = output_dir / "index.html"
