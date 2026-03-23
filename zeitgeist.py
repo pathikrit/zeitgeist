@@ -89,7 +89,7 @@ async def fetch_from_kalshi() -> pl.DataFrame:
     def simple_prediction(e):
         bets = []
         for m in e["markets"]:
-            bets.append({"prompt": m["yes_sub_title"], "probability": m["last_price"] / m["notional_value"]})
+            bets.append({"prompt": m["yes_sub_title"], "probability": float(m["last_price_dollars"]) / float(m["notional_value_dollars"])})
         return {
             "id": f"k-{e['event_ticker']}",
             "title": e["title"],
