@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeitgeist Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  header {
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 { font-size: 18px; font-weight: 600; }
+  header .date { color: #888; font-size: 13px; margin-left: auto; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; display: flex; flex-direction: column; gap: 32px; }
+
+  section { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; overflow: hidden; }
+
+  .section-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-header h2 { font-size: 15px; font-weight: 600; }
+  .section-header .count {
+    background: #f0f0f0;
+    color: #555;
+    border-radius: 20px;
+    padding: 1px 8px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* Search */
+  .search-wrap { padding: 12px 20px; border-bottom: 1px solid #f0f0f0; }
+  .search-wrap input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background: #fafafa;
+    transition: border-color .15s;
+  }
+  .search-wrap input:focus { border-color: #0071e3; background: #fff; }
+
+  /* Predictions table */
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #888;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+    position: sticky;
+    top: 57px;
+  }
+  tbody tr { border-bottom: 1px solid #f7f7f7; transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafafa; }
+  td { padding: 12px 20px; vertical-align: top; }
+
+  td.question { max-width: 420px; }
+  td.question a { color: #0071e3; text-decoration: none; font-weight: 500; }
+  td.question a:hover { text-decoration: underline; }
+
+  td.answers { min-width: 260px; }
+  .bet { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 13px; }
+  .bet:last-child { margin-bottom: 0; }
+  .bet-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333; }
+  .bet-bar-wrap { width: 100px; height: 6px; background: #eee; border-radius: 3px; flex-shrink: 0; }
+  .bet-bar { height: 6px; border-radius: 3px; background: #0071e3; }
+  .bet-bar.high { background: #34c759; }
+  .bet-bar.low  { background: #ff3b30; }
+  .bet-pct { width: 36px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; color: #333; font-size: 12px; }
+
+  td.topics .tag {
+    display: inline-block;
+    background: #f0f4ff;
+    color: #3a5bd9;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .no-results { padding: 40px 20px; text-align: center; color: #aaa; }
+
+  /* Catalysts */
+  .catalyst-list { display: flex; flex-direction: column; gap: 0; }
+  .catalyst-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 11px 20px;
+    border-bottom: 1px solid #f7f7f7;
+  }
+  .catalyst-row:last-child { border-bottom: none; }
+  .catalyst-when {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: #888;
+    width: 110px;
+  }
+  .catalyst-title { flex: 1; }
+  .catalyst-title a { color: #0071e3; text-decoration: none; }
+  .catalyst-title a:hover { text-decoration: underline; }
+  .catalyst-topics .tag {
+    display: inline-block;
+    background: #fff3e0;
+    color: #b45309;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  /* News */
+  .news-list { display: flex; flex-direction: column; }
+  .news-row {
+    padding: 11px 20px;
+    border-bottom: 1px solid #f7f7f7;
+  }
+  .news-row:last-child { border-bottom: none; }
+  .news-row a { color: #1d1d1f; text-decoration: none; font-weight: 500; }
+  .news-row a:hover { color: #0071e3; }
+  .news-desc { color: #666; font-size: 13px; margin-top: 2px; }
+
+  /* FRED */
+  .fred-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0;
+  }
+  .fred-card {
+    padding: 14px 20px;
+    border-right: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .fred-card:hover { background: #fafafa; }
+  .fred-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+  .fred-title a { color: #1d1d1f; text-decoration: none; }
+  .fred-title a:hover { color: #0071e3; }
+  .fred-latest {
+    font-size: 22px;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+    color: #1d1d1f;
+  }
+  .fred-latest span { font-size: 13px; color: #888; font-weight: 400; margin-left: 6px; }
+  svg.sparkline { display: block; overflow: visible; }
+
+  /* Error */
+  #error-banner {
+    display: none;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 24px 32px 0;
+    font-size: 13px;
+    color: #856404;
+  }
+  #error-banner code { background: #ffe;  padding: 1px 4px; border-radius: 3px; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Zeitgeist Dashboard</h1>
+  <span class="date" id="report-date"></span>
+</header>
+
+<div id="error-banner">
+  Could not load <strong>.reports/output.json</strong>. If opening from <code>file://</code>, serve locally instead:<br>
+  <code>python3 -m http.server 8000</code> then open <code>http://localhost:8000/dashboard.html</code>
+</div>
+
+<div class="container">
+
+  <section id="section-predictions">
+    <div class="section-header">
+      <h2>Prediction Markets</h2>
+      <span class="count" id="pred-count"></span>
+    </div>
+    <div class="search-wrap">
+      <input type="search" id="pred-search" placeholder="Search questions or topics..." autocomplete="off">
+    </div>
+    <div id="pred-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:35%">Question</th>
+            <th>Answers</th>
+            <th>Topics</th>
+          </tr>
+        </thead>
+        <tbody id="pred-tbody"></tbody>
+      </table>
+      <div class="no-results" id="pred-no-results" style="display:none">No matching predictions</div>
+    </div>
+  </section>
+
+  <section id="section-catalysts">
+    <div class="section-header">
+      <h2>Upcoming Catalysts</h2>
+      <span class="count" id="cat-count"></span>
+    </div>
+    <div class="catalyst-list" id="catalyst-list"></div>
+  </section>
+
+  <section id="section-news">
+    <div class="section-header">
+      <h2>News Headlines</h2>
+      <span class="count" id="news-count"></span>
+    </div>
+    <div class="news-list" id="news-list"></div>
+  </section>
+
+  <section id="section-fred">
+    <div class="section-header">
+      <h2>FRED Economic Data</h2>
+      <span class="count" id="fred-count"></span>
+    </div>
+    <div class="fred-grid" id="fred-grid"></div>
+  </section>
+
+</div>
+
+<script>
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function barColor(p) {
+  if (p >= 0.65) return 'high';
+  if (p <= 0.25) return 'low';
+  return '';
+}
+
+function renderPredictions(rows) {
+  const tbody = document.getElementById('pred-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    document.getElementById('pred-no-results').style.display = '';
+    return;
+  }
+  document.getElementById('pred-no-results').style.display = 'none';
+  tbody.innerHTML = rows.map(p => {
+    const betsHtml = (p.bets || []).map(b => {
+      const pct = Math.round(b.probability * 100);
+      const cls = barColor(b.probability);
+      return `<div class="bet">
+        <span class="bet-label" title="${esc(b.prompt)}">${esc(b.prompt)}</span>
+        <div class="bet-bar-wrap"><div class="bet-bar ${cls}" style="width:${pct}%"></div></div>
+        <span class="bet-pct">${pct}%</span>
+      </div>`;
+    }).join('');
+    const titleHtml = p.url
+      ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>`
+      : esc(p.title);
+    return `<tr data-title="${esc(p.title)}" data-topics="${esc(p.topics||'')}">
+      <td class="question">${titleHtml}</td>
+      <td class="answers">${betsHtml}</td>
+      <td class="topics">${p.topics ? `<span class="tag">${esc(p.topics)}</span>` : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCatalysts(items) {
+  const el = document.getElementById('catalyst-list');
+  document.getElementById('cat-count').textContent = items.length;
+  el.innerHTML = items.map(c => {
+    const titleHtml = c.url
+      ? `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)}</a>`
+      : esc(c.title);
+    return `<div class="catalyst-row">
+      <span class="catalyst-when">${esc(c.when || '')}</span>
+      <span class="catalyst-title">${titleHtml}</span>
+      ${c.topics ? `<span class="catalyst-topics"><span class="tag">${esc(c.topics)}</span></span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderNews(items) {
+  const el = document.getElementById('news-list');
+  document.getElementById('news-count').textContent = items.length;
+  el.innerHTML = items.map(n => {
+    const titleHtml = n.url
+      ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a>`
+      : esc(n.title);
+    return `<div class="news-row">
+      <div>${titleHtml}</div>
+      ${n.description ? `<div class="news-desc">${esc(n.description)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function sparkline(data, width=120, height=32) {
+  const vals = data.map(d => d.value).filter(v => v != null && !isNaN(v));
+  if (vals.length < 2) return '';
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = max - min || 1;
+  const pad = 2;
+  const pts = vals.map((v, i) => {
+    const x = pad + (i / (vals.length - 1)) * (width - pad * 2);
+    const y = pad + (1 - (v - min) / range) * (height - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  return `<svg class="sparkline" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    <polyline points="${pts}" fill="none" stroke="#0071e3" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function renderFred(items) {
+  const el = document.getElementById('fred-grid');
+  document.getElementById('fred-count').textContent = items.length;
+  el.innerHTML = items.map(f => {
+    const data = f.data || [];
+    const latest = data[data.length - 1];
+    const latestVal = latest ? Number(latest.value).toLocaleString(undefined, {maximumFractionDigits: 2}) : 'N/A';
+    const latestDate = latest ? latest.date : '';
+    const spark = sparkline(data);
+    const titleHtml = f.url
+      ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)}</a>`
+      : esc(f.title);
+    return `<div class="fred-card">
+      <div class="fred-title">${titleHtml}</div>
+      <div class="fred-latest">${latestVal}<span>${esc(latestDate)}</span></div>
+      ${spark}
+    </div>`;
+  }).join('');
+}
+
+// Search
+let allPredictions = [];
+document.getElementById('pred-search').addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  const filtered = q
+    ? allPredictions.filter(p =>
+        (p.title || '').toLowerCase().includes(q) ||
+        (p.topics || '').toLowerCase().includes(q)
+      )
+    : allPredictions;
+  document.getElementById('pred-count').textContent = `${filtered.length} / ${allPredictions.length}`;
+  renderPredictions(filtered);
+});
+
+// Load data
+fetch('.reports/output.json')
+  .then(r => { if (!r.ok) throw new Error(r.statusText); return r.text(); })
+  .then(t => JSON.parse(t.replace(/:\s*NaN\b/g, ': null')))
+  .then(data => {
+    if (data.date) document.getElementById('report-date').textContent = data.date;
+
+    allPredictions = data.relevant_predictions || [];
+    document.getElementById('pred-count').textContent = allPredictions.length;
+    renderPredictions(allPredictions);
+
+    renderCatalysts(data.upcoming_catalysts || []);
+    renderNews(data.news_headlines || []);
+
+    if (data.fred_data) {
+      renderFred(data.fred_data);
+    } else {
+      document.getElementById('section-fred').style.display = 'none';
+    }
+
+    if (!data.news_headlines) {
+      document.getElementById('section-news').style.display = 'none';
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    const banner = document.getElementById('error-banner');
+    banner.style.display = 'block';
+    banner.innerHTML += `<br><code>${err}</code>`;
+  });
+</script>
+</body>
+</html>

@@ -168,6 +168,7 @@ def get_fred_data() -> pl.DataFrame | None:
             records = [
                 {"date": d.date().isoformat(), "value": float(v)}
                 for d, v in zip(series.index, series.values)
+                if v == v  # skip NaN
             ]
             out.append({
                 "title": title,
