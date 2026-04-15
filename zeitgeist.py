@@ -302,10 +302,16 @@ async def main():
     html = templates.get_template("index.html.mako").render(today=today, report=report)
     output_file.write_text(html, encoding="utf-8")
 
-    if IS_PROD:
-        predictions_file = Path(".reports/predictions.json")
-        log.info(f"Writing predictions to {predictions_file} ...")
-        predictions_file.write_text(tagged_predictions.write_json(), encoding="utf-8")
+    output_json_file = Path(".reports/output.json")
+    log.info(f"Writing output to {output_json_file} ...")
+    output_data = {
+        "date": today.isoformat(),
+        "relevant_predictions": tagged_predictions.to_dicts(),
+        "upcoming_catalysts": events.to_dicts(),
+        "news_headlines": news.to_dicts() if news is not None else None,
+        "fred_data": fred_data.to_dicts() if fred_data is not None else None,
+    }
+    output_json_file.write_text(json.dumps(output_data, indent=2), encoding="utf-8")
     log.info("Done!")
     if IS_DEV:
         import webbrowser
