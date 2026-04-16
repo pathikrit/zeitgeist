@@ -291,7 +291,10 @@ function betHtml(b) {
 }
 
 function betsHtml(p) {
-  const sorted = (p.bets || []).filter(b => b.probability > 0.01).sort((a, b) => b.probability - a.probability);
+  const isYesNo = bets => bets.length === 2 && bets.every(b => /^(yes|no)$/i.test((b.prompt || '').trim()));
+  const raw = (p.bets || []).filter(b => b.probability > 0.01);
+  const sorted = (isYesNo(raw) ? [raw.sort((a, b) => b.probability - a.probability)[0]] : raw)
+    .sort((a, b) => b.probability - a.probability);
   const main  = sorted.filter(b => b.probability >= 0.05);
   const other = sorted.filter(b => b.probability <  0.05);
   let html = main.map(betHtml).join('');
