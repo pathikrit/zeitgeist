@@ -109,6 +109,11 @@
 
 mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; }
 
+  .other-toggle { cursor: pointer; opacity: .6; }
+  .other-toggle:hover { opacity: 1; }
+  .other-label { font-style: italic; }
+  .other-bets { padding-left: 8px; border-left: 1px solid #2a2a2e; margin: 2px 0 4px; }
+
   .no-results { padding: 40px 20px; text-align: center; color: #444; }
 
   /* Catalysts */
@@ -275,6 +280,35 @@ function barColor(p) {
   return '';
 }
 
+function betHtml(b) {
+  const pct = Math.round(b.probability * 100);
+  return `<div class="bet">
+    <span class="bet-label" title="${esc(b.prompt)}">${hi(b.prompt)}</span>
+    <div class="bet-bar-wrap"><div class="bet-bar ${barColor(b.probability)}" style="width:${pct}%"></div></div>
+    <span class="bet-pct">${pct}%</span>
+  </div>`;
+}
+
+function betsHtml(p) {
+  const sorted = (p.bets || []).filter(b => b.probability > 0.01).sort((a, b) => b.probability - a.probability);
+  const main  = sorted.filter(b => b.probability >= 0.05);
+  const other = sorted.filter(b => b.probability <  0.05);
+  let html = main.map(betHtml).join('');
+  if (other.length > 1) {
+    const otherPct = Math.round(other.reduce((s, b) => s + b.probability, 0) * 100);
+    const oid = 'other-' + esc(p.id);
+    html += `<div class="bet other-toggle" data-oid="${oid}">
+      <span class="bet-label other-label">&#9654; Other (${other.length})</span>
+      <div class="bet-bar-wrap"><div class="bet-bar" style="width:${otherPct}%;opacity:.4"></div></div>
+      <span class="bet-pct">${otherPct}%</span>
+    </div>
+    <div class="other-bets" id="${oid}" style="display:none">${other.map(betHtml).join('')}</div>`;
+  } else {
+    html += other.map(betHtml).join('');
+  }
+  return html;
+}
+
 function renderPredictions(rows) {
   const tbody = document.getElementById('pred-tbody');
   if (!rows.length) {
@@ -284,22 +318,12 @@ function renderPredictions(rows) {
   }
   document.getElementById('pred-no-results').style.display = 'none';
   tbody.innerHTML = rows.map(p => {
-    const sortedBets = (p.bets || []).filter(b => b.probability > 0.01).sort((a, b) => b.probability - a.probability);
-    const betsHtml = sortedBets.map(b => {
-      const pct = Math.round(b.probability * 100);
-      const cls = barColor(b.probability);
-      return `<div class="bet">
-        <span class="bet-label" title="${esc(b.prompt)}">${hi(b.prompt)}</span>
-        <div class="bet-bar-wrap"><div class="bet-bar ${cls}" style="width:${pct}%"></div></div>
-        <span class="bet-pct">${pct}%</span>
-      </div>`;
-    }).join('');
     const titleHtml = p.url
       ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
       : hi(p.title);
     return `<tr data-title="${esc(p.title)}" data-topics="${esc(p.topics||'')}">
       <td class="question">${titleHtml}</td>
-      <td class="answers">${betsHtml}</td>
+      <td class="answers">${betsHtml(p)}</td>
       <td class="topics">${(p.topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
     </tr>`;
   }).join('');
@@ -454,10 +478,21 @@ searchInput.addEventListener('input', function() { applySearch(this.value); });
 ['pred-tbody', 'consensus-tbody'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) {
     const tag = e.target.closest('.clickable-tag');
-    if (!tag) return;
-    searchInput.value = tag.dataset.tag;
-    applySearch(tag.dataset.tag);
-    searchInput.focus();
+    if (tag) {
+      searchInput.value = tag.dataset.tag;
+      applySearch(tag.dataset.tag);
+      searchInput.focus();
+      return;
+    }
+    const toggle = e.target.closest('.other-toggle');
+    if (toggle) {
+      const el = document.getElementById(toggle.dataset.oid);
+      if (!el) return;
+      const expanded = el.style.display !== 'none';
+      el.style.display = expanded ? 'none' : 'block';
+      const label = toggle.querySelector('.other-label');
+      label.innerHTML = (expanded ? '&#9654;' : '&#9660;') + label.innerHTML.slice(1);
+    }
   });
 });
 
