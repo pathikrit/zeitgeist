@@ -263,6 +263,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FlexSearch/0.8.2/flexsearch.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -423,50 +424,55 @@ function renderConsensus(rows) {
 
 // Search
 let allPredictions = [], allConsensusPredictions = [], allCatalysts = [], allNews = [], allFred = [];
+let predIdx, consensusIdx, catIdx, newsIdx, fredIdx;
+
+function idxSearch(idx, q, items) {
+  const hits = new Set(idx.search(q).flatMap(r => r.result));
+  return items.filter((_, i) => hits.has(i));
+}
+
+function buildIndexes() {
+  const mkIdx = (items, getDoc) => {
+    const fieldNames = Object.keys(getDoc(items[0] || {}));
+    const idx = new FlexSearch.Document({ tokenize: 'forward', document: { id: 'id', index: fieldNames } });
+    items.forEach((item, i) => idx.add({ id: i, ...getDoc(item) }));
+    return idx;
+  };
+  const predDoc = p => ({ title: p.title || '', topics: p.topics || '', bets: (p.bets || []).map(b => b.prompt || '').join(' ') });
+  predIdx      = mkIdx(allPredictions,          predDoc);
+  consensusIdx = mkIdx(allConsensusPredictions,  predDoc);
+  catIdx       = mkIdx(allCatalysts,  c => ({ title: c.title || '', topics: c.topics || '', when: c.when || '' }));
+  newsIdx      = mkIdx(allNews,       n => ({ title: n.title || '', description: n.description || '' }));
+  fredIdx      = mkIdx(allFred,       f => ({ title: f.title || '' }));
+}
 
 function applySearch(q) {
   q = q.trim().toLowerCase();
   currentQuery = q;
 
-  const matchesPred = p =>
-    (p.title || '').toLowerCase().includes(q) ||
-    (p.topics || '').toLowerCase().includes(q) ||
-    (p.bets || []).some(b => (b.prompt || '').toLowerCase().includes(q));
+  const search = (idx, all) => q ? idxSearch(idx, q, all) : all;
 
-  const filteredPreds = q ? allPredictions.filter(matchesPred) : allPredictions;
+  const filteredPreds = search(predIdx, allPredictions);
   document.getElementById('pred-count').textContent =
     q ? `${filteredPreds.length} / ${allPredictions.length}` : allPredictions.length;
   renderPredictions(filteredPreds);
 
-  const filteredConsensus = q ? allConsensusPredictions.filter(matchesPred) : allConsensusPredictions;
+  const filteredConsensus = search(consensusIdx, allConsensusPredictions);
   document.getElementById('consensus-count').textContent =
     q ? `${filteredConsensus.length} / ${allConsensusPredictions.length}` : allConsensusPredictions.length;
   renderConsensus(filteredConsensus);
 
-  const filteredCats = q
-    ? allCatalysts.filter(c =>
-        (c.title || '').toLowerCase().includes(q) ||
-        (c.topics || '').toLowerCase().includes(q) ||
-        (c.when || '').toLowerCase().includes(q)
-      )
-    : allCatalysts;
+  const filteredCats = search(catIdx, allCatalysts);
   document.getElementById('cat-count').textContent =
     q ? `${filteredCats.length} / ${allCatalysts.length}` : allCatalysts.length;
   renderCatalysts(filteredCats);
 
-  const filteredNews = q
-    ? allNews.filter(n =>
-        (n.title || '').toLowerCase().includes(q) ||
-        (n.description || '').toLowerCase().includes(q)
-      )
-    : allNews;
+  const filteredNews = search(newsIdx, allNews);
   document.getElementById('news-count').textContent =
     q ? `${filteredNews.length} / ${allNews.length}` : allNews.length;
   renderNews(filteredNews);
 
-  const filteredFred = q
-    ? allFred.filter(f => (f.title || '').toLowerCase().includes(q))
-    : allFred;
+  const filteredFred = search(fredIdx, allFred);
   document.getElementById('fred-count').textContent =
     q ? `${filteredFred.length} / ${allFred.length}` : allFred.length;
   renderFred(filteredFred);
@@ -508,6 +514,7 @@ const active = (data.relevant_predictions || []).filter(p => p.volume_24h > 0).s
     allNews        = data.news_headlines || [];
     allFred        = data.fred_data || [];
 
+    buildIndexes();
     applySearch('');
 
     if (!allFred.length)  document.getElementById('section-fred').style.display = 'none';
