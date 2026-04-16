@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import os
 import logging as log
+import shutil
 
 import polars as pl
 from pydantic import BaseModel, Field
@@ -21,8 +22,6 @@ IS_DEV = not IS_PROD
 
 QUICK_TEST = IS_DEV # If True, run quickly on first few predictions; useful for smoke-testing
 
-ENABLE_CITATIONS = False
-
 BATCH_REQUEST_DELAY_SECONDS = 5
 RATE_LIMIT_WAIT_SECONDS = 10
 
@@ -31,7 +30,6 @@ RETRIES = 3
 
 CLASSIFYING_MODEL = "openai:gpt-5-mini-2025-08-07"
 EVENTS_MODEL = "openai:gpt-5.1-2025-11-13"
-SYNTHESIS_MODEL = "openai:gpt-4.1-2025-04-14"
 
 
 today = date.today()
@@ -56,14 +54,20 @@ FRED_CODES = {
     "CSUSHPISA": "Case-Shiller U.S. Home Price Index",
     "FEDFUNDS": "Fed Funds Rate",
     "M2SL": "M2 Money Supply",
+    "DGS3MO": "3M Treasury Yield",
     "DGS2": "2Y Treasury Yield",
+    "DGS5": "5Y Treasury Yield",
     "DGS10": "10Y Treasury Yield",
+    "DGS30": "30Y Treasury Yield",
     "T10Y2Y": "10Y–2Y Yield Spread",
     "T10Y3M": "10Y–3M Yield Spread",
     "NFCI": "Chicago Fed Financial Conditions Index",
     "DTWEXBGS": "Trade-Weighted USD Index (Broad)",
     "DCOILWTICO": "WTI Crude Oil Price",
     "UMCSENT": "Michigan Consumer Sentiment",
+    "VIXCLS": "VIX",
+    "BAMLH0A0HYM2": "HY Credit Spread (OAS)",
+    "BAMLC0A4CBBB": "BBB Credit Spread (OAS)",
 }
 
 assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found; Either add to .env file or run `export OPENAI_API_KEY=???`"
@@ -175,6 +179,7 @@ def get_fred_data() -> pl.DataFrame | None:
                 if v == v  # skip NaN
             ]
             out.append({
+                "code": code,
                 "title": title,
                 "data": records[-NUM_FRED_DATAPOINTS:],
                 "url": f"https://fred.stlouisfed.org/series/{code}"
@@ -235,12 +240,18 @@ events_agent = Agent(
     retries=RETRIES,
 )
 
-synthesizing_agent = Agent(
-    model=SYNTHESIS_MODEL,
-    output_type=str,
-    system_prompt=templates.get_template("synthesizing_prompt.mako").render(today=today),
-    retries=RETRIES,
-)
+async def get_fear_greed() -> list | None:
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get("https://api.alternative.me/fng/?limit=30")
+            resp.raise_for_status()
+            data = resp.json().get("data", [])
+            log.info(f"Fetched {len(data)} Fear & Greed data points")
+            return data
+    except Exception as e:
+        log.error(f"Error fetching Fear & Greed: {e}")
+        return None
+
 
 async def get_events() -> pl.DataFrame:
     res = await events_agent.run()
@@ -262,54 +273,22 @@ async def main():
     predictions = predictions.filter(pl.col("volume_24h") > 0)
     log.info(f"After volume filter = {len(predictions)} predictions")
 
-    tagged_predictions, events, news, fred_data = await asyncio.gather(
+    tagged_predictions, events, news, fred_data, fear_greed = await asyncio.gather(
         tag_predictions(predictions),
         get_events(),
         asyncio.to_thread(get_news),
         asyncio.to_thread(get_fred_data),
+        get_fear_greed(),
     )
 
-    report_input = {
-        "prediction_markets": tagged_predictions.select("title", "bets", "topics").to_dicts(),
-        "news_headlines": news.select("title", "description").to_dicts() if news is not None else None,
-        "upcoming_catalysts": events.select("title", "when", "topics").to_dicts(),
-        "fred_data_points": fred_data.select("title", "data").to_dicts() if fred_data is not None else None
-    }
-    log.info("Generating report...")
-    report = await synthesizing_agent.run(json.dumps(report_input))
-    report = report.output
-
-    if ENABLE_CITATIONS:
-        citations = [
-            tagged_predictions.select("title", "url"),
-            events.select("title", "url"),
-            news.select("title", "url") if news is not None else None,
-            fred_data.select("title", "url") if fred_data is not None else None
-        ]
-        citations = [c for c in citations if c is not None]
-        citations = pl.concat(citations).filter(pl.col("url").is_not_null())
-        log.info(f"Adding citations from {len(citations)} sources ...")
-
-        citation_agent = Agent(
-            model=SYNTHESIS_MODEL,
-            output_type=str,
-            system_prompt=templates.get_template("citation_prompt.mako").render(memo=report),
-            retries=RETRIES
-        )
-        try:
-            report = await citation_agent.run(citations.write_json())
-            report = report.removesuffix("```").removeprefix("```md").removeprefix("```markdown").removeprefix("```")
-        except Exception as e:
-            log.error(f"Failed to insert citations: {e}")
-
-    output_dir = Path(f".reports/{today.strftime('%Y/%m/%d')}")
-    output_file = output_dir / "index.html"
-    log.info(f"Writing to {output_file} ...")
+    output_dir = Path(".reports")
     output_dir.mkdir(parents=True, exist_ok=True)
-    html = templates.get_template("index.html.mako").render(today=today, report=report)
-    output_file.write_text(html, encoding="utf-8")
 
-    output_json_file = Path(".reports/output.json")
+    index_file = output_dir / "index.html"
+    shutil.copy("index.html", index_file)
+    log.info(f"Copied index.html to {index_file}")
+
+    output_json_file = output_dir / "output.json"
     log.info(f"Writing output to {output_json_file} ...")
     output_data = {
         "date": today.isoformat(),
@@ -317,12 +296,13 @@ async def main():
         "upcoming_catalysts": events.to_dicts(),
         "news_headlines": news.to_dicts() if news is not None else None,
         "fred_data": fred_data.to_dicts() if fred_data is not None else None,
+        "fear_greed": fear_greed,
     }
     output_json_file.write_text(json.dumps(output_data, indent=2), encoding="utf-8")
     log.info("Done!")
     if IS_DEV:
         import webbrowser
-        webbrowser.open(output_file.absolute().as_uri())
+        webbrowser.open(index_file.absolute().as_uri())
 
 if __name__ == "__main__":
     asyncio.run(main())
