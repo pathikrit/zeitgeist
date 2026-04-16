@@ -31,6 +31,9 @@ jobs:
       - name: Generate report
         run: uv run python zeitgeist.py
 
+      - name: Copy dashboard to reports
+        run: cp dashboard.html .reports/
+
       - name: Publish report
         uses: peaceiris/actions-gh-pages@v4
         with:

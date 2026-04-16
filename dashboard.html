@@ -502,8 +502,9 @@ searchInput.addEventListener('input', function() { applySearch(this.value); });
   });
 });
 
-// Load data
-fetch('.reports/output.json')
+// Load data — try root path (gh-pages) then local dev path
+fetch('output.json')
+  .then(r => r.ok ? r : fetch('.reports/output.json'))
   .then(r => { if (!r.ok) throw new Error(r.statusText); return r.text(); })
   .then(t => JSON.parse(t.replace(/:\s*NaN\b/g, ': null')))
   .then(data => {
