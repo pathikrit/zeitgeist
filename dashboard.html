@@ -438,7 +438,7 @@ function buildIndexes() {
     items.forEach((item, i) => idx.add({ id: i, ...getDoc(item) }));
     return idx;
   };
-  const predDoc = p => ({ title: p.title || '', topics: p.topics || '', bets: (p.bets || []).map(b => b.prompt || '').join(' ') });
+  const predDoc = p => ({ title: p.title || '', topics: p.topics || '', bets: (p.bets || []).map(b => b.prompt || '').filter(s => !/^(yes|no)$/i.test(s.trim())).join(' ') });
   predIdx      = mkIdx(allPredictions,          predDoc);
   consensusIdx = mkIdx(allConsensusPredictions,  predDoc);
   catIdx       = mkIdx(allCatalysts,  c => ({ title: c.title || '', topics: c.topics || '', when: c.when || '' }));
