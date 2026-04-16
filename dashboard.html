@@ -30,7 +30,7 @@
   header h1 { font-size: 18px; font-weight: 600; color: #f0f0f5; }
   header .date { color: #555; font-size: 13px; margin-left: auto; }
 
-  .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; display: flex; flex-direction: column; gap: 32px; }
+  .container { max-width: 1800px; margin: 0 auto; padding: 24px 32px; display: flex; flex-direction: column; gap: 32px; }
 
   section { background: #141416; border-radius: 12px; border: 1px solid #2a2a2e; overflow: hidden; }
 
@@ -88,15 +88,15 @@
   tbody tr:hover { background: #1a1a1e; }
   td { padding: 12px 20px; vertical-align: top; }
 
-  td.question { max-width: 420px; }
+  td.question { max-width: 600px; }
   td.question a { color: #4a9eff; text-decoration: none; font-weight: 500; }
   td.question a:hover { text-decoration: underline; }
 
-  td.answers { min-width: 260px; }
+  td.answers { min-width: 380px; }
   .bet { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 13px; }
   .bet:last-child { margin-bottom: 0; }
   .bet-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #aaa; }
-  .bet-bar-wrap { width: 100px; height: 6px; background: #2a2a2e; border-radius: 3px; flex-shrink: 0; }
+  .bet-bar-wrap { width: 160px; height: 6px; background: #2a2a2e; border-radius: 3px; flex-shrink: 0; }
   .bet-bar { height: 6px; border-radius: 3px; background: #3a7bd5; }
   .bet-bar.high { background: #2ea84a; }
   .bet-bar.low  { background: #c0392b; }
@@ -110,9 +110,12 @@
     padding: 2px 7px;
     font-size: 12px;
     font-weight: 500;
+    cursor: pointer;
+    transition: background .1s;
   }
+  td.topics .tag:hover { background: #243060; }
 
-  .no-results { padding: 40px 20px; text-align: center; color: #444; }
+.no-results { padding: 40px 20px; text-align: center; color: #444; }
 
   /* Catalysts */
   .catalyst-list { display: flex; flex-direction: column; }
@@ -291,7 +294,7 @@ function renderPredictions(rows) {
     return `<tr data-title="${esc(p.title)}" data-topics="${esc(p.topics||'')}">
       <td class="question">${titleHtml}</td>
       <td class="answers">${betsHtml}</td>
-      <td class="topics">${p.topics ? `<span class="tag">${esc(p.topics)}</span>` : ''}</td>
+      <td class="topics">${(p.topics || '').split(',').map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${esc(t)}</span>`).join(' ')}</td>
     </tr>`;
   }).join('');
 }
@@ -406,8 +409,15 @@ function applySearch(q) {
   renderFred(filteredFred);
 }
 
-document.getElementById('pred-search').addEventListener('input', function() {
-  applySearch(this.value);
+const searchInput = document.getElementById('pred-search');
+searchInput.addEventListener('input', function() { applySearch(this.value); });
+
+document.getElementById('pred-tbody').addEventListener('click', function(e) {
+  const tag = e.target.closest('.clickable-tag');
+  if (!tag) return;
+  searchInput.value = tag.dataset.tag;
+  applySearch(tag.dataset.tag);
+  searchInput.focus();
 });
 
 // Load data
@@ -417,7 +427,7 @@ fetch('.reports/output.json')
   .then(data => {
     if (data.date) document.getElementById('report-date').textContent = data.date;
 
-    allPredictions = data.relevant_predictions || [];
+    allPredictions = (data.relevant_predictions || []).sort((a, b) => (b.volume_24h || 0) - (a.volume_24h || 0));
     allCatalysts   = data.upcoming_catalysts || [];
     allNews        = data.news_headlines || [];
     allFred        = data.fred_data || [];

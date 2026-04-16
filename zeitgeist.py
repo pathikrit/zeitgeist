@@ -95,6 +95,10 @@ async def fetch_from_kalshi() -> pl.DataFrame:
             "title": e["title"],
             "bets": bets,
             "url": f"https://kalshi.com/markets/{e['series_ticker']}",
+            "volume": sum(float(m.get("volume_fp") or 0) for m in e["markets"]),
+            "volume_24h": sum(float(m.get("volume_24h_fp") or 0) for m in e["markets"]),
+            "liquidity": sum(float(m.get("liquidity_dollars") or 0) for m in e["markets"]),
+            "open_interest": sum(float(m.get("open_interest_fp") or 0) for m in e["markets"]),
         }
 
     async with httpx.AsyncClient() as client:
@@ -128,7 +132,11 @@ async def fetch_from_polymarket() -> pl.DataFrame:
             "id": f"pm-{p['id']}",
             "title": p["question"],
             "bets": bets,
-            "url": f"https://polymarket.com/event/{p['slug']}"
+            "url": f"https://polymarket.com/event/{p['slug']}",
+            "volume": p.get("volumeNum") or 0,
+            "volume_24h": p.get("volume24hr") or 0,
+            "liquidity": p.get("liquidityNum") or 0,
+            "open_interest": None,
         }
 
     async with httpx.AsyncClient() as client:
