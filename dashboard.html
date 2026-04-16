@@ -9,15 +9,15 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: #f5f5f7;
-    color: #1d1d1f;
+    background: #0d0d0f;
+    color: #e0e0e5;
     font-size: 14px;
     line-height: 1.5;
   }
 
   header {
-    background: #fff;
-    border-bottom: 1px solid #e0e0e0;
+    background: #141416;
+    border-bottom: 1px solid #2a2a2e;
     padding: 16px 32px;
     display: flex;
     align-items: center;
@@ -27,25 +27,25 @@
     z-index: 100;
   }
 
-  header h1 { font-size: 18px; font-weight: 600; }
-  header .date { color: #888; font-size: 13px; margin-left: auto; }
+  header h1 { font-size: 18px; font-weight: 600; color: #f0f0f5; }
+  header .date { color: #555; font-size: 13px; margin-left: auto; }
 
   .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; display: flex; flex-direction: column; gap: 32px; }
 
-  section { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; overflow: hidden; }
+  section { background: #141416; border-radius: 12px; border: 1px solid #2a2a2e; overflow: hidden; }
 
   .section-header {
     padding: 16px 20px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #222226;
     display: flex;
     align-items: center;
     gap: 10px;
   }
 
-  .section-header h2 { font-size: 15px; font-weight: 600; }
+  .section-header h2 { font-size: 15px; font-weight: 600; color: #f0f0f5; }
   .section-header .count {
-    background: #f0f0f0;
-    color: #555;
+    background: #222226;
+    color: #777;
     border-radius: 20px;
     padding: 1px 8px;
     font-size: 12px;
@@ -53,18 +53,20 @@
   }
 
   /* Search */
-  .search-wrap { padding: 12px 20px; border-bottom: 1px solid #f0f0f0; }
+  .search-wrap { padding: 12px 20px; border-bottom: 1px solid #222226; }
   .search-wrap input {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #2a2a2e;
     border-radius: 8px;
     font-size: 14px;
     outline: none;
-    background: #fafafa;
+    background: #1a1a1e;
+    color: #e0e0e5;
     transition: border-color .15s;
   }
-  .search-wrap input:focus { border-color: #0071e3; background: #fff; }
+  .search-wrap input::placeholder { color: #444; }
+  .search-wrap input:focus { border-color: #3a7bd5; background: #1e1e24; }
 
   /* Predictions table */
   table { width: 100%; border-collapse: collapse; }
@@ -75,66 +77,66 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .04em;
-    color: #888;
-    background: #fafafa;
-    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+    background: #111113;
+    border-bottom: 1px solid #222226;
     position: sticky;
     top: 57px;
   }
-  tbody tr { border-bottom: 1px solid #f7f7f7; transition: background .1s; }
+  tbody tr { border-bottom: 1px solid #1c1c20; transition: background .1s; }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: #fafafa; }
+  tbody tr:hover { background: #1a1a1e; }
   td { padding: 12px 20px; vertical-align: top; }
 
   td.question { max-width: 420px; }
-  td.question a { color: #0071e3; text-decoration: none; font-weight: 500; }
+  td.question a { color: #4a9eff; text-decoration: none; font-weight: 500; }
   td.question a:hover { text-decoration: underline; }
 
   td.answers { min-width: 260px; }
   .bet { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 13px; }
   .bet:last-child { margin-bottom: 0; }
-  .bet-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333; }
-  .bet-bar-wrap { width: 100px; height: 6px; background: #eee; border-radius: 3px; flex-shrink: 0; }
-  .bet-bar { height: 6px; border-radius: 3px; background: #0071e3; }
-  .bet-bar.high { background: #34c759; }
-  .bet-bar.low  { background: #ff3b30; }
-  .bet-pct { width: 36px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; color: #333; font-size: 12px; }
+  .bet-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #aaa; }
+  .bet-bar-wrap { width: 100px; height: 6px; background: #2a2a2e; border-radius: 3px; flex-shrink: 0; }
+  .bet-bar { height: 6px; border-radius: 3px; background: #3a7bd5; }
+  .bet-bar.high { background: #2ea84a; }
+  .bet-bar.low  { background: #c0392b; }
+  .bet-pct { width: 36px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: #ccc; font-size: 12px; }
 
   td.topics .tag {
     display: inline-block;
-    background: #f0f4ff;
-    color: #3a5bd9;
+    background: #1a2340;
+    color: #6899e8;
     border-radius: 5px;
     padding: 2px 7px;
     font-size: 12px;
     font-weight: 500;
   }
 
-  .no-results { padding: 40px 20px; text-align: center; color: #aaa; }
+  .no-results { padding: 40px 20px; text-align: center; color: #444; }
 
   /* Catalysts */
-  .catalyst-list { display: flex; flex-direction: column; gap: 0; }
+  .catalyst-list { display: flex; flex-direction: column; }
   .catalyst-row {
     display: flex;
     align-items: baseline;
     gap: 12px;
     padding: 11px 20px;
-    border-bottom: 1px solid #f7f7f7;
+    border-bottom: 1px solid #1c1c20;
   }
   .catalyst-row:last-child { border-bottom: none; }
   .catalyst-when {
     flex-shrink: 0;
     font-size: 12px;
-    color: #888;
+    color: #555;
     width: 110px;
   }
-  .catalyst-title { flex: 1; }
-  .catalyst-title a { color: #0071e3; text-decoration: none; }
+  .catalyst-title { flex: 1; color: #ccc; }
+  .catalyst-title a { color: #4a9eff; text-decoration: none; }
   .catalyst-title a:hover { text-decoration: underline; }
   .catalyst-topics .tag {
     display: inline-block;
-    background: #fff3e0;
-    color: #b45309;
+    background: #2a1f10;
+    color: #c8893a;
     border-radius: 5px;
     padding: 2px 7px;
     font-size: 12px;
@@ -146,12 +148,12 @@
   .news-list { display: flex; flex-direction: column; }
   .news-row {
     padding: 11px 20px;
-    border-bottom: 1px solid #f7f7f7;
+    border-bottom: 1px solid #1c1c20;
   }
   .news-row:last-child { border-bottom: none; }
-  .news-row a { color: #1d1d1f; text-decoration: none; font-weight: 500; }
-  .news-row a:hover { color: #0071e3; }
-  .news-desc { color: #666; font-size: 13px; margin-top: 2px; }
+  .news-row a { color: #ddd; text-decoration: none; font-weight: 500; }
+  .news-row a:hover { color: #4a9eff; }
+  .news-desc { color: #555; font-size: 13px; margin-top: 2px; }
 
   /* FRED */
   .fred-grid {
@@ -161,35 +163,35 @@
   }
   .fred-card {
     padding: 14px 20px;
-    border-right: 1px solid #f0f0f0;
-    border-bottom: 1px solid #f0f0f0;
+    border-right: 1px solid #1c1c20;
+    border-bottom: 1px solid #1c1c20;
   }
-  .fred-card:hover { background: #fafafa; }
-  .fred-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
-  .fred-title a { color: #1d1d1f; text-decoration: none; }
-  .fred-title a:hover { color: #0071e3; }
+  .fred-card:hover { background: #1a1a1e; }
+  .fred-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; color: #aaa; }
+  .fred-title a { color: #aaa; text-decoration: none; }
+  .fred-title a:hover { color: #4a9eff; }
   .fred-latest {
     font-size: 22px;
     font-weight: 300;
     font-variant-numeric: tabular-nums;
     margin-bottom: 6px;
-    color: #1d1d1f;
+    color: #f0f0f5;
   }
-  .fred-latest span { font-size: 13px; color: #888; font-weight: 400; margin-left: 6px; }
+  .fred-latest span { font-size: 13px; color: #444; font-weight: 400; margin-left: 6px; }
   svg.sparkline { display: block; overflow: visible; }
 
   /* Error */
   #error-banner {
     display: none;
-    background: #fff3cd;
-    border: 1px solid #ffc107;
+    background: #2a1f10;
+    border: 1px solid #5a3a10;
     border-radius: 8px;
     padding: 16px 20px;
     margin: 24px 32px 0;
     font-size: 13px;
-    color: #856404;
+    color: #c8893a;
   }
-  #error-banner code { background: #ffe;  padding: 1px 4px; border-radius: 3px; font-family: monospace; }
+  #error-banner code { background: #1a1208; padding: 1px 4px; border-radius: 3px; font-family: monospace; }
 </style>
 </head>
 <body>
@@ -212,7 +214,7 @@
       <span class="count" id="pred-count"></span>
     </div>
     <div class="search-wrap">
-      <input type="search" id="pred-search" placeholder="Search questions or topics..." autocomplete="off">
+      <input type="search" id="pred-search" placeholder="Search all sections..." autocomplete="off">
     </div>
     <div id="pred-table-wrap">
       <table>
@@ -273,7 +275,8 @@ function renderPredictions(rows) {
   }
   document.getElementById('pred-no-results').style.display = 'none';
   tbody.innerHTML = rows.map(p => {
-    const betsHtml = (p.bets || []).map(b => {
+    const sortedBets = (p.bets || []).filter(b => b.probability > 0.01).sort((a, b) => b.probability - a.probability);
+    const betsHtml = sortedBets.map(b => {
       const pct = Math.round(b.probability * 100);
       const cls = barColor(b.probability);
       return `<div class="bet">
@@ -334,7 +337,7 @@ function sparkline(data, width=120, height=32) {
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(' ');
   return `<svg class="sparkline" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-    <polyline points="${pts}" fill="none" stroke="#0071e3" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${pts}" fill="none" stroke="#3a7bd5" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
   </svg>`;
 }
 
@@ -359,17 +362,52 @@ function renderFred(items) {
 }
 
 // Search
-let allPredictions = [];
-document.getElementById('pred-search').addEventListener('input', function() {
-  const q = this.value.trim().toLowerCase();
-  const filtered = q
+let allPredictions = [], allCatalysts = [], allNews = [], allFred = [];
+
+function applySearch(q) {
+  q = q.trim().toLowerCase();
+
+  const filteredPreds = q
     ? allPredictions.filter(p =>
         (p.title || '').toLowerCase().includes(q) ||
         (p.topics || '').toLowerCase().includes(q)
       )
     : allPredictions;
-  document.getElementById('pred-count').textContent = `${filtered.length} / ${allPredictions.length}`;
-  renderPredictions(filtered);
+  document.getElementById('pred-count').textContent =
+    q ? `${filteredPreds.length} / ${allPredictions.length}` : allPredictions.length;
+  renderPredictions(filteredPreds);
+
+  const filteredCats = q
+    ? allCatalysts.filter(c =>
+        (c.title || '').toLowerCase().includes(q) ||
+        (c.topics || '').toLowerCase().includes(q) ||
+        (c.when || '').toLowerCase().includes(q)
+      )
+    : allCatalysts;
+  document.getElementById('cat-count').textContent =
+    q ? `${filteredCats.length} / ${allCatalysts.length}` : allCatalysts.length;
+  renderCatalysts(filteredCats);
+
+  const filteredNews = q
+    ? allNews.filter(n =>
+        (n.title || '').toLowerCase().includes(q) ||
+        (n.description || '').toLowerCase().includes(q)
+      )
+    : allNews;
+  document.getElementById('news-count').textContent =
+    q ? `${filteredNews.length} / ${allNews.length}` : allNews.length;
+  renderNews(filteredNews);
+
+  const filteredFred = q
+    ? allFred.filter(f => (f.title || '').toLowerCase().includes(q))
+    : allFred;
+  document.getElementById('fred-count').textContent =
+    q ? `${filteredFred.length} / ${allFred.length}` : allFred.length;
+  renderFred(filteredFred);
+}
+
+document.getElementById('pred-search').addEventListener('input', function() {
+  applySearch(this.value);
 });
 
 // Load data
@@ -380,21 +418,14 @@ fetch('.reports/output.json')
     if (data.date) document.getElementById('report-date').textContent = data.date;
 
     allPredictions = data.relevant_predictions || [];
-    document.getElementById('pred-count').textContent = allPredictions.length;
-    renderPredictions(allPredictions);
+    allCatalysts   = data.upcoming_catalysts || [];
+    allNews        = data.news_headlines || [];
+    allFred        = data.fred_data || [];
 
-    renderCatalysts(data.upcoming_catalysts || []);
-    renderNews(data.news_headlines || []);
+    applySearch('');
 
-    if (data.fred_data) {
-      renderFred(data.fred_data);
-    } else {
-      document.getElementById('section-fred').style.display = 'none';
-    }
-
-    if (!data.news_headlines) {
-      document.getElementById('section-news').style.display = 'none';
-    }
+    if (!allFred.length)  document.getElementById('section-fred').style.display = 'none';
+    if (!allNews.length)  document.getElementById('section-news').style.display = 'none';
   })
   .catch(err => {
     console.error(err);
