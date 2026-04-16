@@ -115,7 +115,9 @@
   }
   td.topics .tag:hover { background: #243060; }
 
-.no-results { padding: 40px 20px; text-align: center; color: #444; }
+mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; }
+
+  .no-results { padding: 40px 20px; text-align: center; color: #444; }
 
   /* Catalysts */
   .catalyst-list { display: flex; flex-direction: column; }
@@ -256,6 +258,14 @@
 <script>
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
+let currentQuery = '';
+function hi(s) {
+  const safe = esc(s);
+  if (!currentQuery) return safe;
+  const re = new RegExp(`(${currentQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return safe.replace(re, '<mark>$1</mark>');
+}
+
 function barColor(p) {
   if (p >= 0.65) return 'high';
   if (p <= 0.25) return 'low';
@@ -276,18 +286,18 @@ function renderPredictions(rows) {
       const pct = Math.round(b.probability * 100);
       const cls = barColor(b.probability);
       return `<div class="bet">
-        <span class="bet-label" title="${esc(b.prompt)}">${esc(b.prompt)}</span>
+        <span class="bet-label" title="${esc(b.prompt)}">${hi(b.prompt)}</span>
         <div class="bet-bar-wrap"><div class="bet-bar ${cls}" style="width:${pct}%"></div></div>
         <span class="bet-pct">${pct}%</span>
       </div>`;
     }).join('');
     const titleHtml = p.url
-      ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>`
-      : esc(p.title);
+      ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
+      : hi(p.title);
     return `<tr data-title="${esc(p.title)}" data-topics="${esc(p.topics||'')}">
       <td class="question">${titleHtml}</td>
       <td class="answers">${betsHtml}</td>
-      <td class="topics">${(p.topics || '').split(',').map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${esc(t)}</span>`).join(' ')}</td>
+      <td class="topics">${(p.topics || '').split(',').map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
     </tr>`;
   }).join('');
 }
@@ -362,11 +372,13 @@ let allPredictions = [], allCatalysts = [], allNews = [], allFred = [];
 
 function applySearch(q) {
   q = q.trim().toLowerCase();
+  currentQuery = q;
 
   const filteredPreds = q
     ? allPredictions.filter(p =>
         (p.title || '').toLowerCase().includes(q) ||
-        (p.topics || '').toLowerCase().includes(q)
+        (p.topics || '').toLowerCase().includes(q) ||
+        (p.bets || []).some(b => (b.prompt || '').toLowerCase().includes(q))
       )
     : allPredictions;
   document.getElementById('pred-count').textContent =
