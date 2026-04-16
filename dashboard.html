@@ -81,7 +81,7 @@
     background: #111113;
     border-bottom: 1px solid #222226;
     position: sticky;
-    top: 57px;
+    top: 49px;
   }
   tbody tr { border-bottom: 1px solid #1c1c20; transition: background .1s; }
   tbody tr:last-child { border-bottom: none; }
@@ -200,7 +200,6 @@
 <body>
 
 <header>
-  <h1>Zeitgeist Dashboard</h1>
   <span class="date" id="report-date"></span>
 </header>
 
@@ -221,13 +220,7 @@
     </div>
     <div id="pred-table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th style="width:35%">Question</th>
-            <th>Answers</th>
-            <th>Topics</th>
-          </tr>
-        </thead>
+        <thead style="display:none"></thead>
         <tbody id="pred-tbody"></tbody>
       </table>
       <div class="no-results" id="pred-no-results" style="display:none">No matching predictions</div>
