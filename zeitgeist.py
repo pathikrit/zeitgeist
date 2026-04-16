@@ -97,8 +97,6 @@ async def fetch_from_kalshi() -> pl.DataFrame:
             "url": f"https://kalshi.com/markets/{e['series_ticker']}",
             "volume": sum(float(m.get("volume_fp") or 0) for m in e["markets"]),
             "volume_24h": sum(float(m.get("volume_24h_fp") or 0) for m in e["markets"]),
-            "liquidity": sum(float(m.get("liquidity_dollars") or 0) for m in e["markets"]),
-            "open_interest": sum(float(m.get("open_interest_fp") or 0) for m in e["markets"]),
         }
 
     async with httpx.AsyncClient() as client:
@@ -135,8 +133,6 @@ async def fetch_from_polymarket() -> pl.DataFrame:
             "url": f"https://polymarket.com/event/{p['slug']}",
             "volume": p.get("volumeNum") or 0,
             "volume_24h": p.get("volume24hr") or 0,
-            "liquidity": p.get("liquidityNum") or 0,
-            "open_interest": None,
         }
 
     async with httpx.AsyncClient() as client:
@@ -263,6 +259,8 @@ def get_news() -> pl.DataFrame | None:
 async def main():
     predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
     log.info(f"Total = {len(predictions)} predictions")
+    predictions = predictions.filter(pl.col("volume_24h") > 0)
+    log.info(f"After volume filter = {len(predictions)} predictions")
 
     tagged_predictions, events, news, fred_data = await asyncio.gather(
         tag_predictions(predictions),

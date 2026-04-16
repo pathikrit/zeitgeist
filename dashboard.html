@@ -297,7 +297,7 @@ function renderPredictions(rows) {
     return `<tr data-title="${esc(p.title)}" data-topics="${esc(p.topics||'')}">
       <td class="question">${titleHtml}</td>
       <td class="answers">${betsHtml}</td>
-      <td class="topics">${(p.topics || '').split(',').map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
+      <td class="topics">${(p.topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
     </tr>`;
   }).join('');
 }
@@ -432,7 +432,7 @@ fetch('.reports/output.json')
   .then(data => {
     if (data.date) document.getElementById('report-date').textContent = data.date;
 
-    allPredictions = (data.relevant_predictions || []).sort((a, b) => (b.volume_24h || 0) - (a.volume_24h || 0));
+    allPredictions = (data.relevant_predictions || []).filter(p => p.volume_24h > 0).sort((a, b) => b.volume_24h - a.volume_24h);
     allCatalysts   = data.upcoming_catalysts || [];
     allNews        = data.news_headlines || [];
     allFred        = data.fred_data || [];
