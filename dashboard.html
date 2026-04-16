@@ -302,7 +302,7 @@ function betsHtml(p) {
     const otherPct = Math.round(other.reduce((s, b) => s + b.probability, 0) * 100);
     const oid = 'other-' + esc(p.id);
     html += `<div class="bet other-toggle" data-oid="${oid}">
-      <span class="bet-label other-label">&#9654; Other (${other.length})</span>
+      <span class="bet-label other-label">&#9654; Others (${other.length})</span>
       <div class="bet-bar-wrap"><div class="bet-bar" style="width:${otherPct}%;opacity:.4"></div></div>
       <span class="bet-pct">${otherPct}%</span>
     </div>
