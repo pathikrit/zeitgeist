@@ -291,9 +291,9 @@ function betHtml(b) {
 }
 
 function betsHtml(p) {
-  const isYesNo = bets => bets.length === 2 && bets.every(b => /^(yes|no)$/i.test((b.prompt || '').trim()));
+  const isBinary = bets => bets.length === 2 && bets.every(b => /^(yes|no|up|down)$/i.test((b.prompt || '').trim()));
   const raw = (p.bets || []).filter(b => b.probability > 0.01);
-  const sorted = (isYesNo(raw) ? [raw.sort((a, b) => b.probability - a.probability)[0]] : raw)
+  const sorted = (isBinary(raw) ? [raw.sort((a, b) => b.probability - a.probability)[0]] : raw)
     .sort((a, b) => b.probability - a.probability);
   const main  = sorted.filter(b => b.probability >= 0.05);
   const other = sorted.filter(b => b.probability <  0.05);
@@ -441,7 +441,7 @@ function buildIndexes() {
     items.forEach((item, i) => idx.add({ id: i, ...getDoc(item) }));
     return idx;
   };
-  const predDoc = p => ({ title: p.title || '', topics: p.topics || '', bets: (p.bets || []).map(b => b.prompt || '').filter(s => !/^(yes|no)$/i.test(s.trim())).join(' ') });
+  const predDoc = p => ({ title: p.title || '', topics: p.topics || '', bets: (p.bets || []).map(b => b.prompt || '').filter(s => !/^(yes|no|up|down)$/i.test(s.trim())).join(' ') });
   predIdx      = mkIdx(allPredictions,          predDoc);
   consensusIdx = mkIdx(allConsensusPredictions,  predDoc);
   catIdx       = mkIdx(allCatalysts,  c => ({ title: c.title || '', topics: c.topics || '', when: c.when || '' }));
