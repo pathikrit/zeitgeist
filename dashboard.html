@@ -15,22 +15,29 @@
     line-height: 1.5;
   }
 
-  header {
-    background: #141416;
-    border-bottom: 1px solid #2a2a2e;
-    padding: 16px 32px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  .topbar {
+    background: #0d0d0f;
+    padding: 16px 32px 12px;
     position: sticky;
     top: 0;
     z-index: 100;
   }
 
-  header h1 { font-size: 18px; font-weight: 600; color: #f0f0f5; }
-  header .date { color: #555; font-size: 13px; margin-left: auto; }
+  .topbar input {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid #2a2a2e;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    background: #141416;
+    color: #e0e0e5;
+    transition: border-color .15s;
+  }
+  .topbar input::placeholder { color: #3a3a3e; }
+  .topbar input:focus { border-color: #3a7bd5; background: #16161a; }
 
-  .container { max-width: 1800px; margin: 0 auto; padding: 24px 32px; display: flex; flex-direction: column; gap: 32px; }
+  .container { max-width: 1800px; margin: 0 auto; padding: 12px 32px 24px; display: flex; flex-direction: column; gap: 32px; }
 
   section { background: #141416; border-radius: 12px; border: 1px solid #2a2a2e; overflow: hidden; }
 
@@ -52,21 +59,6 @@
     font-weight: 500;
   }
 
-  /* Search */
-  .search-wrap { padding: 12px 20px; border-bottom: 1px solid #222226; }
-  .search-wrap input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #2a2a2e;
-    border-radius: 8px;
-    font-size: 14px;
-    outline: none;
-    background: #1a1a1e;
-    color: #e0e0e5;
-    transition: border-color .15s;
-  }
-  .search-wrap input::placeholder { color: #444; }
-  .search-wrap input:focus { border-color: #3a7bd5; background: #1e1e24; }
 
   /* Predictions table */
   table { width: 100%; border-collapse: collapse; }
@@ -81,7 +73,7 @@
     background: #111113;
     border-bottom: 1px solid #222226;
     position: sticky;
-    top: 49px;
+    top: 57px;
   }
   tbody tr { border-bottom: 1px solid #1c1c20; transition: background .1s; }
   tbody tr:last-child { border-bottom: none; }
@@ -201,9 +193,9 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
 </head>
 <body>
 
-<header>
-  <span class="date" id="report-date"></span>
-</header>
+<div class="topbar">
+  <input type="search" id="pred-search" placeholder="Search..." autocomplete="off">
+</div>
 
 <div id="error-banner">
   Could not load <strong>.reports/output.json</strong>. If opening from <code>file://</code>, serve locally instead:<br>
@@ -217,15 +209,26 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
       <h2>Prediction Markets</h2>
       <span class="count" id="pred-count"></span>
     </div>
-    <div class="search-wrap">
-      <input type="search" id="pred-search" placeholder="Search all sections..." autocomplete="off">
-    </div>
     <div id="pred-table-wrap">
       <table>
         <thead style="display:none"></thead>
         <tbody id="pred-tbody"></tbody>
       </table>
       <div class="no-results" id="pred-no-results" style="display:none">No matching predictions</div>
+    </div>
+  </section>
+
+  <section id="section-consensus">
+    <div class="section-header">
+      <h2>Consensus</h2>
+      <span class="count" id="consensus-count"></span>
+    </div>
+    <div id="consensus-table-wrap">
+      <table>
+        <thead style="display:none"></thead>
+        <tbody id="consensus-tbody"></tbody>
+      </table>
+      <div class="no-results" id="consensus-no-results" style="display:none">No matching predictions</div>
     </div>
   </section>
 
@@ -367,23 +370,54 @@ function renderFred(items) {
   }).join('');
 }
 
+function isConsensus(p) {
+  const bets = (p.bets || []).filter(b => b.probability > 0);
+  return bets.length > 0 && bets.some(b => b.probability >= 0.98) && bets.every(b => b.probability >= 0.98 || b.probability < 0.02);
+}
+
+function renderConsensus(rows) {
+  const tbody = document.getElementById('consensus-tbody');
+  const noResults = document.getElementById('consensus-no-results');
+  if (!rows.length) { tbody.innerHTML = ''; noResults.style.display = ''; return; }
+  noResults.style.display = 'none';
+  tbody.innerHTML = rows.map(p => {
+    const winner = (p.bets || []).find(b => b.probability >= 0.98);
+    const titleHtml = p.url
+      ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
+      : hi(p.title);
+    return `<tr>
+      <td class="question">${titleHtml}</td>
+      <td class="answers"><div class="bet">
+        <span class="bet-label">${winner ? hi(winner.prompt) : ''}</span>
+        <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
+        <span class="bet-pct">${winner ? Math.round(winner.probability * 100) + '%' : ''}</span>
+      </div></td>
+      <td class="topics">${(p.topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
+    </tr>`;
+  }).join('');
+}
+
 // Search
-let allPredictions = [], allCatalysts = [], allNews = [], allFred = [];
+let allPredictions = [], allConsensusPredictions = [], allCatalysts = [], allNews = [], allFred = [];
 
 function applySearch(q) {
   q = q.trim().toLowerCase();
   currentQuery = q;
 
-  const filteredPreds = q
-    ? allPredictions.filter(p =>
-        (p.title || '').toLowerCase().includes(q) ||
-        (p.topics || '').toLowerCase().includes(q) ||
-        (p.bets || []).some(b => (b.prompt || '').toLowerCase().includes(q))
-      )
-    : allPredictions;
+  const matchesPred = p =>
+    (p.title || '').toLowerCase().includes(q) ||
+    (p.topics || '').toLowerCase().includes(q) ||
+    (p.bets || []).some(b => (b.prompt || '').toLowerCase().includes(q));
+
+  const filteredPreds = q ? allPredictions.filter(matchesPred) : allPredictions;
   document.getElementById('pred-count').textContent =
     q ? `${filteredPreds.length} / ${allPredictions.length}` : allPredictions.length;
   renderPredictions(filteredPreds);
+
+  const filteredConsensus = q ? allConsensusPredictions.filter(matchesPred) : allConsensusPredictions;
+  document.getElementById('consensus-count').textContent =
+    q ? `${filteredConsensus.length} / ${allConsensusPredictions.length}` : allConsensusPredictions.length;
+  renderConsensus(filteredConsensus);
 
   const filteredCats = q
     ? allCatalysts.filter(c =>
@@ -417,12 +451,14 @@ function applySearch(q) {
 const searchInput = document.getElementById('pred-search');
 searchInput.addEventListener('input', function() { applySearch(this.value); });
 
-document.getElementById('pred-tbody').addEventListener('click', function(e) {
-  const tag = e.target.closest('.clickable-tag');
-  if (!tag) return;
-  searchInput.value = tag.dataset.tag;
-  applySearch(tag.dataset.tag);
-  searchInput.focus();
+['pred-tbody', 'consensus-tbody'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    const tag = e.target.closest('.clickable-tag');
+    if (!tag) return;
+    searchInput.value = tag.dataset.tag;
+    applySearch(tag.dataset.tag);
+    searchInput.focus();
+  });
 });
 
 // Load data
@@ -430,9 +466,9 @@ fetch('.reports/output.json')
   .then(r => { if (!r.ok) throw new Error(r.statusText); return r.text(); })
   .then(t => JSON.parse(t.replace(/:\s*NaN\b/g, ': null')))
   .then(data => {
-    if (data.date) document.getElementById('report-date').textContent = data.date;
-
-    allPredictions = (data.relevant_predictions || []).filter(p => p.volume_24h > 0).sort((a, b) => b.volume_24h - a.volume_24h);
+const active = (data.relevant_predictions || []).filter(p => p.volume_24h > 0).sort((a, b) => b.volume_24h - a.volume_24h);
+    allConsensusPredictions = active.filter(isConsensus);
+    allPredictions = active.filter(p => !isConsensus(p));
     allCatalysts   = data.upcoming_catalysts || [];
     allNews        = data.news_headlines || [];
     allFred        = data.fred_data || [];
