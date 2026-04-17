@@ -157,32 +157,6 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
   .news-row a:hover { color: #4a9eff; }
   .news-desc { color: #555; font-size: 13px; margin-top: 2px; }
 
-  /* Macro top (yield curve + fear & greed) */
-  .macro-top {
-    display: flex;
-    border-bottom: 1px solid #1c1c20;
-  }
-  .yield-curve-card {
-    flex: 1;
-    padding: 14px 20px 10px;
-    border-right: 1px solid #1c1c20;
-    min-width: 0;
-  }
-  .yield-curve-title { font-weight: 600; font-size: 13px; color: #aaa; margin-bottom: 8px; }
-  svg.yield-curve { display: block; width: 100%; overflow: visible; }
-  .fg-card {
-    width: 200px;
-    flex-shrink: 0;
-    padding: 14px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .fg-title { font-weight: 600; font-size: 13px; color: #aaa; }
-  .fg-value { font-size: 48px; font-weight: 300; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
-  .fg-label { font-size: 13px; font-weight: 600; }
-  .fg-date  { font-size: 12px; color: #444; margin-bottom: 6px; }
-
   /* FRED */
   .fred-grid {
     display: grid;
@@ -281,12 +255,8 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
 
   <section id="section-fred">
     <div class="section-header">
-      <h2>Macro Indicators</h2>
+      <h2>FRED Economic Data</h2>
       <span class="count" id="fred-count"></span>
-    </div>
-    <div class="macro-top" id="macro-top">
-      <div class="yield-curve-card" id="yield-curve-card"></div>
-      <div class="fg-card" id="fg-card"></div>
     </div>
     <div class="fred-grid" id="fred-grid"></div>
   </section>
@@ -408,97 +378,10 @@ function sparkline(data, width=120, height=32) {
   </svg>`;
 }
 
-const YIELD_CURVE_CODES = new Set(['DGS3MO', 'DGS2', 'DGS5', 'DGS10', 'DGS30']);
-const YIELD_MATURITIES = [
-  { code: 'DGS3MO', label: '3M' },
-  { code: 'DGS2',   label: '2Y' },
-  { code: 'DGS5',   label: '5Y' },
-  { code: 'DGS10',  label: '10Y' },
-  { code: 'DGS30',  label: '30Y' },
-];
-
-function fgColor(v) {
-  if (v <= 24) return '#c0392b';
-  if (v <= 44) return '#e67e22';
-  if (v <= 55) return '#d4ac0d';
-  if (v <= 75) return '#27ae60';
-  return '#1e8449';
-}
-
-function renderYieldCurve(fredItems) {
-  const byCode = {};
-  fredItems.forEach(f => { if (f.code) byCode[f.code] = f; });
-
-  const points = YIELD_MATURITIES.map(m => {
-    const s = byCode[m.code];
-    if (!s || !s.data || !s.data.length) return null;
-    const v = parseFloat(s.data[s.data.length - 1].value);
-    return isNaN(v) ? null : { label: m.label, value: v };
-  }).filter(Boolean);
-
-  const el = document.getElementById('yield-curve-card');
-  if (points.length < 2) { el.style.display = 'none'; return; }
-
-  const W = 500, H = 100, padL = 32, padR = 12, padT = 20, padB = 22;
-  const innerW = W - padL - padR, innerH = H - padT - padB;
-  const vals = points.map(p => p.value);
-  const minV = Math.min(...vals), maxV = Math.max(...vals);
-  const range = maxV - minV || 0.5;
-  const xStep = innerW / (points.length - 1);
-
-  const svgPts = points.map((p, i) => ({
-    x: padL + i * xStep,
-    y: padT + (1 - (p.value - minV) / range) * innerH,
-    ...p,
-  }));
-
-  const polyline = svgPts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-
-  // Y-axis ticks
-  const yTicks = [minV, (minV + maxV) / 2, maxV].map(v => {
-    const y = padT + (1 - (v - minV) / range) * innerH;
-    return `<text x="${padL - 4}" y="${y.toFixed(1)}" text-anchor="end" dominant-baseline="middle" fill="#444" font-size="9">${v.toFixed(2)}</text>`;
-  }).join('');
-
-  const markers = svgPts.map(p => `
-    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="#3a7bd5"/>
-    <text x="${p.x.toFixed(1)}" y="${(p.y - 7).toFixed(1)}" text-anchor="middle" fill="#aaa" font-size="9">${p.value.toFixed(2)}</text>
-    <text x="${p.x.toFixed(1)}" y="${(H - 4).toFixed(1)}" text-anchor="middle" fill="#555" font-size="9">${esc(p.label)}</text>
-  `).join('');
-
-  el.innerHTML = `
-    <div class="yield-curve-title">Yield Curve</div>
-    <svg class="yield-curve" viewBox="0 0 ${W} ${H}">
-      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + innerH}" stroke="#2a2a2e" stroke-width="1"/>
-      ${yTicks}
-      <polyline points="${polyline}" fill="none" stroke="#3a7bd5" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-      ${markers}
-    </svg>`;
-}
-
-function renderFearGreed(data) {
-  const el = document.getElementById('fg-card');
-  if (!data || !data.length) { el.style.display = 'none'; return; }
-  const latest = data[0];
-  const val = parseInt(latest.value, 10);
-  const color = fgColor(val);
-  const label = latest.value_classification || '';
-  const date = latest.timestamp ? new Date(parseInt(latest.timestamp, 10) * 1000).toLocaleDateString() : '';
-  const historical = [...data].reverse().map(d => ({ value: parseFloat(d.value) }));
-  const spark = sparkline(historical, 160, 36);
-  el.innerHTML = `
-    <div class="fg-title">Crypto Fear &amp; Greed</div>
-    <div class="fg-value" style="color:${color}">${val}</div>
-    <div class="fg-label" style="color:${color}">${esc(label)}</div>
-    <div class="fg-date">${esc(date)}</div>
-    ${spark}`;
-}
-
 function renderFred(items) {
   const el = document.getElementById('fred-grid');
-  const gridItems = items.filter(f => !YIELD_CURVE_CODES.has(f.code));
-  document.getElementById('fred-count').textContent = gridItems.length;
-  el.innerHTML = gridItems.map(f => {
+  document.getElementById('fred-count').textContent = items.length;
+  el.innerHTML = items.map(f => {
     const data = f.data || [];
     const latest = data[data.length - 1];
     const latestVal = latest ? Number(latest.value).toLocaleString(undefined, {maximumFractionDigits: 2}) : 'N/A';
@@ -638,11 +521,7 @@ const active = (data.relevant_predictions || []).filter(p => p.volume_24h > 0).s
     buildIndexes();
     applySearch('');
 
-    renderYieldCurve(allFred);
-    renderFearGreed(data.fear_greed || null);
-
-    const hasMacro = allFred.length || (data.fear_greed && data.fear_greed.length);
-    if (!hasMacro) document.getElementById('section-fred').style.display = 'none';
+    if (!allFred.length)  document.getElementById('section-fred').style.display = 'none';
     if (!allNews.length)  document.getElementById('section-news').style.display = 'none';
   })
   .catch(err => {
