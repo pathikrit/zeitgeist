@@ -704,22 +704,28 @@ function getTags(p) {
   return (p.topics || '').split(/[,;]/).map(t => t.trim().toLowerCase()).filter(Boolean);
 }
 
-// Greedy tag-diversity re-ranking: pick each next item maximising volume/(1+overlap)
+// Tag-diversity re-ranking in O(n): items with a previously-seen tag are deferred
+// with half their volume score, then merged back in sorted order.
 function diverseSort(items) {
-  const remaining = [...items]; // already sorted desc by volume_24h
+  // items is already sorted desc by volume_24h
   const seen = new Set();
-  const result = [];
-  while (remaining.length) {
-    let bestIdx = 0, bestScore = -Infinity;
-    for (let i = 0; i < remaining.length; i++) {
-      const overlap = getTags(remaining[i]).filter(t => seen.has(t)).length;
-      const score = (remaining[i].volume_24h || 0) / (1 + overlap);
-      if (score > bestScore) { bestScore = score; bestIdx = i; }
-    }
-    const picked = remaining.splice(bestIdx, 1)[0];
-    getTags(picked).forEach(t => seen.add(t));
-    result.push(picked);
+  const primary = [];  // {item, score} — original score
+  const deferred = []; // {item, score} — halved score
+  for (const item of items) {
+    const tags = getTags(item);
+    const hasSeenTag = tags.some(t => seen.has(t));
+    tags.forEach(t => seen.add(t));
+    const score = item.volume_24h || 0;
+    (hasSeenTag ? deferred : primary).push({ item, score: hasSeenTag ? score / 2 : score });
   }
+  // Merge two desc-sorted lists
+  const result = [];
+  let di = 0;
+  for (const { item, score } of primary) {
+    while (di < deferred.length && deferred[di].score > score) result.push(deferred[di++].item);
+    result.push(item);
+  }
+  while (di < deferred.length) result.push(deferred[di++].item);
   return result;
 }
 
