@@ -240,6 +240,64 @@ events_agent = Agent(
     retries=RETRIES,
 )
 
+async def get_gdpnow() -> dict | None:
+    """Fetch Atlanta Fed GDPNow estimate by parsing the embedded JS arrays on their page."""
+    import re as _re, json as _json
+    from datetime import datetime as _dt
+    url = "https://www.atlantafed.org/cqer/research/gdpnow"
+    try:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            resp = await client.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
+            resp.raise_for_status()
+
+        text = resp.text
+
+        # Arrays are embedded in a JS section starting ~offset 57k; search only that region
+        section = text[50000:270000]
+        fd = _re.search(r'\bforecastDates\s*=\s*(\[.*?\]);', section, _re.DOTALL)
+        gf = _re.search(r'\bgdpForecast\s*=\s*(\[.*?\]);', section, _re.DOTALL)
+        if not fd or not gf:
+            log.error("GDPNow: could not find embedded data arrays on page")
+            return None
+
+        dates     = _json.loads(fd.group(1))
+        forecasts = _json.loads(gf.group(1))
+
+        # Quarters are concatenated newest-first; find the boundary of the current quarter
+        # by detecting when the parsed date jumps significantly backward.
+        parsed = []
+        for d, v in zip(dates, forecasts):
+            try:
+                parsed.append((_dt.strptime(d, "%m/%d/%Y"), float(v)))
+            except (ValueError, TypeError):
+                pass
+
+        current_quarter = []
+        for i, (d, v) in enumerate(parsed):
+            if i > 0 and (parsed[i-1][0] - d).days > 30:
+                break
+            current_quarter.append({"date": d.strftime("%Y-%m-%d"), "value": v})
+
+        if not current_quarter:
+            return None
+
+        latest = current_quarter[-1]
+        # Extract the quarter label from the page card (e.g. "2026:Q1" → "2026 Q1")
+        q_match = _re.search(r'GDPNow Estimate for (\d{4}):Q(\d)', text)
+        quarter = f"{q_match.group(1)} Q{q_match.group(2)}" if q_match else ""
+        log.info(f"GDPNow: {latest['value']}% for {quarter} as of {latest['date']} ({len(current_quarter)} updates)")
+        return {
+            "estimate": latest["value"],
+            "quarter": quarter,
+            "date": latest["date"],
+            "history": current_quarter,
+            "url": url,
+        }
+    except Exception as e:
+        log.error(f"Error fetching GDPNow: {e}")
+        return None
+
+
 async def get_fear_greed() -> list | None:
     try:
         async with httpx.AsyncClient() as client:
@@ -273,12 +331,13 @@ async def main():
     predictions = predictions.filter(pl.col("volume_24h") > 0)
     log.info(f"After volume filter = {len(predictions)} predictions")
 
-    tagged_predictions, events, news, fred_data, fear_greed = await asyncio.gather(
+    tagged_predictions, events, news, fred_data, fear_greed, gdpnow = await asyncio.gather(
         tag_predictions(predictions),
         get_events(),
         asyncio.to_thread(get_news),
         asyncio.to_thread(get_fred_data),
         get_fear_greed(),
+        get_gdpnow(),
     )
 
     output_dir = Path(".reports")
@@ -297,6 +356,7 @@ async def main():
         "news_headlines": news.to_dicts() if news is not None else None,
         "fred_data": fred_data.to_dicts() if fred_data is not None else None,
         "fear_greed": fear_greed,
+        "gdpnow": gdpnow,
     }
     output_json_file.write_text(json.dumps(output_data, indent=2), encoding="utf-8")
     log.info("Done!")

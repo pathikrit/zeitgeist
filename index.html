@@ -182,6 +182,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
   .fg-value { font-size: 48px; font-weight: 300; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
   .fg-label { font-size: 13px; font-weight: 600; }
   .fg-date  { font-size: 12px; color: #444; margin-bottom: 6px; }
+  #gdpnow-card { border-right: 1px solid #1c1c20; }
 
   /* FRED */
   .fred-grid {
@@ -286,6 +287,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
     </div>
     <div class="macro-top" id="macro-top">
       <div class="yield-curve-card" id="yield-curve-card"></div>
+      <div class="fg-card" id="gdpnow-card"></div>
       <div class="fg-card" id="fg-card"></div>
     </div>
     <div class="fred-grid" id="fred-grid"></div>
@@ -476,6 +478,21 @@ function renderYieldCurve(fredItems) {
     </svg>`;
 }
 
+function renderGDPNow(data) {
+  const el = document.getElementById('gdpnow-card');
+  if (!data) { el.style.display = 'none'; return; }
+  const val = data.estimate;
+  const color = val >= 0 ? '#27ae60' : '#c0392b';
+  const sign = val >= 0 ? '+' : '';
+  const spark = sparkline((data.history || []).map(d => ({ value: d.value })), 160, 36);
+  el.innerHTML = `
+    <div class="fg-title"><a href="${esc(data.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">GDPNow</a></div>
+    <div class="fg-value" style="color:${color}">${sign}${val.toFixed(1)}<span style="font-size:18px;color:#888">%</span></div>
+    <div class="fg-label" style="color:${color}">${esc(data.quarter)}</div>
+    <div class="fg-date">${esc(data.date)}</div>
+    ${spark}`;
+}
+
 function renderFearGreed(data) {
   const el = document.getElementById('fg-card');
   if (!data || !data.length) { el.style.display = 'none'; return; }
@@ -639,9 +656,10 @@ const active = (data.relevant_predictions || []).filter(p => p.volume_24h > 0).s
     applySearch('');
 
     renderYieldCurve(allFred);
+    renderGDPNow(data.gdpnow || null);
     renderFearGreed(data.fear_greed || null);
 
-    const hasMacro = allFred.length || (data.fear_greed && data.fear_greed.length);
+    const hasMacro = allFred.length || (data.fear_greed && data.fear_greed.length) || data.gdpnow;
     if (!hasMacro) document.getElementById('section-fred').style.display = 'none';
     if (!allNews.length)  document.getElementById('section-news').style.display = 'none';
   })
