@@ -116,6 +116,13 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
 
   .no-results { padding: 40px 20px; text-align: center; color: #444; }
 
+  .pagination { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border-top: 1px solid #1c1c20; }
+  .pagination button { background: #1e1e22; border: 1px solid #2a2a2e; color: #aaa; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .pagination button:hover:not(:disabled) { background: #2a2a2e; color: #fff; }
+  .pagination button:disabled { opacity: .3; cursor: default; }
+  .pagination button.active { background: #3a7bd5; border-color: #3a7bd5; color: #fff; }
+  .pagination-info { font-size: 12px; color: #555; margin-left: 4px; }
+
   /* Catalysts */
   .catalyst-list { display: flex; flex-direction: column; }
   .catalyst-row {
@@ -247,6 +254,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
         <tbody id="pred-tbody"></tbody>
       </table>
       <div class="no-results" id="pred-no-results" style="display:none">No matching predictions</div>
+      <div class="pagination" id="pred-pagination" style="display:none"></div>
     </div>
   </section>
 
@@ -261,6 +269,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
         <tbody id="consensus-tbody"></tbody>
       </table>
       <div class="no-results" id="consensus-no-results" style="display:none">No matching predictions</div>
+      <div class="pagination" id="consensus-pagination" style="display:none"></div>
     </div>
   </section>
 
@@ -269,7 +278,10 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
       <h2>Upcoming Catalysts</h2>
       <span class="count" id="cat-count"></span>
     </div>
-    <div class="catalyst-list" id="catalyst-list"></div>
+    <div id="catalyst-wrap">
+      <div class="catalyst-list" id="catalyst-list"></div>
+      <div class="pagination" id="cat-pagination" style="display:none"></div>
+    </div>
   </section>
 
   <section id="section-news">
@@ -277,7 +289,10 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
       <h2>News Headlines</h2>
       <span class="count" id="news-count"></span>
     </div>
-    <div class="news-list" id="news-list"></div>
+    <div id="news-wrap">
+      <div class="news-list" id="news-list"></div>
+      <div class="pagination" id="news-pagination" style="display:none"></div>
+    </div>
   </section>
 
   <section id="section-fred">
@@ -345,15 +360,48 @@ function betsHtml(p) {
   return html;
 }
 
+function windowedPages(cur, total) {
+  const delta = 2;
+  const pages = new Set([0, total - 1]);
+  for (let i = Math.max(0, cur - delta); i <= Math.min(total - 1, cur + delta); i++) pages.add(i);
+  const sorted = [...pages].sort((a, b) => a - b);
+  const result = [];
+  let prev = -1;
+  for (const p of sorted) {
+    if (p - prev > 1) result.push(null); // ellipsis
+    result.push(p);
+    prev = p;
+  }
+  return result;
+}
+
+function buildPagination(cur, total, pageSize, totalItems, onPageFn) {
+  const prevBtn = `<button ${cur === 0 ? 'disabled' : ''} onclick="${onPageFn}(${cur - 1})">&#8249;</button>`;
+  const nextBtn = `<button ${cur >= total - 1 ? 'disabled' : ''} onclick="${onPageFn}(${cur + 1})">&#8250;</button>`;
+  const pages = windowedPages(cur, total).map(p =>
+    p === null
+      ? `<span class="pagination-info" style="padding:0 4px">…</span>`
+      : `<button class="${p === cur ? 'active' : ''}" onclick="${onPageFn}(${p})">${p + 1}</button>`
+  ).join('');
+  const info = `<span class="pagination-info">${cur * pageSize + 1}–${Math.min((cur + 1) * pageSize, totalItems)} of ${totalItems}</span>`;
+  return prevBtn + pages + nextBtn + info;
+}
+
 function renderPredictions(rows) {
   const tbody = document.getElementById('pred-tbody');
+  const pagEl = document.getElementById('pred-pagination');
   if (!rows.length) {
     tbody.innerHTML = '';
+    pagEl.style.display = 'none';
     document.getElementById('pred-no-results').style.display = '';
     return;
   }
   document.getElementById('pred-no-results').style.display = 'none';
-  tbody.innerHTML = rows.map(p => {
+  const pageSize = 10;
+  const totalPages = Math.ceil(rows.length / pageSize);
+  predPage = Math.min(predPage, totalPages - 1);
+  const pageRows = rows.slice(predPage * pageSize, (predPage + 1) * pageSize);
+  tbody.innerHTML = pageRows.map(p => {
     const titleHtml = p.url
       ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
       : hi(p.title);
@@ -363,12 +411,25 @@ function renderPredictions(rows) {
       <td class="topics">${(p.topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
     </tr>`;
   }).join('');
+  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = buildPagination(predPage, totalPages, pageSize, rows.length, 'goPredPage');
+}
+
+function goPredPage(n) {
+  predPage = n;
+  renderPredictions(currentPredRows);
+  document.getElementById('pred-table-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 function renderCatalysts(items) {
   const el = document.getElementById('catalyst-list');
-  document.getElementById('cat-count').textContent = items.length;
-  el.innerHTML = items.map(c => {
+  const pagEl = document.getElementById('cat-pagination');
+  const pageSize = 10;
+  const totalPages = Math.ceil(items.length / pageSize);
+  catPage = Math.min(catPage, Math.max(0, totalPages - 1));
+  const pageItems = items.slice(catPage * pageSize, (catPage + 1) * pageSize);
+  el.innerHTML = pageItems.map(c => {
     const titleHtml = c.url
       ? `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)}</a>`
       : esc(c.title);
@@ -378,12 +439,25 @@ function renderCatalysts(items) {
       ${c.topics ? `<span class="catalyst-topics"><span class="tag">${esc(c.topics)}</span></span>` : ''}
     </div>`;
   }).join('');
+  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = buildPagination(catPage, totalPages, pageSize, items.length, 'goCatPage');
+}
+
+function goCatPage(n) {
+  catPage = n;
+  renderCatalysts(currentCatRows);
+  document.getElementById('catalyst-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 function renderNews(items) {
   const el = document.getElementById('news-list');
-  document.getElementById('news-count').textContent = items.length;
-  el.innerHTML = items.map(n => {
+  const pagEl = document.getElementById('news-pagination');
+  const pageSize = 10;
+  const totalPages = Math.ceil(items.length / pageSize);
+  newsPage = Math.min(newsPage, Math.max(0, totalPages - 1));
+  const pageItems = items.slice(newsPage * pageSize, (newsPage + 1) * pageSize);
+  el.innerHTML = pageItems.map(n => {
     const titleHtml = n.url
       ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a>`
       : esc(n.title);
@@ -392,6 +466,15 @@ function renderNews(items) {
       ${n.description ? `<div class="news-desc">${esc(n.description)}</div>` : ''}
     </div>`;
   }).join('');
+  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = buildPagination(newsPage, totalPages, pageSize, items.length, 'goNewsPage');
+}
+
+function goNewsPage(n) {
+  newsPage = n;
+  renderNews(currentNewsRows);
+  document.getElementById('news-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 function sparkline(data, width=120, height=32) {
@@ -540,9 +623,14 @@ function isConsensus(p) {
 function renderConsensus(rows) {
   const tbody = document.getElementById('consensus-tbody');
   const noResults = document.getElementById('consensus-no-results');
-  if (!rows.length) { tbody.innerHTML = ''; noResults.style.display = ''; return; }
+  const pagEl = document.getElementById('consensus-pagination');
+  if (!rows.length) { tbody.innerHTML = ''; pagEl.style.display = 'none'; noResults.style.display = ''; return; }
   noResults.style.display = 'none';
-  tbody.innerHTML = rows.map(p => {
+  const pageSize = 10;
+  const totalPages = Math.ceil(rows.length / pageSize);
+  consensusPage = Math.min(consensusPage, totalPages - 1);
+  const pageRows = rows.slice(consensusPage * pageSize, (consensusPage + 1) * pageSize);
+  tbody.innerHTML = pageRows.map(p => {
     const winner = (p.bets || []).find(b => b.probability >= 0.98);
     const titleHtml = p.url
       ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
@@ -557,11 +645,47 @@ function renderConsensus(rows) {
       <td class="topics">${(p.topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
     </tr>`;
   }).join('');
+  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = buildPagination(consensusPage, totalPages, pageSize, rows.length, 'goConsensusPage');
+}
+
+function goConsensusPage(n) {
+  consensusPage = n;
+  renderConsensus(currentConsensusRows);
+  document.getElementById('consensus-table-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 // Search
 let allPredictions = [], allConsensusPredictions = [], allCatalysts = [], allNews = [], allFred = [];
 let predIdx, consensusIdx, catIdx, newsIdx, fredIdx;
+let predPage = 0, currentPredRows = [];
+let consensusPage = 0, currentConsensusRows = [];
+let catPage = 0, currentCatRows = [];
+let newsPage = 0, currentNewsRows = [];
+
+function getTags(p) {
+  return (p.topics || '').split(/[,;]/).map(t => t.trim().toLowerCase()).filter(Boolean);
+}
+
+// Greedy tag-diversity re-ranking: pick each next item maximising volume/(1+overlap)
+function diverseSort(items) {
+  const remaining = [...items]; // already sorted desc by volume_24h
+  const seen = new Set();
+  const result = [];
+  while (remaining.length) {
+    let bestIdx = 0, bestScore = -Infinity;
+    for (let i = 0; i < remaining.length; i++) {
+      const overlap = getTags(remaining[i]).filter(t => seen.has(t)).length;
+      const score = (remaining[i].volume_24h || 0) / (1 + overlap);
+      if (score > bestScore) { bestScore = score; bestIdx = i; }
+    }
+    const picked = remaining.splice(bestIdx, 1)[0];
+    getTags(picked).forEach(t => seen.add(t));
+    result.push(picked);
+  }
+  return result;
+}
 
 function idxSearch(idx, q, items) {
   const hits = new Set(idx.search(q).flatMap(r => r.result));
@@ -592,22 +716,30 @@ function applySearch(q) {
   const filteredPreds = search(predIdx, allPredictions);
   document.getElementById('pred-count').textContent =
     q ? `${filteredPreds.length} / ${allPredictions.length}` : allPredictions.length;
-  renderPredictions(filteredPreds);
+  predPage = 0;
+  currentPredRows = q ? filteredPreds : diverseSort(filteredPreds);
+  renderPredictions(currentPredRows);
 
   const filteredConsensus = search(consensusIdx, allConsensusPredictions);
   document.getElementById('consensus-count').textContent =
     q ? `${filteredConsensus.length} / ${allConsensusPredictions.length}` : allConsensusPredictions.length;
-  renderConsensus(filteredConsensus);
+  consensusPage = 0;
+  currentConsensusRows = q ? filteredConsensus : diverseSort(filteredConsensus);
+  renderConsensus(currentConsensusRows);
 
   const filteredCats = search(catIdx, allCatalysts);
   document.getElementById('cat-count').textContent =
     q ? `${filteredCats.length} / ${allCatalysts.length}` : allCatalysts.length;
-  renderCatalysts(filteredCats);
+  catPage = 0;
+  currentCatRows = filteredCats;
+  renderCatalysts(currentCatRows);
 
   const filteredNews = search(newsIdx, allNews);
   document.getElementById('news-count').textContent =
     q ? `${filteredNews.length} / ${allNews.length}` : allNews.length;
-  renderNews(filteredNews);
+  newsPage = 0;
+  currentNewsRows = filteredNews;
+  renderNews(currentNewsRows);
 
   const filteredFred = search(fredIdx, allFred);
   document.getElementById('fred-count').textContent =
