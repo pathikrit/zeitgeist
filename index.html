@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zeitgeist Dashboard</title>
 <style>
+  /* ── Reset & base ──────────────────────────────────────────────────────── */
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background: #0d0d0f;
@@ -14,7 +14,9 @@
     font-size: 14px;
     line-height: 1.5;
   }
+  .hidden { display: none !important; }
 
+  /* ── Topbar ────────────────────────────────────────────────────────────── */
   .topbar {
     background: #0d0d0f;
     padding: 16px 32px 12px;
@@ -22,7 +24,6 @@
     top: 0;
     z-index: 100;
   }
-
   .topbar input {
     width: 100%;
     padding: 10px 16px;
@@ -37,10 +38,16 @@
   .topbar input::placeholder { color: #3a3a3e; }
   .topbar input:focus { border-color: #3a7bd5; background: #16161a; }
 
-  .container { max-width: 1800px; margin: 0 auto; padding: 12px 32px 24px; display: flex; flex-direction: column; gap: 32px; }
-
+  /* ── Layout ────────────────────────────────────────────────────────────── */
+  .container {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 12px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
   section { background: #141416; border-radius: 12px; border: 1px solid #2a2a2e; overflow: hidden; }
-
   .section-header {
     padding: 16px 20px;
     border-bottom: 1px solid #222226;
@@ -48,9 +55,8 @@
     align-items: center;
     gap: 10px;
   }
-
   .section-header h2 { font-size: 15px; font-weight: 600; color: #f0f0f5; }
-  .section-header .count {
+  .count {
     background: #222226;
     color: #777;
     border-radius: 20px;
@@ -59,8 +65,7 @@
     font-weight: 500;
   }
 
-
-  /* Predictions table */
+  /* ── Predictions table ─────────────────────────────────────────────────── */
   table { width: 100%; border-collapse: collapse; }
   thead th {
     text-align: left;
@@ -79,21 +84,23 @@
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #1a1a1e; }
   td { padding: 12px 20px; vertical-align: top; }
-
   td.question { max-width: 600px; color: #4a9eff; font-weight: 500; }
   td.question a { color: #4a9eff; text-decoration: none; }
   td.question a:hover { text-decoration: underline; }
-
   td.answers { min-width: 380px; }
+
+  /* ── Bets ──────────────────────────────────────────────────────────────── */
   .bet { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 13px; }
   .bet:last-child { margin-bottom: 0; }
   .bet-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #aaa; }
   .bet-bar-wrap { width: 160px; height: 6px; background: #2a2a2e; border-radius: 3px; flex-shrink: 0; }
-  .bet-bar { height: 6px; border-radius: 3px; background: #3a7bd5; }
-  .bet-bar.high { background: #2ea84a; }
-  .bet-bar.low  { background: #c0392b; }
+  .bet-bar { height: 6px; border-radius: 3px; background: #3a7bd5; width: var(--bar-pct, 0%); }
+  .bet-bar.high  { background: #2ea84a; }
+  .bet-bar.low   { background: #c0392b; }
+  .bet-bar.other { opacity: .4; }
   .bet-pct { width: 36px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: #ccc; font-size: 12px; }
 
+  /* ── Tags ──────────────────────────────────────────────────────────────── */
   .tag {
     display: inline-block;
     background: #2a2200;
@@ -106,110 +113,76 @@
     transition: background .1s;
   }
   .tag:hover { background: #3a3000; }
+  mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; }
 
-mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; }
-
+  /* ── Other/toggle bets ─────────────────────────────────────────────────── */
   .other-toggle { cursor: pointer; opacity: .6; }
   .other-toggle:hover { opacity: 1; }
   .other-label { font-style: italic; }
   .other-bets { padding-left: 8px; border-left: 1px solid #2a2a2e; margin: 2px 0 4px; }
-
   .no-results { padding: 40px 20px; text-align: center; color: #444; }
 
+  /* ── Pagination ────────────────────────────────────────────────────────── */
   .pagination { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border-top: 1px solid #1c1c20; }
   .pagination button { background: #1e1e22; border: 1px solid #2a2a2e; color: #aaa; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
   .pagination button:hover:not(:disabled) { background: #2a2a2e; color: #fff; }
   .pagination button:disabled { opacity: .3; cursor: default; }
   .pagination button.active { background: #3a7bd5; border-color: #3a7bd5; color: #fff; }
   .pagination-info { font-size: 12px; color: #555; margin-left: 4px; }
+  .pagination-ellipsis { font-size: 12px; color: #555; padding: 0 4px; }
 
-  /* Catalysts */
+  /* ── Catalysts ─────────────────────────────────────────────────────────── */
   .catalyst-list { display: flex; flex-direction: column; }
-  .catalyst-row {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    padding: 11px 20px;
-    border-bottom: 1px solid #1c1c20;
-  }
+  .catalyst-row { display: flex; align-items: baseline; gap: 12px; padding: 11px 20px; border-bottom: 1px solid #1c1c20; }
   .catalyst-row:last-child { border-bottom: none; }
-  .catalyst-when {
-    flex-shrink: 0;
-    font-size: 12px;
-    color: #555;
-    width: 300px;
-  }
+  .catalyst-when { flex-shrink: 0; font-size: 12px; color: #555; width: 300px; }
   .catalyst-title { flex: 1; color: #ccc; }
   .catalyst-title a { color: #4a9eff; text-decoration: none; }
   .catalyst-title a:hover { text-decoration: underline; }
   .catalyst-topics { flex-shrink: 0; }
 
-  /* News */
+  /* ── News ──────────────────────────────────────────────────────────────── */
   .news-list { display: flex; flex-direction: column; }
-  .news-row {
-    padding: 11px 20px;
-    border-bottom: 1px solid #1c1c20;
-  }
+  .news-row { padding: 11px 20px; border-bottom: 1px solid #1c1c20; }
   .news-row:last-child { border-bottom: none; }
   .news-row a { color: #ddd; text-decoration: none; font-weight: 500; }
   .news-row a:hover { color: #4a9eff; }
   .news-desc { color: #555; font-size: 13px; margin-top: 2px; }
 
-  /* Macro top (yield curve + fear & greed) */
-  .macro-top {
-    display: flex;
-    border-bottom: 1px solid #1c1c20;
-  }
-  .yield-curve-card {
-    flex: 1;
-    padding: 14px 20px 10px;
-    border-right: 1px solid #1c1c20;
-    min-width: 0;
-  }
+  /* ── Macro / yield curve ───────────────────────────────────────────────── */
+  .macro-top { display: flex; border-bottom: 1px solid #1c1c20; }
+  .yield-curve-card { flex: 1; padding: 14px 20px 10px; border-right: 1px solid #1c1c20; min-width: 0; }
   .yield-curve-title { font-weight: 600; font-size: 13px; color: #aaa; margin-bottom: 8px; }
   svg.yield-curve { display: block; width: 100%; overflow: visible; }
-  .fg-card {
-    width: 200px;
-    flex-shrink: 0;
-    padding: 14px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
+  .fg-card { width: 200px; flex-shrink: 0; padding: 14px 20px; display: flex; flex-direction: column; gap: 3px; }
   .fg-title { font-weight: 600; font-size: 13px; color: #aaa; }
+  .fg-title a { color: inherit; text-decoration: none; }
   .fg-value { font-size: 48px; font-weight: 300; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
+  .fg-value-unit { font-size: 18px; color: #888; }
   .fg-label { font-size: 13px; font-weight: 600; }
   .fg-date  { font-size: 12px; color: #444; margin-bottom: 6px; }
   #gdpnow-card { border-right: 1px solid #1c1c20; }
 
-  /* FRED */
-  .fred-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 0;
-  }
-  .fred-card {
-    padding: 14px 20px;
-    border-right: 1px solid #1c1c20;
-    border-bottom: 1px solid #1c1c20;
-  }
+  /* Sentiment color classes (Fear & Greed + GDPNow) */
+  .color-red    { color: #c0392b; }
+  .color-orange { color: #e67e22; }
+  .color-yellow { color: #d4ac0d; }
+  .color-green  { color: #27ae60; }
+  .color-dkgreen{ color: #1e8449; }
+
+  /* ── FRED grid ─────────────────────────────────────────────────────────── */
+  .fred-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0; }
+  .fred-card { padding: 14px 20px; border-right: 1px solid #1c1c20; border-bottom: 1px solid #1c1c20; }
   .fred-card:hover { background: #1a1a1e; }
   .fred-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; color: #aaa; }
   .fred-title a { color: #aaa; text-decoration: none; }
   .fred-title a:hover { color: #4a9eff; }
-  .fred-latest {
-    font-size: 22px;
-    font-weight: 300;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 6px;
-    color: #f0f0f5;
-  }
-  .fred-latest span { font-size: 13px; color: #444; font-weight: 400; margin-left: 6px; }
+  .fred-latest { font-size: 22px; font-weight: 300; font-variant-numeric: tabular-nums; margin-bottom: 6px; color: #f0f0f5; }
+  .fred-latest-date { font-size: 13px; color: #444; font-weight: 400; margin-left: 6px; }
   svg.sparkline { display: block; overflow: visible; }
 
-  /* Error */
+  /* ── Error banner ──────────────────────────────────────────────────────── */
   #error-banner {
-    display: none;
     background: #2a1f10;
     border: 1px solid #5a3a10;
     border-radius: 8px;
@@ -224,12 +197,12 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
 <body>
 
 <div class="topbar">
-  <input type="search" id="pred-search" placeholder="Search..." autocomplete="off">
+  <input type="search" id="pred-search" placeholder="Search…" autocomplete="off">
 </div>
 
-<div id="error-banner">
+<div id="error-banner" class="hidden">
   Could not load <strong>.reports/output.json</strong>. If opening from <code>file://</code>, serve locally instead:<br>
-  <code>python3 -m http.server 8000</code> then open <code>http://localhost:8000/dashboard.html</code>
+  <code>python3 -m http.server 8000</code> then open <code>http://localhost:8000</code>
 </div>
 
 <div class="container">
@@ -241,11 +214,11 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
     </div>
     <div id="pred-table-wrap">
       <table>
-        <thead style="display:none"></thead>
+        <thead class="hidden"></thead>
         <tbody id="pred-tbody"></tbody>
       </table>
-      <div class="no-results" id="pred-no-results" style="display:none">No matching predictions</div>
-      <div class="pagination" id="pred-pagination" style="display:none"></div>
+      <div class="no-results hidden" id="pred-no-results">No matching predictions</div>
+      <div class="pagination hidden" id="pred-pagination"></div>
     </div>
   </section>
 
@@ -256,11 +229,11 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
     </div>
     <div id="consensus-table-wrap">
       <table>
-        <thead style="display:none"></thead>
+        <thead class="hidden"></thead>
         <tbody id="consensus-tbody"></tbody>
       </table>
-      <div class="no-results" id="consensus-no-results" style="display:none">No matching predictions</div>
-      <div class="pagination" id="consensus-pagination" style="display:none"></div>
+      <div class="no-results hidden" id="consensus-no-results">No matching predictions</div>
+      <div class="pagination hidden" id="consensus-pagination"></div>
     </div>
   </section>
 
@@ -271,7 +244,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
     </div>
     <div id="catalyst-wrap">
       <div class="catalyst-list" id="catalyst-list"></div>
-      <div class="pagination" id="cat-pagination" style="display:none"></div>
+      <div class="pagination hidden" id="cat-pagination"></div>
     </div>
   </section>
 
@@ -282,7 +255,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
     </div>
     <div id="news-wrap">
       <div class="news-list" id="news-list"></div>
-      <div class="pagination" id="news-pagination" style="display:none"></div>
+      <div class="pagination hidden" id="news-pagination"></div>
     </div>
   </section>
 
@@ -301,76 +274,258 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
 
 </div>
 
+<!-- ── Templates ─────────────────────────────────────────────────────────── -->
+
+<template id="tpl-pred-row">
+  <tr>
+    <td class="question"></td>
+    <td class="answers"></td>
+    <td class="topics"></td>
+  </tr>
+</template>
+
+<template id="tpl-bet">
+  <div class="bet">
+    <span class="bet-label"></span>
+    <div class="bet-bar-wrap"><div class="bet-bar"></div></div>
+    <span class="bet-pct"></span>
+  </div>
+</template>
+
+<template id="tpl-other-toggle">
+  <div class="bet other-toggle">
+    <span class="bet-label other-label"></span>
+  </div>
+  <div class="other-bets hidden"></div>
+</template>
+
+<template id="tpl-tag">
+  <span class="tag clickable-tag"></span>
+</template>
+
+<template id="tpl-catalyst-row">
+  <div class="catalyst-row">
+    <span class="catalyst-when"></span>
+    <span class="catalyst-title"></span>
+    <span class="catalyst-topics"></span>
+  </div>
+</template>
+
+<template id="tpl-news-row">
+  <div class="news-row">
+    <div class="news-headline"></div>
+    <div class="news-desc"></div>
+  </div>
+</template>
+
+<template id="tpl-fred-card">
+  <div class="fred-card">
+    <div class="fred-title"></div>
+    <div class="fred-latest">
+      <span class="fred-latest-val"></span><span class="fred-latest-date"></span>
+    </div>
+  </div>
+</template>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FlexSearch/0.8.2/flexsearch.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const tagsHtml = (topics, highlight = false) =>
-  (topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean)
-    .map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${highlight ? hi(t) : esc(t)}</span>`).join(' ');
+// ── Constants ────────────────────────────────────────────────────────────────
+const PAGE_SIZE = 10;
+const COLLAPSE_THRESHOLD   = 3;
+const HIGH_CERTAINTY       = 0.98;
+const LOW_CERTAINTY        = 0.02;
+const BAR_HIGH_THRESHOLD   = 0.65;
+const BAR_LOW_THRESHOLD    = 0.25;
+const MIN_BET_PROBABILITY  = 0.01;
+const VISIBLE_BET_THRESHOLD = 0.05;
 
+const YIELD_CURVE_CODES = new Set(['DGS3MO', 'DGS2', 'DGS5', 'DGS10', 'DGS30']);
+const YIELD_MATURITIES  = [
+  { code: 'DGS3MO', label: '3M'  },
+  { code: 'DGS2',   label: '2Y'  },
+  { code: 'DGS5',   label: '5Y'  },
+  { code: 'DGS10',  label: '10Y' },
+  { code: 'DGS30',  label: '30Y' },
+];
+
+const FG_THRESHOLDS = [
+  { max: 24,       cls: 'color-red'     },
+  { max: 44,       cls: 'color-orange'  },
+  { max: 55,       cls: 'color-yellow'  },
+  { max: 75,       cls: 'color-green'   },
+  { max: Infinity, cls: 'color-dkgreen' },
+];
+
+const SPARKLINE_W   = 120;
+const SPARKLINE_H   = 32;
+const SPARKLINE_PAD = 2;
+
+const YIELD_W    = 500;
+const YIELD_H    = 100;
+const YIELD_PAD  = { l: 32, r: 12, t: 20, b: 22 };
+
+// ── DOM helpers ───────────────────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const tpl = id => document.getElementById(id).content.cloneNode(true);
+
+function linkEl(url, text) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.textContent = text;
+  return a;
+}
+
+// ── Highlight helper (mutates a DOM element) ──────────────────────────────────
 let currentQuery = '';
-function hi(s) {
-  const safe = esc(s);
-  if (!currentQuery) return safe;
-  const re = new RegExp(`(${currentQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  return safe.replace(re, '<mark>$1</mark>');
+
+function hi(el, text) {
+  if (!currentQuery) { el.textContent = text; return; }
+  const escaped = currentQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Capturing group → odd-indexed parts of split() are the matches
+  const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+  parts.forEach((part, i) => {
+    if (!part) return;
+    if (i % 2 === 1) {
+      const mark = document.createElement('mark');
+      mark.textContent = part;
+      el.appendChild(mark);
+    } else {
+      el.appendChild(document.createTextNode(part));
+    }
+  });
 }
 
-function barColor(p) {
-  if (p >= 0.65) return 'high';
-  if (p <= 0.25) return 'low';
-  return '';
+// ── Tags ──────────────────────────────────────────────────────────────────────
+function makeTags(topics, highlight = false) {
+  const frag = document.createDocumentFragment();
+  (topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).forEach(t => {
+    const node = tpl('tpl-tag').querySelector('.tag');
+    node.dataset.tag = t;
+    if (highlight) hi(node, t); else node.textContent = t;
+    frag.appendChild(node);
+    frag.appendChild(document.createTextNode(' '));
+  });
+  return frag;
 }
 
-function betHtml(b) {
-  const pct = Math.round(b.probability * 100);
-  return `<div class="bet">
-    <span class="bet-label" title="${esc(b.prompt)}">${hi(b.prompt)}</span>
-    <div class="bet-bar-wrap"><div class="bet-bar ${barColor(b.probability)}" style="width:${pct}%"></div></div>
-    <span class="bet-pct">${pct}%</span>
-  </div>`;
+// ── Bets ──────────────────────────────────────────────────────────────────────
+function barColorClass(p) {
+  if (p >= BAR_HIGH_THRESHOLD) return 'high';
+  if (p <= BAR_LOW_THRESHOLD)  return 'low';
+  return null;
 }
 
-function betsHtml(p) {
+function makeBet(b, { fullWidth = false, dimmed = false } = {}) {
+  const frag = tpl('tpl-bet');
+  const pct  = Math.round(b.probability * 100);
+  const label = frag.querySelector('.bet-label');
+  label.title = b.prompt;
+  hi(label, b.prompt);
+  const bar = frag.querySelector('.bet-bar');
+  bar.style.setProperty('--bar-pct', fullWidth ? '100%' : pct + '%');
+  const cls = fullWidth ? 'high' : barColorClass(b.probability);
+  if (cls) bar.classList.add(cls);
+  if (dimmed) bar.classList.add('other');
+  frag.querySelector('.bet-pct').textContent = pct + '%';
+  return frag;
+}
+
+// Renders the toggle row + collapsed panel for "others" groups
+function makeOtherToggle(oid, labelText, betItems, { showBar = false, barPct = 0 } = {}) {
+  const frag   = tpl('tpl-other-toggle');
+  const toggle = frag.querySelector('.other-toggle');
+  toggle.dataset.oid = oid;
+  toggle.querySelector('.other-label').textContent = `\u25B6 ${labelText}`;
+  if (showBar) {
+    const wrap = document.createElement('div');
+    wrap.className = 'bet-bar-wrap';
+    const bar = document.createElement('div');
+    bar.className = 'bet-bar other';
+    bar.style.setProperty('--bar-pct', barPct + '%');
+    wrap.appendChild(bar);
+    toggle.appendChild(wrap);
+    const pctEl = document.createElement('span');
+    pctEl.className = 'bet-pct';
+    pctEl.textContent = barPct + '%';
+    toggle.appendChild(pctEl);
+  }
+  const panel = frag.querySelector('.other-bets');
+  panel.id = oid;
+  betItems.forEach(f => panel.appendChild(f));
+  return frag;
+}
+
+// Shared collapse logic for >COLLAPSE_THRESHOLD high-certainty bets
+function buildCollapsedHighBets(sorted, idPrefix) {
+  const frag        = document.createDocumentFragment();
+  const highCertain = sorted.filter(b => b.probability >= HIGH_CERTAINTY);
+  const rest        = sorted.filter(b => b.probability <  HIGH_CERTAINTY);
+  const shown       = highCertain[highCertain.length - 1]; // lowest p = most restrictive
+  const collapsed   = highCertain.slice(0, -1);
+  frag.appendChild(makeBet(shown));
+  frag.appendChild(makeOtherToggle(
+    idPrefix,
+    `Others \u003E98% (${collapsed.length})`,
+    collapsed.map(b => makeBet(b)),
+  ));
+  rest.forEach(b => frag.appendChild(makeBet(b)));
+  return frag;
+}
+
+function makeBets(p) {
   const isBinary = bets => bets.length === 2 && bets.every(b => /^(yes|no|up|down)$/i.test((b.prompt || '').trim()));
-  const raw = (p.bets || []).filter(b => b.probability > 0.01);
+  const raw    = (p.bets || []).filter(b => b.probability > MIN_BET_PROBABILITY);
   const sorted = (isBinary(raw) ? [raw.sort((a, b) => b.probability - a.probability)[0]] : raw)
     .sort((a, b) => b.probability - a.probability);
 
-  // If >3 bets are near-certain (>=98%), show only the lowest (most restrictive) and collapse the rest
-  const highCertainty = sorted.filter(b => b.probability >= 0.98);
-  if (highCertainty.length > 3) {
-    const shownHigh = highCertainty[highCertainty.length - 1]; // lowest p (most restrictive)
-    const collapsedHigh = highCertainty.slice(0, -1);
-    const rest = sorted.filter(b => b.probability < 0.98);
-    const oid = 'other-' + esc(p.id);
-    const collapsedHtml = collapsedHigh.map(betHtml).join('');
-    return betHtml(shownHigh) +
-      `<div class="bet other-toggle" data-oid="${oid}">
-        <span class="bet-label other-label">&#9654; Others &gt;98% (${collapsedHigh.length})</span>
-      </div>
-      <div class="other-bets" id="${oid}" style="display:none">${collapsedHtml}</div>` +
-      rest.map(betHtml).join('');
+  const highCertain = sorted.filter(b => b.probability >= HIGH_CERTAINTY);
+  if (highCertain.length > COLLAPSE_THRESHOLD) {
+    return buildCollapsedHighBets(sorted, `other-${p.id}`);
   }
 
-  const main  = sorted.filter(b => b.probability >= 0.05);
-  const other = sorted.filter(b => b.probability <  0.05);
-  let html = main.map(betHtml).join('');
+  const frag  = document.createDocumentFragment();
+  const main  = sorted.filter(b => b.probability >= VISIBLE_BET_THRESHOLD);
+  const other = sorted.filter(b => b.probability <  VISIBLE_BET_THRESHOLD);
+  main.forEach(b => frag.appendChild(makeBet(b)));
   if (other.length > 1) {
     const otherPct = Math.round(other.reduce((s, b) => s + b.probability, 0) * 100);
-    const oid = 'other-' + esc(p.id);
-    html += `<div class="bet other-toggle" data-oid="${oid}">
-      <span class="bet-label other-label">&#9654; Others (${other.length})</span>
-      <div class="bet-bar-wrap"><div class="bet-bar" style="width:${otherPct}%;opacity:.4"></div></div>
-      <span class="bet-pct">${otherPct}%</span>
-    </div>
-    <div class="other-bets" id="${oid}" style="display:none">${other.map(betHtml).join('')}</div>`;
+    frag.appendChild(makeOtherToggle(
+      `other-${p.id}`,
+      `Others (${other.length})`,
+      other.map(b => makeBet(b)),
+      { showBar: true, barPct: otherPct },
+    ));
   } else {
-    html += other.map(betHtml).join('');
+    other.forEach(b => frag.appendChild(makeBet(b)));
   }
-  return html;
+  return frag;
 }
 
+function makeConsensusBets(p) {
+  const highBets = (p.bets || [])
+    .filter(b => b.probability >= HIGH_CERTAINTY)
+    .sort((a, b) => a.probability - b.probability); // ascending: lowest p first
+
+  if (highBets.length > COLLAPSE_THRESHOLD) {
+    const shown    = highBets[0]; // most restrictive
+    const collapsed = highBets.slice(1);
+    const frag = document.createDocumentFragment();
+    frag.appendChild(makeBet(shown, { fullWidth: true }));
+    frag.appendChild(makeOtherToggle(
+      `cons-other-${p.id}`,
+      `Others \u003E98% (${collapsed.length})`,
+      collapsed.map(b => makeBet(b, { fullWidth: true })),
+    ));
+    return frag;
+  }
+
+  const winner = highBets[highBets.length - 1]; // highest p for simple case
+  return winner ? makeBet(winner, { fullWidth: true }) : document.createDocumentFragment();
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
 function windowedPages(cur, total) {
   const delta = 2;
   const pages = new Set([0, total - 1]);
@@ -379,327 +534,356 @@ function windowedPages(cur, total) {
   const result = [];
   let prev = -1;
   for (const p of sorted) {
-    if (p - prev > 1) result.push(null); // ellipsis
+    if (p - prev > 1) result.push(null); // null = ellipsis
     result.push(p);
     prev = p;
   }
   return result;
 }
 
-function buildPagination(cur, total, pageSize, totalItems, onPageFn) {
-  const prevBtn = `<button ${cur === 0 ? 'disabled' : ''} onclick="${onPageFn}(${cur - 1})">&#8249;</button>`;
-  const nextBtn = `<button ${cur >= total - 1 ? 'disabled' : ''} onclick="${onPageFn}(${cur + 1})">&#8250;</button>`;
-  const pages = windowedPages(cur, total).map(p =>
-    p === null
-      ? `<span class="pagination-info" style="padding:0 4px">…</span>`
-      : `<button class="${p === cur ? 'active' : ''}" onclick="${onPageFn}(${p})">${p + 1}</button>`
-  ).join('');
-  const info = `<span class="pagination-info">${cur * pageSize + 1}–${Math.min((cur + 1) * pageSize, totalItems)} of ${totalItems}</span>`;
-  return prevBtn + pages + nextBtn + info;
+function buildPagination(container, cur, total, totalItems, onPage) {
+  container.innerHTML = '';
+  const mkBtn = (label, page, disabled, active) => {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    if (disabled) { btn.disabled = true; }
+    if (active)   { btn.classList.add('active'); }
+    if (!disabled) btn.addEventListener('click', () => onPage(page));
+    return btn;
+  };
+  container.appendChild(mkBtn('\u2039', cur - 1, cur === 0, false));
+  windowedPages(cur, total).forEach(p => {
+    if (p === null) {
+      const el = document.createElement('span');
+      el.className = 'pagination-ellipsis';
+      el.textContent = '\u2026';
+      container.appendChild(el);
+    } else {
+      container.appendChild(mkBtn(p + 1, p, false, p === cur));
+    }
+  });
+  container.appendChild(mkBtn('\u203A', cur + 1, cur >= total - 1, false));
+  const info = document.createElement('span');
+  info.className = 'pagination-info';
+  info.textContent = `${cur * PAGE_SIZE + 1}\u2013${Math.min((cur + 1) * PAGE_SIZE, totalItems)} of ${totalItems}`;
+  container.appendChild(info);
+}
+
+// Generic paginator — renders one page and wires the nav controls
+function paginate(state, items, renderPage) {
+  const total = Math.ceil(items.length / PAGE_SIZE);
+  state.page  = Math.min(state.page, Math.max(0, total - 1));
+  renderPage(items.slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE));
+  const pagEl = $(state.paginationId);
+  if (total <= 1) { pagEl.classList.add('hidden'); return; }
+  pagEl.classList.remove('hidden');
+  buildPagination(pagEl, state.page, total, items.length, n => {
+    state.page = n;
+    paginate(state, items, renderPage);
+    $(state.scrollTarget).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+// ── Render: Predictions ───────────────────────────────────────────────────────
+function makePredRow(p) {
+  const frag = tpl('tpl-pred-row');
+  const qTd  = frag.querySelector('.question');
+  qTd.appendChild(p.url ? linkEl(p.url, '') : document.createElement('span'));
+  const titleTarget = qTd.firstChild;
+  hi(titleTarget, p.title);
+  frag.querySelector('.answers').appendChild(makeBets(p));
+  frag.querySelector('.topics').appendChild(makeTags(p.topics, true));
+  return frag;
+}
+
+function makeConsensusRow(p) {
+  const frag = tpl('tpl-pred-row');
+  const qTd  = frag.querySelector('.question');
+  qTd.appendChild(p.url ? linkEl(p.url, '') : document.createElement('span'));
+  hi(qTd.firstChild, p.title);
+  frag.querySelector('.answers').appendChild(makeConsensusBets(p));
+  frag.querySelector('.topics').appendChild(makeTags(p.topics, true));
+  return frag;
 }
 
 function renderPredictions(rows) {
-  const tbody = document.getElementById('pred-tbody');
-  const pagEl = document.getElementById('pred-pagination');
+  const tbody     = $('pred-tbody');
+  const noResults = $('pred-no-results');
   if (!rows.length) {
     tbody.innerHTML = '';
-    pagEl.style.display = 'none';
-    document.getElementById('pred-no-results').style.display = '';
+    $('pred-pagination').classList.add('hidden');
+    noResults.classList.remove('hidden');
     return;
   }
-  document.getElementById('pred-no-results').style.display = 'none';
-  const pageSize = 10;
-  const totalPages = Math.ceil(rows.length / pageSize);
-  predPage = Math.min(predPage, totalPages - 1);
-  const pageRows = rows.slice(predPage * pageSize, (predPage + 1) * pageSize);
-  tbody.innerHTML = pageRows.map(p => {
-    const titleHtml = p.url
-      ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
-      : hi(p.title);
-    return `<tr data-title="${esc(p.title)}" data-topics="${esc(p.topics||'')}">
-      <td class="question">${titleHtml}</td>
-      <td class="answers">${betsHtml(p)}</td>
-      <td class="topics">${tagsHtml(p.topics, true)}</td>
-    </tr>`;
-  }).join('');
-  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
-  pagEl.style.display = 'flex';
-  pagEl.innerHTML = buildPagination(predPage, totalPages, pageSize, rows.length, 'goPredPage');
+  noResults.classList.add('hidden');
+  paginate(predState, rows, page => {
+    tbody.innerHTML = '';
+    page.forEach(p => tbody.appendChild(makePredRow(p)));
+  });
 }
 
-function goPredPage(n) {
-  predPage = n;
-  renderPredictions(currentPredRows);
-  document.getElementById('pred-table-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
+function renderConsensus(rows) {
+  const tbody     = $('consensus-tbody');
+  const noResults = $('consensus-no-results');
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    $('consensus-pagination').classList.add('hidden');
+    noResults.classList.remove('hidden');
+    return;
+  }
+  noResults.classList.add('hidden');
+  paginate(consensusState, rows, page => {
+    tbody.innerHTML = '';
+    page.forEach(p => tbody.appendChild(makeConsensusRow(p)));
+  });
 }
 
+// ── Render: Catalysts ─────────────────────────────────────────────────────────
 function renderCatalysts(items) {
-  const el = document.getElementById('catalyst-list');
-  const pagEl = document.getElementById('cat-pagination');
-  const pageSize = 10;
-  const totalPages = Math.ceil(items.length / pageSize);
-  catPage = Math.min(catPage, Math.max(0, totalPages - 1));
-  const pageItems = items.slice(catPage * pageSize, (catPage + 1) * pageSize);
-  el.innerHTML = pageItems.map(c => {
-    const titleHtml = c.url
-      ? `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)}</a>`
-      : esc(c.title);
-    return `<div class="catalyst-row">
-      <span class="catalyst-when">${esc(c.when || '')}</span>
-      <span class="catalyst-title">${titleHtml}</span>
-      ${c.topics ? `<span class="catalyst-topics">${tagsHtml(c.topics)}</span>` : ''}
-    </div>`;
-  }).join('');
-  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
-  pagEl.style.display = 'flex';
-  pagEl.innerHTML = buildPagination(catPage, totalPages, pageSize, items.length, 'goCatPage');
+  const list = $('catalyst-list');
+  paginate(catState, items, page => {
+    list.innerHTML = '';
+    page.forEach(c => {
+      const frag    = tpl('tpl-catalyst-row');
+      frag.querySelector('.catalyst-when').textContent = c.when || '';
+      const titleEl = frag.querySelector('.catalyst-title');
+      titleEl.appendChild(c.url ? linkEl(c.url, c.title) : document.createTextNode(c.title));
+      const topicsEl = frag.querySelector('.catalyst-topics');
+      if (c.topics) topicsEl.appendChild(makeTags(c.topics));
+      else          topicsEl.remove();
+      list.appendChild(frag);
+    });
+  });
 }
 
-function goCatPage(n) {
-  catPage = n;
-  renderCatalysts(currentCatRows);
-  document.getElementById('catalyst-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
-}
-
+// ── Render: News ──────────────────────────────────────────────────────────────
 function renderNews(items) {
-  const el = document.getElementById('news-list');
-  const pagEl = document.getElementById('news-pagination');
-  const pageSize = 10;
-  const totalPages = Math.ceil(items.length / pageSize);
-  newsPage = Math.min(newsPage, Math.max(0, totalPages - 1));
-  const pageItems = items.slice(newsPage * pageSize, (newsPage + 1) * pageSize);
-  el.innerHTML = pageItems.map(n => {
-    const titleHtml = n.url
-      ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a>`
-      : esc(n.title);
-    return `<div class="news-row">
-      <div>${titleHtml}</div>
-      ${n.description ? `<div class="news-desc">${esc(n.description)}</div>` : ''}
-    </div>`;
-  }).join('');
-  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
-  pagEl.style.display = 'flex';
-  pagEl.innerHTML = buildPagination(newsPage, totalPages, pageSize, items.length, 'goNewsPage');
+  const list = $('news-list');
+  paginate(newsState, items, page => {
+    list.innerHTML = '';
+    page.forEach(n => {
+      const frag    = tpl('tpl-news-row');
+      const headEl  = frag.querySelector('.news-headline');
+      headEl.appendChild(n.url ? linkEl(n.url, n.title) : document.createTextNode(n.title));
+      const descEl  = frag.querySelector('.news-desc');
+      if (n.description) descEl.textContent = n.description;
+      else               descEl.remove();
+      list.appendChild(frag);
+    });
+  });
 }
 
-function goNewsPage(n) {
-  newsPage = n;
-  renderNews(currentNewsRows);
-  document.getElementById('news-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
-}
-
-function sparkline(data, width=120, height=32) {
+// ── Sparkline ─────────────────────────────────────────────────────────────────
+function sparkline(data, width = SPARKLINE_W, height = SPARKLINE_H) {
   const vals = data.map(d => d.value).filter(v => v != null && !isNaN(v));
-  if (vals.length < 2) return '';
-  const min = Math.min(...vals), max = Math.max(...vals);
+  if (vals.length < 2) return null;
+  const min   = Math.min(...vals);
+  const max   = Math.max(...vals);
   const range = max - min || 1;
-  const pad = 2;
-  const pts = vals.map((v, i) => {
-    const x = pad + (i / (vals.length - 1)) * (width - pad * 2);
-    const y = pad + (1 - (v - min) / range) * (height - pad * 2);
+  const pad   = SPARKLINE_PAD;
+  const pts   = vals.map((v, i) => {
+    const x = pad + (i / (vals.length - 1)) * (width  - pad * 2);
+    const y = pad + (1 - (v - min) / range)  * (height - pad * 2);
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(' ');
-  return `<svg class="sparkline" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-    <polyline points="${pts}" fill="none" stroke="#3a7bd5" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-  </svg>`;
+
+  const ns   = 'http://www.w3.org/2000/svg';
+  const svg  = document.createElementNS(ns, 'svg');
+  svg.setAttribute('class', 'sparkline');
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+  const poly = document.createElementNS(ns, 'polyline');
+  poly.setAttribute('points', pts);
+  poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', '#3a7bd5');
+  poly.setAttribute('stroke-width', '1.5');
+  poly.setAttribute('stroke-linejoin', 'round');
+  poly.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(poly);
+  return svg;
 }
 
-const YIELD_CURVE_CODES = new Set(['DGS3MO', 'DGS2', 'DGS5', 'DGS10', 'DGS30']);
-const YIELD_MATURITIES = [
-  { code: 'DGS3MO', label: '3M' },
-  { code: 'DGS2',   label: '2Y' },
-  { code: 'DGS5',   label: '5Y' },
-  { code: 'DGS10',  label: '10Y' },
-  { code: 'DGS30',  label: '30Y' },
-];
-
-function fgColor(v) {
-  if (v <= 24) return '#c0392b';
-  if (v <= 44) return '#e67e22';
-  if (v <= 55) return '#d4ac0d';
-  if (v <= 75) return '#27ae60';
-  return '#1e8449';
-}
-
+// ── Render: Yield Curve ───────────────────────────────────────────────────────
 function renderYieldCurve(fredItems) {
-  const byCode = {};
-  fredItems.forEach(f => { if (f.code) byCode[f.code] = f; });
-
+  const byCode = Object.fromEntries(fredItems.filter(f => f.code).map(f => [f.code, f]));
   const points = YIELD_MATURITIES.map(m => {
     const s = byCode[m.code];
-    if (!s || !s.data || !s.data.length) return null;
+    if (!s?.data?.length) return null;
     const v = parseFloat(s.data[s.data.length - 1].value);
     return isNaN(v) ? null : { label: m.label, value: v };
   }).filter(Boolean);
 
-  const el = document.getElementById('yield-curve-card');
-  if (points.length < 2) { el.style.display = 'none'; return; }
+  const el = $('yield-curve-card');
+  if (points.length < 2) { el.classList.add('hidden'); return; }
 
-  const W = 500, H = 100, padL = 32, padR = 12, padT = 20, padB = 22;
-  const innerW = W - padL - padR, innerH = H - padT - padB;
-  const vals = points.map(p => p.value);
-  const minV = Math.min(...vals), maxV = Math.max(...vals);
-  const range = maxV - minV || 0.5;
-  const xStep = innerW / (points.length - 1);
+  const { l: padL, r: padR, t: padT, b: padB } = YIELD_PAD;
+  const innerW = YIELD_W - padL - padR;
+  const innerH = YIELD_H - padT - padB;
+  const vals   = points.map(p => p.value);
+  const minV   = Math.min(...vals);
+  const maxV   = Math.max(...vals);
+  const range  = maxV - minV || 0.5;
+  const xStep  = innerW / (points.length - 1);
 
   const svgPts = points.map((p, i) => ({
+    ...p,
     x: padL + i * xStep,
     y: padT + (1 - (p.value - minV) / range) * innerH,
-    ...p,
   }));
 
-  const polyline = svgPts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const ns   = 'http://www.w3.org/2000/svg';
+  const mkSvgEl = (tag, attrs) => {
+    const el = document.createElementNS(ns, tag);
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+    return el;
+  };
 
-  // Y-axis ticks
-  const yTicks = [minV, (minV + maxV) / 2, maxV].map(v => {
+  const svg = mkSvgEl('svg', { class: 'yield-curve', viewBox: `0 0 ${YIELD_W} ${YIELD_H}` });
+
+  svg.appendChild(mkSvgEl('line', {
+    x1: padL, y1: padT, x2: padL, y2: padT + innerH,
+    stroke: '#2a2a2e', 'stroke-width': 1,
+  }));
+
+  [minV, (minV + maxV) / 2, maxV].forEach(v => {
     const y = padT + (1 - (v - minV) / range) * innerH;
-    return `<text x="${padL - 4}" y="${y.toFixed(1)}" text-anchor="end" dominant-baseline="middle" fill="#444" font-size="9">${v.toFixed(2)}</text>`;
-  }).join('');
+    const t = mkSvgEl('text', { x: padL - 4, y: y.toFixed(1), 'text-anchor': 'end', 'dominant-baseline': 'middle', fill: '#444', 'font-size': 9 });
+    t.textContent = v.toFixed(2);
+    svg.appendChild(t);
+  });
 
-  const markers = svgPts.map(p => `
-    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="#3a7bd5"/>
-    <text x="${p.x.toFixed(1)}" y="${(p.y - 7).toFixed(1)}" text-anchor="middle" fill="#aaa" font-size="9">${p.value.toFixed(2)}</text>
-    <text x="${p.x.toFixed(1)}" y="${(H - 4).toFixed(1)}" text-anchor="middle" fill="#555" font-size="9">${esc(p.label)}</text>
-  `).join('');
+  svg.appendChild(mkSvgEl('polyline', {
+    points: svgPts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '),
+    fill: 'none', stroke: '#3a7bd5', 'stroke-width': 1.5,
+    'stroke-linejoin': 'round', 'stroke-linecap': 'round',
+  }));
 
-  el.innerHTML = `
-    <div class="yield-curve-title">Yield Curve</div>
-    <svg class="yield-curve" viewBox="0 0 ${W} ${H}">
-      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + innerH}" stroke="#2a2a2e" stroke-width="1"/>
-      ${yTicks}
-      <polyline points="${polyline}" fill="none" stroke="#3a7bd5" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-      ${markers}
-    </svg>`;
+  svgPts.forEach(p => {
+    svg.appendChild(mkSvgEl('circle', { cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 3, fill: '#3a7bd5' }));
+    const valT = mkSvgEl('text', { x: p.x.toFixed(1), y: (p.y - 7).toFixed(1), 'text-anchor': 'middle', fill: '#aaa', 'font-size': 9 });
+    valT.textContent = p.value.toFixed(2);
+    svg.appendChild(valT);
+    const lblT = mkSvgEl('text', { x: p.x.toFixed(1), y: (YIELD_H - 4).toFixed(1), 'text-anchor': 'middle', fill: '#555', 'font-size': 9 });
+    lblT.textContent = p.label;
+    svg.appendChild(lblT);
+  });
+
+  el.innerHTML = '';
+  const title = document.createElement('div');
+  title.className = 'yield-curve-title';
+  title.textContent = 'Yield Curve';
+  el.appendChild(title);
+  el.appendChild(svg);
 }
 
+// ── Render: GDPNow ────────────────────────────────────────────────────────────
 function renderGDPNow(data) {
-  const el = document.getElementById('gdpnow-card');
-  if (!data) { el.style.display = 'none'; return; }
-  const val = data.estimate;
-  const color = val >= 0 ? '#27ae60' : '#c0392b';
-  const sign = val >= 0 ? '+' : '';
+  const el = $('gdpnow-card');
+  if (!data) { el.classList.add('hidden'); return; }
+
+  const colorCls = data.estimate >= 0 ? 'color-green' : 'color-red';
+  const sign     = data.estimate >= 0 ? '+' : '';
+
+  const titleDiv = document.createElement('div');
+  titleDiv.className = 'fg-title';
+  titleDiv.appendChild(linkEl(data.url, 'GDPNow'));
+
+  const valDiv = document.createElement('div');
+  valDiv.className = `fg-value ${colorCls}`;
+  valDiv.appendChild(document.createTextNode(`${sign}${data.estimate.toFixed(1)}`));
+  const unit = document.createElement('span');
+  unit.className = 'fg-value-unit';
+  unit.textContent = '%';
+  valDiv.appendChild(unit);
+
+  const labelDiv = document.createElement('div');
+  labelDiv.className = `fg-label ${colorCls}`;
+  labelDiv.textContent = data.quarter;
+
+  const dateDiv = document.createElement('div');
+  dateDiv.className = 'fg-date';
+  dateDiv.textContent = data.date;
+
+  el.innerHTML = '';
+  [titleDiv, valDiv, labelDiv, dateDiv].forEach(d => el.appendChild(d));
   const spark = sparkline((data.history || []).map(d => ({ value: d.value })), 160, 36);
-  el.innerHTML = `
-    <div class="fg-title"><a href="${esc(data.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">GDPNow</a></div>
-    <div class="fg-value" style="color:${color}">${sign}${val.toFixed(1)}<span style="font-size:18px;color:#888">%</span></div>
-    <div class="fg-label" style="color:${color}">${esc(data.quarter)}</div>
-    <div class="fg-date">${esc(data.date)}</div>
-    ${spark}`;
+  if (spark) el.appendChild(spark);
+}
+
+// ── Render: Fear & Greed ──────────────────────────────────────────────────────
+function fgColorClass(v) {
+  return FG_THRESHOLDS.find(t => v <= t.max).cls;
 }
 
 function renderFearGreed(data) {
-  const el = document.getElementById('fg-card');
-  if (!data || !data.length) { el.style.display = 'none'; return; }
-  const latest = data[0];
-  const val = parseInt(latest.value, 10);
-  const color = fgColor(val);
-  const label = latest.value_classification || '';
-  const date = latest.timestamp ? new Date(parseInt(latest.timestamp, 10) * 1000).toLocaleDateString() : '';
-  const historical = [...data].reverse().map(d => ({ value: parseFloat(d.value) }));
-  const spark = sparkline(historical, 160, 36);
-  el.innerHTML = `
-    <div class="fg-title">Crypto Fear &amp; Greed</div>
-    <div class="fg-value" style="color:${color}">${val}</div>
-    <div class="fg-label" style="color:${color}">${esc(label)}</div>
-    <div class="fg-date">${esc(date)}</div>
-    ${spark}`;
+  const el = $('fg-card');
+  if (!data?.length) { el.classList.add('hidden'); return; }
+
+  const latest   = data[0];
+  const val      = parseInt(latest.value, 10);
+  const colorCls = fgColorClass(val);
+  const date     = latest.timestamp
+    ? new Date(parseInt(latest.timestamp, 10) * 1000).toLocaleDateString()
+    : '';
+
+  const titleDiv = document.createElement('div');
+  titleDiv.className = 'fg-title';
+  titleDiv.textContent = 'Crypto Fear & Greed';
+
+  const valDiv = document.createElement('div');
+  valDiv.className = `fg-value ${colorCls}`;
+  valDiv.textContent = val;
+
+  const labelDiv = document.createElement('div');
+  labelDiv.className = `fg-label ${colorCls}`;
+  labelDiv.textContent = latest.value_classification || '';
+
+  const dateDiv = document.createElement('div');
+  dateDiv.className = 'fg-date';
+  dateDiv.textContent = date;
+
+  el.innerHTML = '';
+  [titleDiv, valDiv, labelDiv, dateDiv].forEach(d => el.appendChild(d));
+  const spark = sparkline([...data].reverse().map(d => ({ value: parseFloat(d.value) })), 160, 36);
+  if (spark) el.appendChild(spark);
 }
 
+// ── Render: FRED grid ─────────────────────────────────────────────────────────
 function renderFred(items) {
-  const el = document.getElementById('fred-grid');
+  const gridEl    = $('fred-grid');
   const gridItems = items.filter(f => !YIELD_CURVE_CODES.has(f.code));
-  document.getElementById('fred-count').textContent = gridItems.length;
-  el.innerHTML = gridItems.map(f => {
-    const data = f.data || [];
+  $('fred-count').textContent = gridItems.length;
+  gridEl.innerHTML = '';
+  gridItems.forEach(f => {
+    const frag   = tpl('tpl-fred-card');
+    const titleEl = frag.querySelector('.fred-title');
+    titleEl.appendChild(f.url ? linkEl(f.url, f.title) : document.createTextNode(f.title));
+    const data   = f.data || [];
     const latest = data[data.length - 1];
-    const latestVal = latest ? Number(latest.value).toLocaleString(undefined, {maximumFractionDigits: 2}) : 'N/A';
-    const latestDate = latest ? latest.date : '';
+    frag.querySelector('.fred-latest-val').textContent  = latest
+      ? Number(latest.value).toLocaleString(undefined, { maximumFractionDigits: 2 })
+      : 'N/A';
+    frag.querySelector('.fred-latest-date').textContent = latest?.date || '';
+    const card  = frag.querySelector('.fred-card');
     const spark = sparkline(data);
-    const titleHtml = f.url
-      ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title)}</a>`
-      : esc(f.title);
-    return `<div class="fred-card">
-      <div class="fred-title">${titleHtml}</div>
-      <div class="fred-latest">${latestVal}<span>${esc(latestDate)}</span></div>
-      ${spark}
-    </div>`;
-  }).join('');
+    if (spark) card.appendChild(spark);
+    gridEl.appendChild(frag);
+  });
 }
 
-function isConsensus(p) {
-  const bets = (p.bets || []).filter(b => b.probability > 0);
-  return bets.length > 0 && bets.some(b => b.probability >= 0.98) && bets.every(b => b.probability >= 0.98 || b.probability < 0.02);
-}
-
-function renderConsensus(rows) {
-  const tbody = document.getElementById('consensus-tbody');
-  const noResults = document.getElementById('consensus-no-results');
-  const pagEl = document.getElementById('consensus-pagination');
-  if (!rows.length) { tbody.innerHTML = ''; pagEl.style.display = 'none'; noResults.style.display = ''; return; }
-  noResults.style.display = 'none';
-  const pageSize = 10;
-  const totalPages = Math.ceil(rows.length / pageSize);
-  consensusPage = Math.min(consensusPage, totalPages - 1);
-  const pageRows = rows.slice(consensusPage * pageSize, (consensusPage + 1) * pageSize);
-  tbody.innerHTML = pageRows.map(p => {
-    const highBets = (p.bets || []).filter(b => b.probability >= 0.98)
-      .sort((a, b) => a.probability - b.probability); // ascending: lowest p first
-    const titleHtml = p.url
-      ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
-      : hi(p.title);
-    let answersHtml;
-    if (highBets.length > 3) {
-      const shown = highBets[0]; // most restrictive (lowest p)
-      const collapsed = highBets.slice(1); // the trivially-true ones
-      const oid = 'cons-other-' + esc(p.id);
-      answersHtml = `<div class="bet">
-        <span class="bet-label">${hi(shown.prompt)}</span>
-        <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
-        <span class="bet-pct">${Math.round(shown.probability * 100)}%</span>
-      </div>
-      <div class="bet other-toggle" data-oid="${oid}">
-        <span class="bet-label other-label">&#9654; Others &gt;98% (${collapsed.length})</span>
-      </div>
-      <div class="other-bets" id="${oid}" style="display:none">${collapsed.map(b =>
-        `<div class="bet">
-          <span class="bet-label">${hi(b.prompt)}</span>
-          <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
-          <span class="bet-pct">${Math.round(b.probability * 100)}%</span>
-        </div>`).join('')}
-      </div>`;
-    } else {
-      const winner = highBets[highBets.length - 1]; // highest p for simple case
-      answersHtml = `<div class="bet">
-        <span class="bet-label">${winner ? hi(winner.prompt) : ''}</span>
-        <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
-        <span class="bet-pct">${winner ? Math.round(winner.probability * 100) + '%' : ''}</span>
-      </div>`;
-    }
-    return `<tr>
-      <td class="question">${titleHtml}</td>
-      <td class="answers">${answersHtml}</td>
-      <td class="topics">${tagsHtml(p.topics, true)}</td>
-    </tr>`;
-  }).join('');
-  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
-  pagEl.style.display = 'flex';
-  pagEl.innerHTML = buildPagination(consensusPage, totalPages, pageSize, rows.length, 'goConsensusPage');
-}
-
-function goConsensusPage(n) {
-  consensusPage = n;
-  renderConsensus(currentConsensusRows);
-  document.getElementById('consensus-table-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
-}
-
-// Search
+// ── State ─────────────────────────────────────────────────────────────────────
 let allPredictions = [], allConsensusPredictions = [], allCatalysts = [], allNews = [], allFred = [];
 let predIdx, consensusIdx, catIdx, newsIdx, fredIdx;
-let predPage = 0, currentPredRows = [];
-let consensusPage = 0, currentConsensusRows = [];
-let catPage = 0, currentCatRows = [];
-let newsPage = 0, currentNewsRows = [];
+let currentPredRows = [], currentConsensusRows = [], currentCatRows = [], currentNewsRows = [];
 
+const predState      = { page: 0, paginationId: 'pred-pagination',      scrollTarget: 'pred-table-wrap'      };
+const consensusState = { page: 0, paginationId: 'consensus-pagination',  scrollTarget: 'consensus-table-wrap' };
+const catState       = { page: 0, paginationId: 'cat-pagination',        scrollTarget: 'catalyst-wrap'        };
+const newsState      = { page: 0, paginationId: 'news-pagination',       scrollTarget: 'news-wrap'            };
+
+// ── Search & indexing ─────────────────────────────────────────────────────────
 function getTags(p) {
   return (p.topics || '').split(/[,;]/).map(t => t.trim().toLowerCase()).filter(Boolean);
 }
@@ -707,10 +891,8 @@ function getTags(p) {
 // Tag-diversity re-ranking in O(n): items with a previously-seen tag are deferred
 // with half their volume score, then merged back in sorted order.
 function diverseSort(items) {
-  // items is already sorted desc by volume_24h
   const seen = new Set();
-  const primary = [];  // {item, score} — original score
-  const deferred = []; // {item, score} — halved score
+  const primary = [], deferred = [];
   for (const item of items) {
     const tags = getTags(item);
     const hasSeenTag = tags.some(t => seen.has(t));
@@ -718,7 +900,6 @@ function diverseSort(items) {
     const score = item.volume_24h || 0;
     (hasSeenTag ? deferred : primary).push({ item, score: hasSeenTag ? score / 2 : score });
   }
-  // Merge two desc-sorted lists
   const result = [];
   let di = 0;
   for (const { item, score } of primary) {
@@ -736,112 +917,123 @@ function idxSearch(idx, q, items) {
 
 function buildIndexes() {
   const mkIdx = (items, getDoc) => {
-    const fieldNames = Object.keys(getDoc(items[0] || {}));
-    const idx = new FlexSearch.Document({ tokenize: 'forward', document: { id: 'id', index: fieldNames } });
+    const fields = Object.keys(getDoc(items[0] || {}));
+    const idx    = new FlexSearch.Document({ tokenize: 'forward', document: { id: 'id', index: fields } });
     items.forEach((item, i) => idx.add({ id: i, ...getDoc(item) }));
     return idx;
   };
-  const predDoc = p => ({ title: p.title || '', topics: p.topics || '', bets: (p.bets || []).map(b => b.prompt || '').filter(s => !/^(yes|no|up|down)$/i.test(s.trim())).join(' ') });
+  const predDoc = p => ({
+    title:  p.title   || '',
+    topics: p.topics  || '',
+    bets:   (p.bets || []).map(b => b.prompt || '').filter(s => !/^(yes|no|up|down)$/i.test(s.trim())).join(' '),
+  });
   predIdx      = mkIdx(allPredictions,          predDoc);
   consensusIdx = mkIdx(allConsensusPredictions,  predDoc);
-  catIdx       = mkIdx(allCatalysts,  c => ({ title: c.title || '', topics: c.topics || '', when: c.when || '' }));
-  newsIdx      = mkIdx(allNews,       n => ({ title: n.title || '', description: n.description || '' }));
-  fredIdx      = mkIdx(allFred,       f => ({ title: f.title || '' }));
+  catIdx       = mkIdx(allCatalysts, c => ({ title: c.title || '', topics: c.topics || '', when: c.when || '' }));
+  newsIdx      = mkIdx(allNews,      n => ({ title: n.title || '', description: n.description || '' }));
+  fredIdx      = mkIdx(allFred,      f => ({ title: f.title || '' }));
 }
 
 function applySearch(q) {
   q = q.trim().toLowerCase();
   currentQuery = q;
-
   const search = (idx, all) => q ? idxSearch(idx, q, all) : all;
 
   const filteredPreds = search(predIdx, allPredictions);
-  document.getElementById('pred-count').textContent =
-    q ? `${filteredPreds.length} / ${allPredictions.length}` : allPredictions.length;
-  predPage = 0;
+  $('pred-count').textContent = q ? `${filteredPreds.length} / ${allPredictions.length}` : allPredictions.length;
+  predState.page  = 0;
   currentPredRows = q ? filteredPreds : diverseSort(filteredPreds);
   renderPredictions(currentPredRows);
 
   const filteredConsensus = search(consensusIdx, allConsensusPredictions);
-  document.getElementById('consensus-count').textContent =
-    q ? `${filteredConsensus.length} / ${allConsensusPredictions.length}` : allConsensusPredictions.length;
-  consensusPage = 0;
+  $('consensus-count').textContent = q ? `${filteredConsensus.length} / ${allConsensusPredictions.length}` : allConsensusPredictions.length;
+  consensusState.page  = 0;
   currentConsensusRows = q ? filteredConsensus : diverseSort(filteredConsensus);
   renderConsensus(currentConsensusRows);
 
   const filteredCats = search(catIdx, allCatalysts);
-  document.getElementById('cat-count').textContent =
-    q ? `${filteredCats.length} / ${allCatalysts.length}` : allCatalysts.length;
-  catPage = 0;
+  $('cat-count').textContent = q ? `${filteredCats.length} / ${allCatalysts.length}` : allCatalysts.length;
+  catState.page  = 0;
   currentCatRows = filteredCats;
   renderCatalysts(currentCatRows);
 
   const filteredNews = search(newsIdx, allNews);
-  document.getElementById('news-count').textContent =
-    q ? `${filteredNews.length} / ${allNews.length}` : allNews.length;
-  newsPage = 0;
+  $('news-count').textContent = q ? `${filteredNews.length} / ${allNews.length}` : allNews.length;
+  newsState.page  = 0;
   currentNewsRows = filteredNews;
   renderNews(currentNewsRows);
 
   const filteredFred = search(fredIdx, allFred);
-  document.getElementById('fred-count').textContent =
-    q ? `${filteredFred.length} / ${allFred.length}` : allFred.length;
+  $('fred-count').textContent = q ? `${filteredFred.length} / ${allFred.length}` : allFred.length;
   renderFred(filteredFred);
 }
 
-const searchInput = document.getElementById('pred-search');
-searchInput.addEventListener('input', function() { applySearch(this.value); });
+// ── Event delegation ──────────────────────────────────────────────────────────
+$('pred-search').addEventListener('input', function () { applySearch(this.value); });
 
 ['pred-tbody', 'consensus-tbody', 'catalyst-list'].forEach(id => {
-  document.getElementById(id).addEventListener('click', function(e) {
+  $(id).addEventListener('click', e => {
     const tag = e.target.closest('.clickable-tag');
     if (tag) {
-      searchInput.value = tag.dataset.tag;
+      const input = $('pred-search');
+      input.value = tag.dataset.tag;
       applySearch(tag.dataset.tag);
-      searchInput.focus();
+      input.focus();
       return;
     }
     const toggle = e.target.closest('.other-toggle');
     if (toggle) {
-      const el = document.getElementById(toggle.dataset.oid);
-      if (!el) return;
-      const expanded = el.style.display !== 'none';
-      el.style.display = expanded ? 'none' : 'block';
+      const panel    = $(toggle.dataset.oid);
+      if (!panel) return;
+      const expanded = !panel.classList.contains('hidden');
+      panel.classList.toggle('hidden', expanded);
       const label = toggle.querySelector('.other-label');
-      label.innerHTML = (expanded ? '&#9654;' : '&#9660;') + label.innerHTML.slice(1);
+      label.textContent = (expanded ? '\u25B6' : '\u25BC') + label.textContent.slice(1);
     }
   });
 });
 
-// Load data — try root path (gh-pages) then local dev path
+// ── Data loading ──────────────────────────────────────────────────────────────
+function isConsensus(p) {
+  const bets = (p.bets || []).filter(b => b.probability > 0);
+  return bets.length > 0
+    && bets.some(b => b.probability >= HIGH_CERTAINTY)
+    && bets.every(b => b.probability >= HIGH_CERTAINTY || b.probability < LOW_CERTAINTY);
+}
+
 fetch('output.json')
   .then(r => r.ok ? r : fetch('.reports/output.json'))
   .then(r => { if (!r.ok) throw new Error(r.statusText); return r.text(); })
   .then(t => JSON.parse(t.replace(/:\s*NaN\b/g, ': null')))
   .then(data => {
-const active = (data.relevant_predictions || []).filter(p => p.volume_24h > 0).sort((a, b) => b.volume_24h - a.volume_24h);
+    const active = (data.relevant_predictions || [])
+      .filter(p => p.volume_24h > 0)
+      .sort((a, b) => b.volume_24h - a.volume_24h);
     allConsensusPredictions = active.filter(isConsensus);
-    allPredictions = active.filter(p => !isConsensus(p));
-    allCatalysts   = data.upcoming_catalysts || [];
-    allNews        = data.news_headlines || [];
-    allFred        = data.fred_data || [];
+    allPredictions          = active.filter(p => !isConsensus(p));
+    allCatalysts = data.upcoming_catalysts || [];
+    allNews      = data.news_headlines     || [];
+    allFred      = data.fred_data          || [];
 
     buildIndexes();
     applySearch('');
 
     renderYieldCurve(allFred);
-    renderGDPNow(data.gdpnow || null);
+    renderGDPNow(data.gdpnow      || null);
     renderFearGreed(data.fear_greed || null);
 
-    const hasMacro = allFred.length || (data.fear_greed && data.fear_greed.length) || data.gdpnow;
-    if (!hasMacro) document.getElementById('section-fred').style.display = 'none';
-    if (!allNews.length)  document.getElementById('section-news').style.display = 'none';
+    const hasMacro = allFred.length || data.fear_greed?.length || data.gdpnow;
+    if (!hasMacro)        $('section-fred').classList.add('hidden');
+    if (!allNews.length)  $('section-news').classList.add('hidden');
   })
   .catch(err => {
     console.error(err);
-    const banner = document.getElementById('error-banner');
-    banner.style.display = 'block';
-    banner.innerHTML += `<br><code>${err}</code>`;
+    const banner = $('error-banner');
+    banner.classList.remove('hidden');
+    banner.appendChild(document.createElement('br'));
+    const code = document.createElement('code');
+    code.textContent = String(err);
+    banner.appendChild(code);
   });
 </script>
 </body>
