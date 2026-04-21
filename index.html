@@ -94,7 +94,7 @@
   .bet-bar.low  { background: #c0392b; }
   .bet-pct { width: 36px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: #ccc; font-size: 12px; }
 
-  td.topics .tag {
+  .tag {
     display: inline-block;
     background: #2a2200;
     color: #e8c840;
@@ -105,7 +105,7 @@
     cursor: pointer;
     transition: background .1s;
   }
-  td.topics .tag:hover { background: #3a3000; }
+  .tag:hover { background: #3a3000; }
 
 mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; }
 
@@ -142,16 +142,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
   .catalyst-title { flex: 1; color: #ccc; }
   .catalyst-title a { color: #4a9eff; text-decoration: none; }
   .catalyst-title a:hover { text-decoration: underline; }
-  .catalyst-topics .tag {
-    display: inline-block;
-    background: #2a2200;
-    color: #e8c840;
-    border-radius: 5px;
-    padding: 2px 7px;
-    font-size: 12px;
-    font-weight: 500;
-    flex-shrink: 0;
-  }
+  .catalyst-topics { flex-shrink: 0; }
 
   /* News */
   .news-list { display: flex; flex-direction: column; }
@@ -313,6 +304,9 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FlexSearch/0.8.2/flexsearch.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const tagsHtml = (topics, highlight = false) =>
+  (topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean)
+    .map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${highlight ? hi(t) : esc(t)}</span>`).join(' ');
 
 let currentQuery = '';
 function hi(s) {
@@ -408,7 +402,7 @@ function renderPredictions(rows) {
     return `<tr data-title="${esc(p.title)}" data-topics="${esc(p.topics||'')}">
       <td class="question">${titleHtml}</td>
       <td class="answers">${betsHtml(p)}</td>
-      <td class="topics">${(p.topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
+      <td class="topics">${tagsHtml(p.topics, true)}</td>
     </tr>`;
   }).join('');
   if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
@@ -436,7 +430,7 @@ function renderCatalysts(items) {
     return `<div class="catalyst-row">
       <span class="catalyst-when">${esc(c.when || '')}</span>
       <span class="catalyst-title">${titleHtml}</span>
-      ${c.topics ? `<span class="catalyst-topics"><span class="tag">${esc(c.topics)}</span></span>` : ''}
+      ${c.topics ? `<span class="catalyst-topics">${tagsHtml(c.topics)}</span>` : ''}
     </div>`;
   }).join('');
   if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
@@ -642,7 +636,7 @@ function renderConsensus(rows) {
         <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
         <span class="bet-pct">${winner ? Math.round(winner.probability * 100) + '%' : ''}</span>
       </div></td>
-      <td class="topics">${(p.topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
+      <td class="topics">${tagsHtml(p.topics, true)}</td>
     </tr>`;
   }).join('');
   if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
@@ -750,7 +744,7 @@ function applySearch(q) {
 const searchInput = document.getElementById('pred-search');
 searchInput.addEventListener('input', function() { applySearch(this.value); });
 
-['pred-tbody', 'consensus-tbody'].forEach(id => {
+['pred-tbody', 'consensus-tbody', 'catalyst-list'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) {
     const tag = e.target.closest('.clickable-tag');
     if (tag) {
