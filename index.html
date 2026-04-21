@@ -336,6 +336,23 @@ function betsHtml(p) {
   const raw = (p.bets || []).filter(b => b.probability > 0.01);
   const sorted = (isBinary(raw) ? [raw.sort((a, b) => b.probability - a.probability)[0]] : raw)
     .sort((a, b) => b.probability - a.probability);
+
+  // If >3 bets are near-certain (>=98%), show only the lowest (most restrictive) and collapse the rest
+  const highCertainty = sorted.filter(b => b.probability >= 0.98);
+  if (highCertainty.length > 3) {
+    const shownHigh = highCertainty[highCertainty.length - 1]; // lowest p (most restrictive)
+    const collapsedHigh = highCertainty.slice(0, -1);
+    const rest = sorted.filter(b => b.probability < 0.98);
+    const oid = 'other-' + esc(p.id);
+    const collapsedHtml = collapsedHigh.map(betHtml).join('');
+    return betHtml(shownHigh) +
+      `<div class="bet other-toggle" data-oid="${oid}">
+        <span class="bet-label other-label">&#9654; Others &gt;98% (${collapsedHigh.length})</span>
+      </div>
+      <div class="other-bets" id="${oid}" style="display:none">${collapsedHtml}</div>` +
+      rest.map(betHtml).join('');
+  }
+
   const main  = sorted.filter(b => b.probability >= 0.05);
   const other = sorted.filter(b => b.probability <  0.05);
   let html = main.map(betHtml).join('');
@@ -625,17 +642,42 @@ function renderConsensus(rows) {
   consensusPage = Math.min(consensusPage, totalPages - 1);
   const pageRows = rows.slice(consensusPage * pageSize, (consensusPage + 1) * pageSize);
   tbody.innerHTML = pageRows.map(p => {
-    const winner = (p.bets || []).find(b => b.probability >= 0.98);
+    const highBets = (p.bets || []).filter(b => b.probability >= 0.98)
+      .sort((a, b) => a.probability - b.probability); // ascending: lowest p first
     const titleHtml = p.url
       ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
       : hi(p.title);
-    return `<tr>
-      <td class="question">${titleHtml}</td>
-      <td class="answers"><div class="bet">
+    let answersHtml;
+    if (highBets.length > 3) {
+      const shown = highBets[0]; // most restrictive (lowest p)
+      const collapsed = highBets.slice(1); // the trivially-true ones
+      const oid = 'cons-other-' + esc(p.id);
+      answersHtml = `<div class="bet">
+        <span class="bet-label">${hi(shown.prompt)}</span>
+        <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
+        <span class="bet-pct">${Math.round(shown.probability * 100)}%</span>
+      </div>
+      <div class="bet other-toggle" data-oid="${oid}">
+        <span class="bet-label other-label">&#9654; Others &gt;98% (${collapsed.length})</span>
+      </div>
+      <div class="other-bets" id="${oid}" style="display:none">${collapsed.map(b =>
+        `<div class="bet">
+          <span class="bet-label">${hi(b.prompt)}</span>
+          <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
+          <span class="bet-pct">${Math.round(b.probability * 100)}%</span>
+        </div>`).join('')}
+      </div>`;
+    } else {
+      const winner = highBets[highBets.length - 1]; // highest p for simple case
+      answersHtml = `<div class="bet">
         <span class="bet-label">${winner ? hi(winner.prompt) : ''}</span>
         <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
         <span class="bet-pct">${winner ? Math.round(winner.probability * 100) + '%' : ''}</span>
-      </div></td>
+      </div>`;
+    }
+    return `<tr>
+      <td class="question">${titleHtml}</td>
+      <td class="answers">${answersHtml}</td>
       <td class="topics">${tagsHtml(p.topics, true)}</td>
     </tr>`;
   }).join('');
