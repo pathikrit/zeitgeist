@@ -94,7 +94,7 @@
   .bet-bar.low  { background: #c0392b; }
   .bet-pct { width: 36px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: #ccc; font-size: 12px; }
 
-  td.topics .tag {
+  .tag {
     display: inline-block;
     background: #2a2200;
     color: #e8c840;
@@ -105,7 +105,7 @@
     cursor: pointer;
     transition: background .1s;
   }
-  td.topics .tag:hover { background: #3a3000; }
+  .tag:hover { background: #3a3000; }
 
 mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; }
 
@@ -115,6 +115,13 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
   .other-bets { padding-left: 8px; border-left: 1px solid #2a2a2e; margin: 2px 0 4px; }
 
   .no-results { padding: 40px 20px; text-align: center; color: #444; }
+
+  .pagination { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border-top: 1px solid #1c1c20; }
+  .pagination button { background: #1e1e22; border: 1px solid #2a2a2e; color: #aaa; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .pagination button:hover:not(:disabled) { background: #2a2a2e; color: #fff; }
+  .pagination button:disabled { opacity: .3; cursor: default; }
+  .pagination button.active { background: #3a7bd5; border-color: #3a7bd5; color: #fff; }
+  .pagination-info { font-size: 12px; color: #555; margin-left: 4px; }
 
   /* Catalysts */
   .catalyst-list { display: flex; flex-direction: column; }
@@ -135,16 +142,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
   .catalyst-title { flex: 1; color: #ccc; }
   .catalyst-title a { color: #4a9eff; text-decoration: none; }
   .catalyst-title a:hover { text-decoration: underline; }
-  .catalyst-topics .tag {
-    display: inline-block;
-    background: #2a2200;
-    color: #e8c840;
-    border-radius: 5px;
-    padding: 2px 7px;
-    font-size: 12px;
-    font-weight: 500;
-    flex-shrink: 0;
-  }
+  .catalyst-topics { flex-shrink: 0; }
 
   /* News */
   .news-list { display: flex; flex-direction: column; }
@@ -182,6 +180,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
   .fg-value { font-size: 48px; font-weight: 300; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
   .fg-label { font-size: 13px; font-weight: 600; }
   .fg-date  { font-size: 12px; color: #444; margin-bottom: 6px; }
+  #gdpnow-card { border-right: 1px solid #1c1c20; }
 
   /* FRED */
   .fred-grid {
@@ -246,6 +245,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
         <tbody id="pred-tbody"></tbody>
       </table>
       <div class="no-results" id="pred-no-results" style="display:none">No matching predictions</div>
+      <div class="pagination" id="pred-pagination" style="display:none"></div>
     </div>
   </section>
 
@@ -260,6 +260,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
         <tbody id="consensus-tbody"></tbody>
       </table>
       <div class="no-results" id="consensus-no-results" style="display:none">No matching predictions</div>
+      <div class="pagination" id="consensus-pagination" style="display:none"></div>
     </div>
   </section>
 
@@ -268,7 +269,10 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
       <h2>Upcoming Catalysts</h2>
       <span class="count" id="cat-count"></span>
     </div>
-    <div class="catalyst-list" id="catalyst-list"></div>
+    <div id="catalyst-wrap">
+      <div class="catalyst-list" id="catalyst-list"></div>
+      <div class="pagination" id="cat-pagination" style="display:none"></div>
+    </div>
   </section>
 
   <section id="section-news">
@@ -276,7 +280,10 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
       <h2>News Headlines</h2>
       <span class="count" id="news-count"></span>
     </div>
-    <div class="news-list" id="news-list"></div>
+    <div id="news-wrap">
+      <div class="news-list" id="news-list"></div>
+      <div class="pagination" id="news-pagination" style="display:none"></div>
+    </div>
   </section>
 
   <section id="section-fred">
@@ -286,6 +293,7 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
     </div>
     <div class="macro-top" id="macro-top">
       <div class="yield-curve-card" id="yield-curve-card"></div>
+      <div class="fg-card" id="gdpnow-card"></div>
       <div class="fg-card" id="fg-card"></div>
     </div>
     <div class="fred-grid" id="fred-grid"></div>
@@ -296,6 +304,9 @@ mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FlexSearch/0.8.2/flexsearch.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const tagsHtml = (topics, highlight = false) =>
+  (topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean)
+    .map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${highlight ? hi(t) : esc(t)}</span>`).join(' ');
 
 let currentQuery = '';
 function hi(s) {
@@ -325,6 +336,23 @@ function betsHtml(p) {
   const raw = (p.bets || []).filter(b => b.probability > 0.01);
   const sorted = (isBinary(raw) ? [raw.sort((a, b) => b.probability - a.probability)[0]] : raw)
     .sort((a, b) => b.probability - a.probability);
+
+  // If >3 bets are near-certain (>=98%), show only the lowest (most restrictive) and collapse the rest
+  const highCertainty = sorted.filter(b => b.probability >= 0.98);
+  if (highCertainty.length > 3) {
+    const shownHigh = highCertainty[highCertainty.length - 1]; // lowest p (most restrictive)
+    const collapsedHigh = highCertainty.slice(0, -1);
+    const rest = sorted.filter(b => b.probability < 0.98);
+    const oid = 'other-' + esc(p.id);
+    const collapsedHtml = collapsedHigh.map(betHtml).join('');
+    return betHtml(shownHigh) +
+      `<div class="bet other-toggle" data-oid="${oid}">
+        <span class="bet-label other-label">&#9654; Others &gt;98% (${collapsedHigh.length})</span>
+      </div>
+      <div class="other-bets" id="${oid}" style="display:none">${collapsedHtml}</div>` +
+      rest.map(betHtml).join('');
+  }
+
   const main  = sorted.filter(b => b.probability >= 0.05);
   const other = sorted.filter(b => b.probability <  0.05);
   let html = main.map(betHtml).join('');
@@ -343,45 +371,104 @@ function betsHtml(p) {
   return html;
 }
 
+function windowedPages(cur, total) {
+  const delta = 2;
+  const pages = new Set([0, total - 1]);
+  for (let i = Math.max(0, cur - delta); i <= Math.min(total - 1, cur + delta); i++) pages.add(i);
+  const sorted = [...pages].sort((a, b) => a - b);
+  const result = [];
+  let prev = -1;
+  for (const p of sorted) {
+    if (p - prev > 1) result.push(null); // ellipsis
+    result.push(p);
+    prev = p;
+  }
+  return result;
+}
+
+function buildPagination(cur, total, pageSize, totalItems, onPageFn) {
+  const prevBtn = `<button ${cur === 0 ? 'disabled' : ''} onclick="${onPageFn}(${cur - 1})">&#8249;</button>`;
+  const nextBtn = `<button ${cur >= total - 1 ? 'disabled' : ''} onclick="${onPageFn}(${cur + 1})">&#8250;</button>`;
+  const pages = windowedPages(cur, total).map(p =>
+    p === null
+      ? `<span class="pagination-info" style="padding:0 4px">…</span>`
+      : `<button class="${p === cur ? 'active' : ''}" onclick="${onPageFn}(${p})">${p + 1}</button>`
+  ).join('');
+  const info = `<span class="pagination-info">${cur * pageSize + 1}–${Math.min((cur + 1) * pageSize, totalItems)} of ${totalItems}</span>`;
+  return prevBtn + pages + nextBtn + info;
+}
+
 function renderPredictions(rows) {
   const tbody = document.getElementById('pred-tbody');
+  const pagEl = document.getElementById('pred-pagination');
   if (!rows.length) {
     tbody.innerHTML = '';
+    pagEl.style.display = 'none';
     document.getElementById('pred-no-results').style.display = '';
     return;
   }
   document.getElementById('pred-no-results').style.display = 'none';
-  tbody.innerHTML = rows.map(p => {
+  const pageSize = 10;
+  const totalPages = Math.ceil(rows.length / pageSize);
+  predPage = Math.min(predPage, totalPages - 1);
+  const pageRows = rows.slice(predPage * pageSize, (predPage + 1) * pageSize);
+  tbody.innerHTML = pageRows.map(p => {
     const titleHtml = p.url
       ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
       : hi(p.title);
     return `<tr data-title="${esc(p.title)}" data-topics="${esc(p.topics||'')}">
       <td class="question">${titleHtml}</td>
       <td class="answers">${betsHtml(p)}</td>
-      <td class="topics">${(p.topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
+      <td class="topics">${tagsHtml(p.topics, true)}</td>
     </tr>`;
   }).join('');
+  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = buildPagination(predPage, totalPages, pageSize, rows.length, 'goPredPage');
+}
+
+function goPredPage(n) {
+  predPage = n;
+  renderPredictions(currentPredRows);
+  document.getElementById('pred-table-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 function renderCatalysts(items) {
   const el = document.getElementById('catalyst-list');
-  document.getElementById('cat-count').textContent = items.length;
-  el.innerHTML = items.map(c => {
+  const pagEl = document.getElementById('cat-pagination');
+  const pageSize = 10;
+  const totalPages = Math.ceil(items.length / pageSize);
+  catPage = Math.min(catPage, Math.max(0, totalPages - 1));
+  const pageItems = items.slice(catPage * pageSize, (catPage + 1) * pageSize);
+  el.innerHTML = pageItems.map(c => {
     const titleHtml = c.url
       ? `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)}</a>`
       : esc(c.title);
     return `<div class="catalyst-row">
       <span class="catalyst-when">${esc(c.when || '')}</span>
       <span class="catalyst-title">${titleHtml}</span>
-      ${c.topics ? `<span class="catalyst-topics"><span class="tag">${esc(c.topics)}</span></span>` : ''}
+      ${c.topics ? `<span class="catalyst-topics">${tagsHtml(c.topics)}</span>` : ''}
     </div>`;
   }).join('');
+  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = buildPagination(catPage, totalPages, pageSize, items.length, 'goCatPage');
+}
+
+function goCatPage(n) {
+  catPage = n;
+  renderCatalysts(currentCatRows);
+  document.getElementById('catalyst-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 function renderNews(items) {
   const el = document.getElementById('news-list');
-  document.getElementById('news-count').textContent = items.length;
-  el.innerHTML = items.map(n => {
+  const pagEl = document.getElementById('news-pagination');
+  const pageSize = 10;
+  const totalPages = Math.ceil(items.length / pageSize);
+  newsPage = Math.min(newsPage, Math.max(0, totalPages - 1));
+  const pageItems = items.slice(newsPage * pageSize, (newsPage + 1) * pageSize);
+  el.innerHTML = pageItems.map(n => {
     const titleHtml = n.url
       ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a>`
       : esc(n.title);
@@ -390,6 +477,15 @@ function renderNews(items) {
       ${n.description ? `<div class="news-desc">${esc(n.description)}</div>` : ''}
     </div>`;
   }).join('');
+  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = buildPagination(newsPage, totalPages, pageSize, items.length, 'goNewsPage');
+}
+
+function goNewsPage(n) {
+  newsPage = n;
+  renderNews(currentNewsRows);
+  document.getElementById('news-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 function sparkline(data, width=120, height=32) {
@@ -476,6 +572,21 @@ function renderYieldCurve(fredItems) {
     </svg>`;
 }
 
+function renderGDPNow(data) {
+  const el = document.getElementById('gdpnow-card');
+  if (!data) { el.style.display = 'none'; return; }
+  const val = data.estimate;
+  const color = val >= 0 ? '#27ae60' : '#c0392b';
+  const sign = val >= 0 ? '+' : '';
+  const spark = sparkline((data.history || []).map(d => ({ value: d.value })), 160, 36);
+  el.innerHTML = `
+    <div class="fg-title"><a href="${esc(data.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">GDPNow</a></div>
+    <div class="fg-value" style="color:${color}">${sign}${val.toFixed(1)}<span style="font-size:18px;color:#888">%</span></div>
+    <div class="fg-label" style="color:${color}">${esc(data.quarter)}</div>
+    <div class="fg-date">${esc(data.date)}</div>
+    ${spark}`;
+}
+
 function renderFearGreed(data) {
   const el = document.getElementById('fg-card');
   if (!data || !data.length) { el.style.display = 'none'; return; }
@@ -523,28 +634,94 @@ function isConsensus(p) {
 function renderConsensus(rows) {
   const tbody = document.getElementById('consensus-tbody');
   const noResults = document.getElementById('consensus-no-results');
-  if (!rows.length) { tbody.innerHTML = ''; noResults.style.display = ''; return; }
+  const pagEl = document.getElementById('consensus-pagination');
+  if (!rows.length) { tbody.innerHTML = ''; pagEl.style.display = 'none'; noResults.style.display = ''; return; }
   noResults.style.display = 'none';
-  tbody.innerHTML = rows.map(p => {
-    const winner = (p.bets || []).find(b => b.probability >= 0.98);
+  const pageSize = 10;
+  const totalPages = Math.ceil(rows.length / pageSize);
+  consensusPage = Math.min(consensusPage, totalPages - 1);
+  const pageRows = rows.slice(consensusPage * pageSize, (consensusPage + 1) * pageSize);
+  tbody.innerHTML = pageRows.map(p => {
+    const highBets = (p.bets || []).filter(b => b.probability >= 0.98)
+      .sort((a, b) => a.probability - b.probability); // ascending: lowest p first
     const titleHtml = p.url
       ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${hi(p.title)}</a>`
       : hi(p.title);
-    return `<tr>
-      <td class="question">${titleHtml}</td>
-      <td class="answers"><div class="bet">
+    let answersHtml;
+    if (highBets.length > 3) {
+      const shown = highBets[0]; // most restrictive (lowest p)
+      const collapsed = highBets.slice(1); // the trivially-true ones
+      const oid = 'cons-other-' + esc(p.id);
+      answersHtml = `<div class="bet">
+        <span class="bet-label">${hi(shown.prompt)}</span>
+        <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
+        <span class="bet-pct">${Math.round(shown.probability * 100)}%</span>
+      </div>
+      <div class="bet other-toggle" data-oid="${oid}">
+        <span class="bet-label other-label">&#9654; Others &gt;98% (${collapsed.length})</span>
+      </div>
+      <div class="other-bets" id="${oid}" style="display:none">${collapsed.map(b =>
+        `<div class="bet">
+          <span class="bet-label">${hi(b.prompt)}</span>
+          <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
+          <span class="bet-pct">${Math.round(b.probability * 100)}%</span>
+        </div>`).join('')}
+      </div>`;
+    } else {
+      const winner = highBets[highBets.length - 1]; // highest p for simple case
+      answersHtml = `<div class="bet">
         <span class="bet-label">${winner ? hi(winner.prompt) : ''}</span>
         <div class="bet-bar-wrap"><div class="bet-bar high" style="width:100%"></div></div>
         <span class="bet-pct">${winner ? Math.round(winner.probability * 100) + '%' : ''}</span>
-      </div></td>
-      <td class="topics">${(p.topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).map(t => `<span class="tag clickable-tag" data-tag="${esc(t)}">${hi(t)}</span>`).join(' ')}</td>
+      </div>`;
+    }
+    return `<tr>
+      <td class="question">${titleHtml}</td>
+      <td class="answers">${answersHtml}</td>
+      <td class="topics">${tagsHtml(p.topics, true)}</td>
     </tr>`;
   }).join('');
+  if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = buildPagination(consensusPage, totalPages, pageSize, rows.length, 'goConsensusPage');
+}
+
+function goConsensusPage(n) {
+  consensusPage = n;
+  renderConsensus(currentConsensusRows);
+  document.getElementById('consensus-table-wrap').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 // Search
 let allPredictions = [], allConsensusPredictions = [], allCatalysts = [], allNews = [], allFred = [];
 let predIdx, consensusIdx, catIdx, newsIdx, fredIdx;
+let predPage = 0, currentPredRows = [];
+let consensusPage = 0, currentConsensusRows = [];
+let catPage = 0, currentCatRows = [];
+let newsPage = 0, currentNewsRows = [];
+
+function getTags(p) {
+  return (p.topics || '').split(/[,;]/).map(t => t.trim().toLowerCase()).filter(Boolean);
+}
+
+// Greedy tag-diversity re-ranking: pick each next item maximising volume/(1+overlap)
+function diverseSort(items) {
+  const remaining = [...items]; // already sorted desc by volume_24h
+  const seen = new Set();
+  const result = [];
+  while (remaining.length) {
+    let bestIdx = 0, bestScore = -Infinity;
+    for (let i = 0; i < remaining.length; i++) {
+      const overlap = getTags(remaining[i]).filter(t => seen.has(t)).length;
+      const score = (remaining[i].volume_24h || 0) / (1 + overlap);
+      if (score > bestScore) { bestScore = score; bestIdx = i; }
+    }
+    const picked = remaining.splice(bestIdx, 1)[0];
+    getTags(picked).forEach(t => seen.add(t));
+    result.push(picked);
+  }
+  return result;
+}
 
 function idxSearch(idx, q, items) {
   const hits = new Set(idx.search(q).flatMap(r => r.result));
@@ -575,22 +752,30 @@ function applySearch(q) {
   const filteredPreds = search(predIdx, allPredictions);
   document.getElementById('pred-count').textContent =
     q ? `${filteredPreds.length} / ${allPredictions.length}` : allPredictions.length;
-  renderPredictions(filteredPreds);
+  predPage = 0;
+  currentPredRows = q ? filteredPreds : diverseSort(filteredPreds);
+  renderPredictions(currentPredRows);
 
   const filteredConsensus = search(consensusIdx, allConsensusPredictions);
   document.getElementById('consensus-count').textContent =
     q ? `${filteredConsensus.length} / ${allConsensusPredictions.length}` : allConsensusPredictions.length;
-  renderConsensus(filteredConsensus);
+  consensusPage = 0;
+  currentConsensusRows = q ? filteredConsensus : diverseSort(filteredConsensus);
+  renderConsensus(currentConsensusRows);
 
   const filteredCats = search(catIdx, allCatalysts);
   document.getElementById('cat-count').textContent =
     q ? `${filteredCats.length} / ${allCatalysts.length}` : allCatalysts.length;
-  renderCatalysts(filteredCats);
+  catPage = 0;
+  currentCatRows = filteredCats;
+  renderCatalysts(currentCatRows);
 
   const filteredNews = search(newsIdx, allNews);
   document.getElementById('news-count').textContent =
     q ? `${filteredNews.length} / ${allNews.length}` : allNews.length;
-  renderNews(filteredNews);
+  newsPage = 0;
+  currentNewsRows = filteredNews;
+  renderNews(currentNewsRows);
 
   const filteredFred = search(fredIdx, allFred);
   document.getElementById('fred-count').textContent =
@@ -601,7 +786,7 @@ function applySearch(q) {
 const searchInput = document.getElementById('pred-search');
 searchInput.addEventListener('input', function() { applySearch(this.value); });
 
-['pred-tbody', 'consensus-tbody'].forEach(id => {
+['pred-tbody', 'consensus-tbody', 'catalyst-list'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) {
     const tag = e.target.closest('.clickable-tag');
     if (tag) {
@@ -639,9 +824,10 @@ const active = (data.relevant_predictions || []).filter(p => p.volume_24h > 0).s
     applySearch('');
 
     renderYieldCurve(allFred);
+    renderGDPNow(data.gdpnow || null);
     renderFearGreed(data.fear_greed || null);
 
-    const hasMacro = allFred.length || (data.fear_greed && data.fear_greed.length);
+    const hasMacro = allFred.length || (data.fear_greed && data.fear_greed.length) || data.gdpnow;
     if (!hasMacro) document.getElementById('section-fred').style.display = 'none';
     if (!allNews.length)  document.getElementById('section-news').style.display = 'none';
   })
