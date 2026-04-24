@@ -28,11 +28,14 @@ jobs:
         with:
           secrets: ${{toJSON(secrets)}}
 
+      - name: Cache fastembed models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/fastembed
+          key: fastembed-all-minilm-l6-v2-v1
+
       - name: Generate report
         run: uv run python zeitgeist.py
-
-      - name: Copy dashboard to reports
-        run: cp dashboard.html .reports/
 
       - name: Publish report
         uses: peaceiris/actions-gh-pages@v4

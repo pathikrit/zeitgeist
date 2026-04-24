@@ -315,6 +315,49 @@ async def get_events() -> pl.DataFrame:
     res = await events_agent.run()
     return pl.DataFrame(res.output)
 
+def generate_embeddings(data: dict) -> dict:
+    """Generate semantic embeddings using fastembed all-MiniLM-L6-v2 (384-dim, L2-normalised).
+
+    Compatible with Xenova/all-MiniLM-L6-v2 served by transformers.js in the browser,
+    so dot-product of a pre-built embedding and a browser-side query embedding equals cosine similarity.
+    """
+    from fastembed import TextEmbedding
+
+    log.info("Loading fastembed model (all-MiniLM-L6-v2) ...")
+    model = TextEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    result: dict = {}
+
+    preds = data.get("relevant_predictions") or []
+    if preds:
+        texts = [
+            f"{p['title']} {p.get('topics', '')} {' '.join(b['prompt'] for b in (p.get('bets') or []))}"
+            for p in preds
+        ]
+        log.info(f"Embedding {len(texts)} predictions ...")
+        embs = list(model.embed(texts))
+        result["predictions"] = {p["id"]: [round(float(x), 5) for x in emb] for p, emb in zip(preds, embs)}
+
+    cats = data.get("upcoming_catalysts") or []
+    if cats:
+        texts = [f"{c['title']} {c.get('topics', '')} {c.get('when', '')}" for c in cats]
+        log.info(f"Embedding {len(texts)} catalysts ...")
+        embs = list(model.embed(texts))
+        result["catalysts"] = [[round(float(x), 5) for x in emb] for emb in embs]
+
+    news = data.get("news_headlines") or []
+    if news:
+        texts = [f"{n.get('title', '')} {n.get('description', '')}" for n in news]
+        log.info(f"Embedding {len(texts)} news items ...")
+        embs = list(model.embed(texts))
+        result["news"] = [[round(float(x), 5) for x in emb] for emb in embs]
+
+    log.info(
+        f"Embeddings ready: {len(result.get('predictions', {}))} predictions, "
+        f"{len(result.get('catalysts', []))} catalysts, {len(result.get('news', []))} news"
+    )
+    return result
+
+
 def get_news() -> pl.DataFrame | None:
     from gnews import GNews
     try:
@@ -359,6 +402,12 @@ async def main():
         "gdpnow": gdpnow,
     }
     output_json_file.write_text(json.dumps(output_data, indent=2), encoding="utf-8")
+
+    embeddings = generate_embeddings(output_data)
+    embeddings_file = output_dir / "embeddings.json"
+    embeddings_file.write_text(json.dumps(embeddings), encoding="utf-8")
+    log.info(f"Wrote semantic index to {embeddings_file}")
+
     log.info("Done!")
     if IS_DEV:
         import webbrowser
