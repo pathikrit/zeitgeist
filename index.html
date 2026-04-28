@@ -38,18 +38,6 @@
   .topbar input::placeholder { color: #3a3a3e; }
   .topbar input:focus { border-color: #3a7bd5; background: #16161a; }
   .search-wrap { position: relative; }
-  .topbar input { padding-right: 115px; }
-  .semantic-btn {
-    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    background: transparent; border: 1px solid #2a2a2e; color: #555;
-    padding: 5px 10px; border-radius: 6px; cursor: pointer;
-    font-size: 12px; font-weight: 500; white-space: nowrap;
-    transition: border-color .15s, color .15s, background .15s;
-  }
-  .semantic-btn:hover { border-color: #3a7bd5; color: #3a7bd5; }
-  .semantic-btn.active { border-color: #3a7bd5; color: #3a7bd5; background: rgba(58,123,213,.1); }
-  .semantic-btn.loading { animation: sem-pulse 1s ease-in-out infinite; cursor: wait; }
-  @keyframes sem-pulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
 
   /* ── Layout ────────────────────────────────────────────────────────────── */
   .container {
@@ -212,7 +200,6 @@
 <div class="topbar">
   <div class="search-wrap">
     <input type="search" id="pred-search" placeholder="Search…" autocomplete="off">
-    <button id="semantic-btn" class="semantic-btn" title="Toggle semantic search — downloads ~22 MB model on first use">≈ Semantic</button>
   </div>
 </div>
 
@@ -984,15 +971,13 @@ function applySearch(q) {
   renderFred(filteredFred);
 }
 
-// ── Semantic Search ───────────────────────────────────────────────────────────
-// Pre-built embeddings (384-dim, L2-normalised all-MiniLM-L6-v2) are shipped in
-// embeddings.json alongside output.json.  Query encoding runs in-browser via
-// @xenova/transformers using the same model, so dot-product == cosine similarity.
+// ── Search ────────────────────────────────────────────────────────────────────
+// Always runs both keyword (FlexSearch) and semantic (all-MiniLM-L6-v2) search.
+// Keyword results render immediately; semantic results enrich after 350 ms of
+// inactivity. Combined results are ranked by popularity (volume_24h desc).
 
-let semanticMode = false;
 let _embCache = null, _pipeCache = null, _pipePromise = null, _semTimer = null;
-
-const SEMANTIC_THRESHOLD = 0.20; // minimum cosine similarity to surface a result
+const SEMANTIC_THRESHOLD = 0.20;
 
 async function _loadPipeline() {
   if (_pipeCache) return _pipeCache;
@@ -1014,85 +999,89 @@ async function _loadEmbs() {
 
 function _dot(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; }
 
-async function applySemanticSearch(q) {
-  q = q.trim();
-  if (!q) { currentQuery = ''; applySearch(''); return; }
-  const btn = $('semantic-btn');
-  btn.classList.add('loading');
-  try {
-    const [pipe, embs] = await Promise.all([_loadPipeline(), _loadEmbs()]);
-    const out  = await pipe(q, { pooling: 'mean', normalize: true });
-    const qEmb = Array.from(out.data);
-    btn.classList.remove('loading');
-    currentQuery = ''; // suppress keyword highlights in semantic mode
+// Union of keyword and semantic matches, ranked by popularity (volume_24h desc).
+function _unionByPop(kw, sem) {
+  const kwSet = new Set(kw);
+  const combined = [...kw, ...sem.filter(x => !kwSet.has(x))];
+  return combined.sort((a, b) => (b.volume_24h || 0) - (a.volume_24h || 0));
+}
 
-    const byKey = (items, map, kFn) => {
-      if (!map) return items;
-      return items
-        .map(x => ({ x, s: _dot(qEmb, map[kFn(x)] || []) }))
-        .filter(({ s }) => s >= SEMANTIC_THRESHOLD)
-        .sort((a, b) => b.s - a.s)
-        .map(({ x }) => x);
-    };
+function applySearch(q) {
+  q = q.trim().toLowerCase();
+  currentQuery = q;
+  clearTimeout(_semTimer);
 
-    const byIdx = (items, arr) => {
-      if (!arr) return items;
-      return items
-        .map((x, i) => ({ x, s: _dot(qEmb, arr[i] || []) }))
-        .filter(({ s }) => s >= SEMANTIC_THRESHOLD)
-        .sort((a, b) => b.s - a.s)
-        .map(({ x }) => x);
-    };
-
-    const pMap = embs.predictions || {};
-    const rP   = byKey(allPredictions,         pMap, p => p.id);
-    const rC   = byKey(allConsensusPredictions, pMap, p => p.id);
-    const rCat = byIdx(allCatalysts, embs.catalysts);
-    const rN   = byIdx(allNews,      embs.news);
-    const filtFred = q ? idxSearch(fredIdx, q, allFred) : allFred;
-
-    $('pred-count').textContent      = `${rP.length} / ${allPredictions.length}`;
-    predState.page = 0; renderPredictions(rP);
-
-    $('consensus-count').textContent = `${rC.length} / ${allConsensusPredictions.length}`;
-    consensusState.page = 0; renderConsensus(rC);
-
-    $('cat-count').textContent       = `${rCat.length} / ${allCatalysts.length}`;
-    catState.page = 0; renderCatalysts(rCat);
-
-    $('news-count').textContent      = `${rN.length} / ${allNews.length}`;
-    newsState.page = 0; renderNews(rN);
-
-    $('fred-count').textContent = q ? `${filtFred.length} / ${allFred.length}` : allFred.length;
-    renderFred(filtFred);
-  } catch (err) {
-    console.error('Semantic search error:', err);
-    btn.classList.remove('loading');
-    semanticMode = false;
-    btn.classList.remove('active');
-    btn.textContent = '≈ Semantic';
-    applySearch(q);
+  if (!q) {
+    $('pred-count').textContent      = allPredictions.length;
+    predState.page = 0; currentPredRows = diverseSort(allPredictions); renderPredictions(currentPredRows);
+    $('consensus-count').textContent = allConsensusPredictions.length;
+    consensusState.page = 0; currentConsensusRows = diverseSort(allConsensusPredictions); renderConsensus(currentConsensusRows);
+    $('cat-count').textContent       = allCatalysts.length;
+    catState.page = 0; currentCatRows = allCatalysts; renderCatalysts(currentCatRows);
+    $('news-count').textContent      = allNews.length;
+    newsState.page = 0; currentNewsRows = allNews; renderNews(currentNewsRows);
+    $('fred-count').textContent      = allFred.length; renderFred(allFred);
+    return;
   }
+
+  // Phase 1: keyword results (synchronous, immediate)
+  const kw = {
+    preds:     idxSearch(predIdx,      q, allPredictions),
+    consensus: idxSearch(consensusIdx, q, allConsensusPredictions),
+    cats:      idxSearch(catIdx,       q, allCatalysts),
+    news:      idxSearch(newsIdx,      q, allNews),
+    fred:      idxSearch(fredIdx,      q, allFred),
+  };
+
+  const renderAll = (preds, consensus, cats, news, fred) => {
+    $('pred-count').textContent      = `${preds.length} / ${allPredictions.length}`;
+    predState.page = 0; currentPredRows = preds; renderPredictions(preds);
+    $('consensus-count').textContent = `${consensus.length} / ${allConsensusPredictions.length}`;
+    consensusState.page = 0; currentConsensusRows = consensus; renderConsensus(consensus);
+    $('cat-count').textContent       = `${cats.length} / ${allCatalysts.length}`;
+    catState.page = 0; currentCatRows = cats; renderCatalysts(cats);
+    $('news-count').textContent      = `${news.length} / ${allNews.length}`;
+    newsState.page = 0; currentNewsRows = news; renderNews(news);
+    $('fred-count').textContent      = `${fred.length} / ${allFred.length}`; renderFred(fred);
+  };
+  renderAll(kw.preds, kw.consensus, kw.cats, kw.news, kw.fred);
+
+  // Phase 2: semantic enrichment (debounced; updates results once model is ready)
+  _semTimer = setTimeout(async () => {
+    if (currentQuery !== q) return;
+    try {
+      const [pipe, embs] = await Promise.all([_loadPipeline(), _loadEmbs()]);
+      if (currentQuery !== q) return;
+      const out  = await pipe(q, { pooling: 'mean', normalize: true });
+      if (currentQuery !== q) return;
+      const qEmb = Array.from(out.data);
+      const pMap = embs.predictions || {};
+
+      const semPreds     = allPredictions.map(x => ({ x, s: _dot(qEmb, pMap[x.id] || []) }))
+                             .filter(({ s }) => s >= SEMANTIC_THRESHOLD).map(({ x }) => x);
+      const semConsensus = allConsensusPredictions.map(x => ({ x, s: _dot(qEmb, pMap[x.id] || []) }))
+                             .filter(({ s }) => s >= SEMANTIC_THRESHOLD).map(({ x }) => x);
+      const semCats      = allCatalysts.map((x, i) => ({ x, s: _dot(qEmb, (embs.catalysts || [])[i] || []) }))
+                             .filter(({ s }) => s >= SEMANTIC_THRESHOLD).map(({ x }) => x);
+      const semNews      = allNews.map((x, i) => ({ x, s: _dot(qEmb, (embs.news || [])[i] || []) }))
+                             .filter(({ s }) => s >= SEMANTIC_THRESHOLD).map(({ x }) => x);
+
+      renderAll(
+        _unionByPop(kw.preds, semPreds),
+        _unionByPop(kw.consensus, semConsensus),
+        _unionByPop(kw.cats, semCats),
+        _unionByPop(kw.news, semNews),
+        kw.fred
+      );
+    } catch (err) {
+      console.warn('Semantic search unavailable:', err);
+    }
+  }, 350);
 }
 
 // ── Event delegation ──────────────────────────────────────────────────────────
 $('pred-search').addEventListener('input', function () {
-  if (semanticMode) {
-    clearTimeout(_semTimer);
-    _semTimer = setTimeout(() => applySemanticSearch(this.value), 350);
-  } else {
-    applySearch(this.value);
-  }
-});
-
-$('semantic-btn').addEventListener('click', function () {
-  semanticMode = !semanticMode;
-  this.classList.toggle('active', semanticMode);
-  this.textContent = semanticMode ? '≈ Semantic ✓' : '≈ Semantic';
-  clearTimeout(_semTimer);
-  const q = $('pred-search').value;
-  if (semanticMode && q.trim()) applySemanticSearch(q);
-  else { currentQuery = ''; applySearch(q); }
+  applySearch(this.value);
 });
 
 ['pred-tbody', 'consensus-tbody', 'catalyst-list'].forEach(id => {
