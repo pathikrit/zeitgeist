@@ -101,19 +101,6 @@
   .bet-bar.other { opacity: .4; }
   .bet-pct { width: 36px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: #ccc; font-size: 12px; }
 
-  /* ── Tags ──────────────────────────────────────────────────────────────── */
-  .tag {
-    display: inline-block;
-    background: #2a2200;
-    color: #e8c840;
-    border-radius: 5px;
-    padding: 2px 7px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .1s;
-  }
-  .tag:hover { background: #3a3000; }
   mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; }
 
   /* ── Other/toggle bets ─────────────────────────────────────────────────── */
@@ -140,7 +127,6 @@
   .catalyst-title { flex: 1; color: #ccc; }
   .catalyst-title a { color: #4a9eff; text-decoration: none; }
   .catalyst-title a:hover { text-decoration: underline; }
-  .catalyst-topics { flex-shrink: 0; }
 
   /* ── News ──────────────────────────────────────────────────────────────── */
   .news-list { display: flex; flex-direction: column; }
@@ -283,7 +269,6 @@
   <tr>
     <td class="question"></td>
     <td class="answers"></td>
-    <td class="topics"></td>
   </tr>
 </template>
 
@@ -302,15 +287,10 @@
   <div class="other-bets hidden"></div>
 </template>
 
-<template id="tpl-tag">
-  <span class="tag clickable-tag"></span>
-</template>
-
 <template id="tpl-catalyst-row">
   <div class="catalyst-row">
     <span class="catalyst-when"></span>
     <span class="catalyst-title"></span>
-    <span class="catalyst-topics"></span>
   </div>
 </template>
 
@@ -398,19 +378,6 @@ function hi(el, text) {
       el.appendChild(document.createTextNode(part));
     }
   });
-}
-
-// ── Tags ──────────────────────────────────────────────────────────────────────
-function makeTags(topics, highlight = false) {
-  const frag = document.createDocumentFragment();
-  (topics || '').split(/[,;]/).map(t => t.trim()).filter(Boolean).forEach(t => {
-    const node = tpl('tpl-tag').querySelector('.tag');
-    node.dataset.tag = t;
-    if (highlight) hi(node, t); else node.textContent = t;
-    frag.appendChild(node);
-    frag.appendChild(document.createTextNode(' '));
-  });
-  return frag;
 }
 
 // ── Bets ──────────────────────────────────────────────────────────────────────
@@ -594,7 +561,6 @@ function makePredRow(p, makeBetsFn) {
   const title = frag.querySelector('.question').appendChild(p.url ? linkEl(p.url, '') : document.createElement('span'));
   hi(title, p.title);
   frag.querySelector('.answers').appendChild(makeBetsFn(p));
-  frag.querySelector('.topics').appendChild(makeTags(p.topics, true));
   return frag;
 }
 
@@ -626,9 +592,6 @@ function renderCatalysts(items) {
       frag.querySelector('.catalyst-when').textContent = c.when || '';
       const titleEl = frag.querySelector('.catalyst-title');
       titleEl.appendChild(c.url ? linkEl(c.url, c.title) : document.createTextNode(c.title));
-      const topicsEl = frag.querySelector('.catalyst-topics');
-      if (c.topics) topicsEl.appendChild(makeTags(c.topics));
-      else          topicsEl.remove();
       list.appendChild(frag);
     });
   });
@@ -861,32 +824,6 @@ const catState       = { page: 0, paginationId: 'cat-pagination',        scrollT
 const newsState      = { page: 0, paginationId: 'news-pagination',       scrollTarget: 'news-wrap'            };
 
 // ── Indexing & ranking ─────────────────────────────────────────────────────────
-function getTags(p) {
-  return (p.topics || '').split(/[,;]/).map(t => t.trim().toLowerCase()).filter(Boolean);
-}
-
-// Tag-diversity re-ranking in O(n): items with a previously-seen tag are deferred
-// with half their volume score, then merged back in sorted order.
-function diverseSort(items) {
-  const seen = new Set();
-  const primary = [], deferred = [];
-  for (const item of items) {
-    const tags = getTags(item);
-    const hasSeenTag = tags.some(t => seen.has(t));
-    tags.forEach(t => seen.add(t));
-    const score = item.volume_24h || 0;
-    (hasSeenTag ? deferred : primary).push({ item, score: hasSeenTag ? score / 2 : score });
-  }
-  const result = [];
-  let di = 0;
-  for (const { item, score } of primary) {
-    while (di < deferred.length && deferred[di].score > score) result.push(deferred[di++].item);
-    result.push(item);
-  }
-  while (di < deferred.length) result.push(deferred[di++].item);
-  return result;
-}
-
 function idxSearch(idx, q, items) {
   const hits = new Set(idx.search(q).flatMap(r => r.result));
   return items.filter((_, i) => hits.has(i));
@@ -901,12 +838,11 @@ function buildIndexes() {
   };
   const predDoc = p => ({
     title:  p.title   || '',
-    topics: p.topics  || '',
     bets:   (p.bets || []).map(b => b.prompt || '').filter(s => !/^(yes|no|up|down)$/i.test(s.trim())).join(' '),
   });
   predIdx      = mkIdx(allPredictions,          predDoc);
   consensusIdx = mkIdx(allConsensusPredictions,  predDoc);
-  catIdx       = mkIdx(allCatalysts, c => ({ title: c.title || '', topics: c.topics || '', when: c.when || '' }));
+  catIdx       = mkIdx(allCatalysts, c => ({ title: c.title || '', when: c.when || '' }));
   newsIdx      = mkIdx(allNews,      n => ({ title: n.title || '', description: n.description || '' }));
   fredIdx      = mkIdx(allFred,      f => ({ title: f.title || '' }));
 }
@@ -970,8 +906,8 @@ function applySearch(q) {
 
   if (!q) {
     renderAll({
-      preds:     diverseSort(allPredictions),
-      consensus: diverseSort(allConsensusPredictions),
+      preds:     allPredictions,
+      consensus: allConsensusPredictions,
       cats:      allCatalysts,
       news:      allNews,
       fred:      allFred,
@@ -1026,14 +962,6 @@ $('pred-search').addEventListener('input', function () {
 
 ['pred-tbody', 'consensus-tbody', 'catalyst-list'].forEach(id => {
   $(id).addEventListener('click', e => {
-    const tag = e.target.closest('.clickable-tag');
-    if (tag) {
-      const input = $('pred-search');
-      input.value = tag.dataset.tag;
-      applySearch(tag.dataset.tag);
-      input.focus();
-      return;
-    }
     const toggle = e.target.closest('.other-toggle');
     if (toggle) {
       const panel    = $(toggle.dataset.oid);
