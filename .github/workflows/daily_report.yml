@@ -24,10 +24,6 @@ jobs:
         with:
           python-version-file: ".python-version"
 
-      - uses: oNaiPs/secrets-to-env-action@v1
-        with:
-          secrets: ${{toJSON(secrets)}}
-
       - name: Cache fastembed models
         uses: actions/cache@v4
         with:
@@ -36,6 +32,9 @@ jobs:
 
       - name: Generate report
         run: uv run python zeitgeist.py
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
 
       - name: Publish report
         uses: peaceiris/actions-gh-pages@v4
