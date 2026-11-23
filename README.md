@@ -3,7 +3,7 @@ Daily macro dashboard for an equities investor: prediction markets -> LLM releva
 
 1. Fetch every open market from Kalshi and Polymarket
 2. Ask the OpenAI [Decisions API](https://developers.openai.com/api/docs/guides/decisions) how likely each one is to matter to the investor described in `templates/about_me.mako`, and keep the likely ones
-3. Tag the survivors with topics, and add upcoming catalysts, news headlines and macro indicators (FRED, GDPNow, Fear & Greed)
+3. Add upcoming catalysts, news headlines and macro indicators (FRED, GDPNow, Fear & Greed)
 4. Publish `output.json` + `index.html` to GitHub Pages
 
 ## Today's Dashboard

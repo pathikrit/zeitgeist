@@ -23,7 +23,6 @@ IS_DEV = not IS_PROD
 
 QUICK_TEST = IS_DEV # If True, run quickly on first few predictions; useful for smoke-testing
 
-BATCH_REQUEST_DELAY_SECONDS = 5
 RATE_LIMIT_WAIT_SECONDS = 10
 RETRIES = 3
 
@@ -36,10 +35,8 @@ DECISIONS_CONCURRENCY = 4
 DECISIONS_TIMEOUT_SECONDS = 120
 RELEVANCE_THRESHOLD = 0.5 # keep predictions at or above this probability of being relevant
 MAX_BETS_PER_QUESTION = 20 # only the most likely outcomes are shown to the model
+DECISIONS_USD_PER_1M_INPUT_TOKENS = 0.10 # uncached; output tokens are free
 
-# Topic tags are free text, which the Decisions API cannot return, so the survivors go to a regular model
-TOPICS_MODEL = "openai:gpt-5-mini-2025-08-07"
-TOPICS_BATCH_SIZE = 100
 EVENTS_MODEL = "openai:gpt-5.1-2025-11-13"
 
 
@@ -214,8 +211,8 @@ def relevance_question(prediction: dict) -> dict:
         "instructions": f"{RELEVANCE_QUESTION}\nMarket: {prediction['title']}\nOutcomes: {outcomes}",
     }
 
-async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> list[dict]:
-    """POST one batch of questions about RELEVANCE_INPUT to the Decisions API and return its answers."""
+async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> dict:
+    """POST one batch of questions about RELEVANCE_INPUT to the Decisions API and return its response."""
     body = {"model": RELEVANCE_MODEL, "input": RELEVANCE_INPUT, "questions": questions}
     error = None
     for _ in range(RETRIES):
@@ -232,21 +229,25 @@ async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> lis
             continue
         if resp.is_error:
             break
-        return resp.json()["answers"]
+        return resp.json()
     raise RuntimeError(f"Decisions API request failed: {error}")
 
 async def find_relevant_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
     """Score every prediction's relevance with the Decisions API and keep those above RELEVANCE_THRESHOLD."""
     semaphore = asyncio.Semaphore(DECISIONS_CONCURRENCY)
+    input_tokens = 0
 
     async def process_batch(i: int, batch: pl.DataFrame, client: httpx.AsyncClient) -> list[dict]:
+        nonlocal input_tokens
         async with semaphore:
             log.info(f"Asking Decisions API about batch {i} ({len(batch)} predictions) ...")
             try:
-                answers = await ask_decisions(client, [relevance_question(p) for p in batch.to_dicts()])
+                decision = await ask_decisions(client, [relevance_question(p) for p in batch.to_dicts()])
             except Exception as e:
                 log.error(f"Error in relevance batch {i}: {e}")
                 return []
+        answers = decision["answers"]
+        input_tokens += (decision.get("usage") or {}).get("input_tokens", 0)
         # A question the model declines to answer comes back as type "refusal"; treat it as not relevant
         scores = [{"id": a["name"], "relevance": a["probability"]} for a in answers if a["type"] == "predicate"]
         if len(scores) < len(batch):
@@ -267,53 +268,14 @@ async def find_relevant_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
     relevance = pl.DataFrame(scores, schema={"id": pl.String, "relevance": pl.Float64})
     relevant = predictions.join(relevance, on="id", how="inner").filter(pl.col("relevance") >= RELEVANCE_THRESHOLD)
     log.info(f"Picked {len(relevant)} relevant predictions from {len(predictions)} ({len(scores)} scored)")
+    log.info(f"Decisions API usage: {input_tokens:,} input tokens ~ ${input_tokens * DECISIONS_USD_PER_1M_INPUT_TOKENS / 1e6:.3f}")
     return relevant
-
-
-class PredictionTopics(BaseModel):
-    id: str = Field(description="original id from input")
-    topics: str = Field(description="Very short phrase (1-3 words): public companies or investment sectors or broad alternatives impacted")
-
-topics_agent = Agent(
-    model=TOPICS_MODEL,
-    output_type=list[PredictionTopics],
-    system_prompt=templates.get_template("topics_prompt.mako").render(today=today),
-    retries=RETRIES,
-)
-
-async def tag_topics(predictions: pl.DataFrame) -> pl.DataFrame:
-    """Add a topics column to already-relevant predictions; one that fails to get tagged is kept untagged."""
-    async def process_batch_with_delay(i: int, batch: pl.DataFrame) -> list[dict]:
-        await asyncio.sleep(i * BATCH_REQUEST_DELAY_SECONDS)
-        log.info(f"Tagging topics for batch {i} ...")
-        try:
-            result = await topics_agent.run(batch.write_json())
-            log.info(f"Completed topics batch {i}")
-            return [t.model_dump() for t in result.output]
-        except Exception as e:
-            log.error(f"Error in tagging batch {i}: {e}")
-            return []
-
-    results = await asyncio.gather(*[
-        process_batch_with_delay(i, batch)
-        for i, batch in enumerate(predictions.select("id", "title", "bets").iter_slices(TOPICS_BATCH_SIZE))
-    ])
-    topics = pl.DataFrame(
-        [t for batch_topics in results for t in batch_topics],
-        schema={"id": pl.String, "topics": pl.String},
-    ).unique(subset="id")
-    log.info(f"Tagged {len(topics)} of {len(predictions)} relevant predictions with topics")
-    return predictions.join(topics, on="id", how="left")
-
-async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
-    return await tag_topics(await find_relevant_predictions(predictions))
 
 
 class Event(BaseModel):
     title: str = Field(description="title of macro event or catalyst")
     when: str = Field(description="approximately when; either specific date or stringy like '2025 Q2' or 'next month'")
     url: str | None = Field(description="web url linking to a page with details about the event - okay to skip if url is not available or too generic")
-    topics: str = Field(description="Very short phrase (1-3 words): public companies or investment sectors or broad alternatives impacted")
 
 events_agent = Agent(
     model=EVENTS_MODEL,
@@ -415,14 +377,11 @@ def generate_embeddings(data: dict) -> dict:
 
     # Predictions are keyed by id; catalysts and news are positional (same order as in output.json)
     if preds := data.get("relevant_predictions"):
-        texts = [
-            f"{p['title']} {p.get('topics') or ''} {' '.join(b['prompt'] for b in (p.get('bets') or []))}"
-            for p in preds
-        ]
+        texts = [f"{p['title']} {' '.join(b['prompt'] for b in (p.get('bets') or []))}" for p in preds]
         result["predictions"] = dict(zip((p["id"] for p in preds), embed("predictions", texts)))
 
     if cats := data.get("upcoming_catalysts"):
-        result["catalysts"] = embed("catalysts", [f"{c['title']} {c.get('topics', '')} {c.get('when', '')}" for c in cats])
+        result["catalysts"] = embed("catalysts", [f"{c['title']} {c.get('when', '')}" for c in cats])
 
     if news := data.get("news_headlines"):
         result["news"] = embed("news items", [f"{n.get('title', '')} {n.get('description', '')}" for n in news])
@@ -450,8 +409,8 @@ async def main():
     predictions = predictions.filter(pl.col("volume_24h") > 0)
     log.info(f"After volume filter = {len(predictions)} predictions")
 
-    tagged_predictions, events, news, fred_data, fear_greed, gdpnow = await asyncio.gather(
-        tag_predictions(predictions),
+    relevant_predictions, events, news, fred_data, fear_greed, gdpnow = await asyncio.gather(
+        find_relevant_predictions(predictions),
         get_events(),
         asyncio.to_thread(get_news),
         asyncio.to_thread(get_fred_data),
@@ -470,7 +429,7 @@ async def main():
     log.info(f"Writing output to {output_json_file} ...")
     output_data = {
         "date": today.isoformat(),
-        "relevant_predictions": tagged_predictions.to_dicts(),
+        "relevant_predictions": relevant_predictions.to_dicts(),
         "upcoming_catalysts": events.to_dicts(),
         "news_headlines": news.to_dicts() if news is not None else None,
         "fred_data": fred_data.to_dicts() if fred_data is not None else None,
