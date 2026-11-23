@@ -1,9 +1,10 @@
 import asyncio
-from datetime import date
+from datetime import date, datetime
 import json
 from pathlib import Path
 import os
 import logging as log
+import re
 import shutil
 
 import polars as pl
@@ -24,11 +25,21 @@ QUICK_TEST = IS_DEV # If True, run quickly on first few predictions; useful for 
 
 BATCH_REQUEST_DELAY_SECONDS = 5
 RATE_LIMIT_WAIT_SECONDS = 10
-
-BATCH_SIZE = 100
 RETRIES = 3
 
-CLASSIFYING_MODEL = "openai:gpt-5-mini-2025-08-07"
+# Relevance filter: OpenAI Decisions API, one predicate question per prediction
+# https://developers.openai.com/api/docs/guides/decisions
+DECISIONS_API_URL = "https://api.openai.com/v1/decisions"
+RELEVANCE_MODEL = "gpt-6-luna" # the only model the Decisions API supports
+DECISIONS_BATCH_SIZE = 400 # API maximum questions per request
+DECISIONS_CONCURRENCY = 4
+DECISIONS_TIMEOUT_SECONDS = 120
+RELEVANCE_THRESHOLD = 0.5 # keep predictions at or above this probability of being relevant
+MAX_BETS_PER_QUESTION = 20 # only the most likely outcomes are shown to the model
+
+# Topic tags are free text, which the Decisions API cannot return, so the survivors go to a regular model
+TOPICS_MODEL = "openai:gpt-5-mini-2025-08-07"
+TOPICS_BATCH_SIZE = 100
 EVENTS_MODEL = "openai:gpt-5.1-2025-11-13"
 
 
@@ -169,7 +180,7 @@ def get_fred_data() -> pl.DataFrame | None:
 
     out = []
     for code, title in FRED_CODES.items():
-        print(f"Fetching {title} ({code}) from FRED ...")
+        log.info(f"Fetching {title} ({code}) from FRED ...")
         try:
             series = fred_client.get_series_latest_release(code)
             log.info(f"Fetched {len(series)} data points for FRED {code=}")
@@ -190,40 +201,112 @@ def get_fred_data() -> pl.DataFrame | None:
     return pl.DataFrame(out)
 
 
-class RelevantPrediction(BaseModel):
+RELEVANCE_INPUT = templates.get_template("relevance_input.mako").render(today=today)
+RELEVANCE_QUESTION = "Would the outcome of this prediction market have a VERY obvious impact on this investor?"
+
+def relevance_question(prediction: dict) -> dict:
+    """One predicate question for the Decisions API; its name is the prediction id so the answer maps back."""
+    bets = sorted(prediction["bets"] or [], key=lambda b: b["probability"], reverse=True)[:MAX_BETS_PER_QUESTION]
+    outcomes = "; ".join(f"{b['prompt']} ({b['probability']:.0%})" for b in bets)
+    return {
+        "type": "predicate",
+        "name": prediction["id"],
+        "instructions": f"{RELEVANCE_QUESTION}\nMarket: {prediction['title']}\nOutcomes: {outcomes}",
+    }
+
+async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> list[dict]:
+    """POST one batch of questions about RELEVANCE_INPUT to the Decisions API and return its answers."""
+    body = {"model": RELEVANCE_MODEL, "input": RELEVANCE_INPUT, "questions": questions}
+    error = None
+    for _ in range(RETRIES):
+        try:
+            resp = await client.post(DECISIONS_API_URL, json=body)
+        except httpx.TransportError as e:
+            error = repr(e)
+            continue
+        error = f"{resp.status_code}: {resp.text[:500]}"
+        if await sleep_if_rate_limit(resp):
+            continue
+        if resp.status_code >= 500:
+            await asyncio.sleep(RATE_LIMIT_WAIT_SECONDS)
+            continue
+        if resp.is_error:
+            break
+        return resp.json()["answers"]
+    raise RuntimeError(f"Decisions API request failed: {error}")
+
+async def find_relevant_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
+    """Score every prediction's relevance with the Decisions API and keep those above RELEVANCE_THRESHOLD."""
+    semaphore = asyncio.Semaphore(DECISIONS_CONCURRENCY)
+
+    async def process_batch(i: int, batch: pl.DataFrame, client: httpx.AsyncClient) -> list[dict]:
+        async with semaphore:
+            log.info(f"Asking Decisions API about batch {i} ({len(batch)} predictions) ...")
+            try:
+                answers = await ask_decisions(client, [relevance_question(p) for p in batch.to_dicts()])
+            except Exception as e:
+                log.error(f"Error in relevance batch {i}: {e}")
+                return []
+        # A question the model declines to answer comes back as type "refusal"; treat it as not relevant
+        scores = [{"id": a["name"], "relevance": a["probability"]} for a in answers if a["type"] == "predicate"]
+        if len(scores) < len(batch):
+            log.warning(f"Batch {i}: {len(batch) - len(scores)} of {len(batch)} predictions got no answer")
+        return scores
+
+    async with httpx.AsyncClient(
+        headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
+        timeout=DECISIONS_TIMEOUT_SECONDS,
+    ) as client:
+        results = await asyncio.gather(*[
+            process_batch(i, batch, client)
+            for i, batch in enumerate(predictions.select("id", "title", "bets").iter_slices(DECISIONS_BATCH_SIZE))
+        ])
+
+    scores = [score for batch_scores in results for score in batch_scores]
+    assert scores, "Decisions API returned no answers"
+    relevance = pl.DataFrame(scores, schema={"id": pl.String, "relevance": pl.Float64})
+    relevant = predictions.join(relevance, on="id", how="inner").filter(pl.col("relevance") >= RELEVANCE_THRESHOLD)
+    log.info(f"Picked {len(relevant)} relevant predictions from {len(predictions)} ({len(scores)} scored)")
+    return relevant
+
+
+class PredictionTopics(BaseModel):
     id: str = Field(description="original id from input")
     topics: str = Field(description="Very short phrase (1-3 words): public companies or investment sectors or broad alternatives impacted")
 
-relevant_prediction_agent = Agent(
-    model=CLASSIFYING_MODEL,
-    output_type=list[RelevantPrediction],
-    system_prompt=templates.get_template("relevant_prediction_prompt.mako").render(today=today),
+topics_agent = Agent(
+    model=TOPICS_MODEL,
+    output_type=list[PredictionTopics],
+    system_prompt=templates.get_template("topics_prompt.mako").render(today=today),
     retries=RETRIES,
 )
 
-async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
-    async def process_batch_with_delay(i: int, batch: pl.DataFrame) -> pl.DataFrame | None:
+async def tag_topics(predictions: pl.DataFrame) -> pl.DataFrame:
+    """Add a topics column to already-relevant predictions; one that fails to get tagged is kept untagged."""
+    async def process_batch_with_delay(i: int, batch: pl.DataFrame) -> list[dict]:
         await asyncio.sleep(i * BATCH_REQUEST_DELAY_SECONDS)
-        log.info(f"Submitting batch {i} ...")
+        log.info(f"Tagging topics for batch {i} ...")
         try:
-            result = await relevant_prediction_agent.run(batch.write_json())
-            log.info(f"Completed batch {i}")
-            if result.output:
-                return pl.DataFrame(result.output)
+            result = await topics_agent.run(batch.write_json())
+            log.info(f"Completed topics batch {i}")
+            return [t.model_dump() for t in result.output]
         except Exception as e:
             log.error(f"Error in tagging batch {i}: {e}")
-        return None
+            return []
 
-    tasks = [
+    results = await asyncio.gather(*[
         process_batch_with_delay(i, batch)
-        for i, batch in enumerate(predictions.select("id", "title", "bets").iter_slices(BATCH_SIZE))
-    ]
-    results = await asyncio.gather(*tasks)
-    dfs = [df for df in results if df is not None]
-    assert dfs, "No relevant predictions found"
-    relevant_predictions = pl.concat(dfs)
-    log.info(f"Picked {len(relevant_predictions)} relevant predictions from {len(predictions)}")
-    return predictions.join(relevant_predictions, on="id", how="inner")
+        for i, batch in enumerate(predictions.select("id", "title", "bets").iter_slices(TOPICS_BATCH_SIZE))
+    ])
+    topics = pl.DataFrame(
+        [t for batch_topics in results for t in batch_topics],
+        schema={"id": pl.String, "topics": pl.String},
+    ).unique(subset="id")
+    log.info(f"Tagged {len(topics)} of {len(predictions)} relevant predictions with topics")
+    return predictions.join(topics, on="id", how="left")
+
+async def tag_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
+    return await tag_topics(await find_relevant_predictions(predictions))
 
 
 class Event(BaseModel):
@@ -242,8 +325,6 @@ events_agent = Agent(
 
 async def get_gdpnow() -> dict | None:
     """Fetch Atlanta Fed GDPNow estimate by parsing the embedded JS arrays on their page."""
-    import re as _re, json as _json
-    from datetime import datetime as _dt
     url = "https://www.atlantafed.org/cqer/research/gdpnow"
     try:
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -254,21 +335,21 @@ async def get_gdpnow() -> dict | None:
 
         # Arrays are embedded in a JS section starting ~offset 57k; search only that region
         section = text[50000:270000]
-        fd = _re.search(r'\bforecastDates\s*=\s*(\[.*?\]);', section, _re.DOTALL)
-        gf = _re.search(r'\bgdpForecast\s*=\s*(\[.*?\]);', section, _re.DOTALL)
+        fd = re.search(r'\bforecastDates\s*=\s*(\[.*?\]);', section, re.DOTALL)
+        gf = re.search(r'\bgdpForecast\s*=\s*(\[.*?\]);', section, re.DOTALL)
         if not fd or not gf:
             log.error("GDPNow: could not find embedded data arrays on page")
             return None
 
-        dates     = _json.loads(fd.group(1))
-        forecasts = _json.loads(gf.group(1))
+        dates     = json.loads(fd.group(1))
+        forecasts = json.loads(gf.group(1))
 
         # Quarters are concatenated newest-first; find the boundary of the current quarter
         # by detecting when the parsed date jumps significantly backward.
         parsed = []
         for d, v in zip(dates, forecasts):
             try:
-                parsed.append((_dt.strptime(d, "%m/%d/%Y"), float(v)))
+                parsed.append((datetime.strptime(d, "%m/%d/%Y"), float(v)))
             except (ValueError, TypeError):
                 pass
 
@@ -283,7 +364,7 @@ async def get_gdpnow() -> dict | None:
 
         latest = current_quarter[-1]
         # Extract the quarter label from the page card (e.g. "2026:Q1" → "2026 Q1")
-        q_match = _re.search(r'GDPNow Estimate for (\d{4}):Q(\d)', text)
+        q_match = re.search(r'GDPNow Estimate for (\d{4}):Q(\d)', text)
         quarter = f"{q_match.group(1)} Q{q_match.group(2)}" if q_match else ""
         log.info(f"GDPNow: {latest['value']}% for {quarter} as of {latest['date']} ({len(current_quarter)} updates)")
         return {
@@ -325,31 +406,26 @@ def generate_embeddings(data: dict) -> dict:
 
     log.info("Loading fastembed model (all-MiniLM-L6-v2) ...")
     model = TextEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+    def embed(kind: str, texts: list[str]) -> list[list[float]]:
+        log.info(f"Embedding {len(texts)} {kind} ...")
+        return [[round(float(x), 5) for x in emb] for emb in model.embed(texts)]
+
     result: dict = {}
 
-    preds = data.get("relevant_predictions") or []
-    if preds:
+    # Predictions are keyed by id; catalysts and news are positional (same order as in output.json)
+    if preds := data.get("relevant_predictions"):
         texts = [
-            f"{p['title']} {p.get('topics', '')} {' '.join(b['prompt'] for b in (p.get('bets') or []))}"
+            f"{p['title']} {p.get('topics') or ''} {' '.join(b['prompt'] for b in (p.get('bets') or []))}"
             for p in preds
         ]
-        log.info(f"Embedding {len(texts)} predictions ...")
-        embs = list(model.embed(texts))
-        result["predictions"] = {p["id"]: [round(float(x), 5) for x in emb] for p, emb in zip(preds, embs)}
+        result["predictions"] = dict(zip((p["id"] for p in preds), embed("predictions", texts)))
 
-    cats = data.get("upcoming_catalysts") or []
-    if cats:
-        texts = [f"{c['title']} {c.get('topics', '')} {c.get('when', '')}" for c in cats]
-        log.info(f"Embedding {len(texts)} catalysts ...")
-        embs = list(model.embed(texts))
-        result["catalysts"] = [[round(float(x), 5) for x in emb] for emb in embs]
+    if cats := data.get("upcoming_catalysts"):
+        result["catalysts"] = embed("catalysts", [f"{c['title']} {c.get('topics', '')} {c.get('when', '')}" for c in cats])
 
-    news = data.get("news_headlines") or []
-    if news:
-        texts = [f"{n.get('title', '')} {n.get('description', '')}" for n in news]
-        log.info(f"Embedding {len(texts)} news items ...")
-        embs = list(model.embed(texts))
-        result["news"] = [[round(float(x), 5) for x in emb] for emb in embs]
+    if news := data.get("news_headlines"):
+        result["news"] = embed("news items", [f"{n.get('title', '')} {n.get('description', '')}" for n in news])
 
     log.info(
         f"Embeddings ready: {len(result.get('predictions', {}))} predictions, "

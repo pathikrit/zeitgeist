@@ -1,11 +1,11 @@
-<task>
-You will be provided an array of questions from an online betting market
-Your job is to return only the ids of questions relevant to me
-</task>
-
 <%include file="about_me.mako"/>
 
-Some examples of things that are UNLIKELY to impact (unless a good reason is provided):
+<relevance_criteria>
+I am screening questions from online prediction markets (e.g. Kalshi and Polymarket)
+and I only want the ones that are relevant to me
+Be very strict and careful: a market is relevant only if its outcome has a VERY obvious impact on me
+
+Some examples of things that are UNLIKELY to impact me (unless there is a good reason):
   - Celebrity gossips e.g. how many tweets would Elon tweet in a certain period
   - Sports related e.g. Would Ronaldo be traded this season
   - Events far (10+ years) in the future: Would India host the Olympics by 2040
@@ -15,8 +15,4 @@ Some examples of things that are UNLIKELY to impact (unless a good reason is pro
   - Ignore memecoins, eSports and NFTs (but focus on major crypto themes like BTC, solana and ethereum etc)
   - Ignore essentially gambling bets on short term prices e.g. what will be USD/JPY today at 12pm
   - Extreme short term crypto stuff e.g. What would be BTC at EoD? or Would Solana be up or down on this date?
-
-Examine each question and return a subset of ids and related topics they may impact
-Topics must be few short strings like sectors or tickers or short phrases that would be impacted by this question
-Generally be very strict and careful when possible to decide whether to include an id or not
-i.e. I am only interested in things that have VERY obvious impact on me
+</relevance_criteria>
