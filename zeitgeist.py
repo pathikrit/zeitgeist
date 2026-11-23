@@ -147,21 +147,25 @@ async def fetch_from_polymarket() -> pl.DataFrame:
             "volume_24h": p.get("volume24hr") or 0,
         }
 
-    async with httpx.AsyncClient() as client:
+    # Offset paging is capped at 2000 rows, so use the keyset endpoint. Sorting by 24h volume
+    # lets us stop at the first page with no traded market instead of walking ~140k markets.
+    params = {"active": "true", "closed": "false", "limit": LIMIT, "order": "volume24hr", "ascending": "false"}
+    async with httpx.AsyncClient(timeout=30) as client:
         while True:
-            params = {"active": "true", "closed": "false", "limit": LIMIT, "offset": len(predictions)}
-            log.info(f"Fetching from polymarket @ offset={params['offset']} ...")
+            log.info(f"Fetching from polymarket @ {len(predictions)} ...")
             try:
-                resp = await client.get(f"{API_URL}/markets", params=params)
+                resp = await client.get(f"{API_URL}/markets/keyset", params=params)
                 if await sleep_if_rate_limit(resp):
                     continue
                 resp.raise_for_status()
                 data = resp.json()
-                predictions.extend(data)
             except Exception as e:
                 log.error(f"Stopping because of error from Polymarket: {e}")
-                data = None
-            if not data or (QUICK_TEST and len(predictions) > LIMIT):
+                data = {}
+            traded = [p for p in data.get("markets", []) if (p.get("volume24hr") or 0) > 0]
+            predictions.extend(traded)
+            params["after_cursor"] = data.get("next_cursor")
+            if not traded or not params["after_cursor"] or (QUICK_TEST and len(predictions) > LIMIT):
                 log.info(f"Fetched {len(predictions)} from polymarket")
                 return pl.DataFrame([simple_prediction(p) for p in predictions])
 
