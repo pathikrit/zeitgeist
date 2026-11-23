@@ -330,7 +330,7 @@
       ],
       "url": "https://kalshi.com/markets/KXNEXTSPEAKER",
       "volume": 2191414.32,
-      "volume_24h": 14290.24,
+      "volume_24h": 14322.0,
       "relevance": 0.79
     },
     {
@@ -392,26 +392,8 @@
       ],
       "url": "https://kalshi.com/markets/KXAGICO",
       "volume": 378433.52,
-      "volume_24h": 11532.32,
+      "volume_24h": 11432.32,
       "relevance": 0.79
-    },
-    {
-      "id": "k-USCLIMATE",
-      "title": "US meets its climate goals?",
-      "bets": [
-        {
-          "prompt": "By 2025",
-          "probability": 0.004
-        },
-        {
-          "prompt": "By 2030",
-          "probability": 0.192
-        }
-      ],
-      "url": "https://kalshi.com/markets/KXUSCLIMATE",
-      "volume": 64726.61,
-      "volume_24h": 41.26,
-      "relevance": 0.92
     },
     {
       "id": "k-KXSP500WHEN-10000",
@@ -1026,7 +1008,7 @@
       ],
       "url": "https://kalshi.com/markets/KXGOVTCUTS",
       "volume": 95023.56999999999,
-      "volume_24h": 33.0,
+      "volume_24h": 39.0,
       "relevance": 0.86
     },
     {
@@ -1589,7 +1571,7 @@
         },
         {
           "prompt": "Marco Rubio",
-          "probability": 0.096
+          "probability": 0.095
         },
         {
           "prompt": "Glenn Youngkin",
@@ -1749,8 +1731,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXPRESPERSON",
-      "volume": 109984248.94,
-      "volume_24h": 853819.32,
+      "volume": 109984347.93,
+      "volume_24h": 853174.86,
       "relevance": 0.97
     },
     {
@@ -1786,7 +1768,7 @@
       ],
       "url": "https://kalshi.com/markets/KXGREENTERRITORY",
       "volume": 3590246.42,
-      "volume_24h": 258.54,
+      "volume_24h": 253.54,
       "relevance": 0.83
     },
     {
@@ -1880,7 +1862,7 @@
       ],
       "url": "https://kalshi.com/markets/KXTRUMPREMOVE",
       "volume": 1053661.2,
-      "volume_24h": 5232.530000000001,
+      "volume_24h": 5346.42,
       "relevance": 0.88
     },
     {
@@ -2168,7 +2150,7 @@
       ],
       "url": "https://kalshi.com/markets/KXIMPEACH",
       "volume": 1091823.33,
-      "volume_24h": 4732.03,
+      "volume_24h": 4860.72,
       "relevance": 0.75
     },
     {
@@ -2242,7 +2224,7 @@
       ],
       "url": "https://kalshi.com/markets/KXCANAL",
       "volume": 629001.38,
-      "volume_24h": 144.58,
+      "volume_24h": 140.58,
       "relevance": 0.88
     },
     {
@@ -2466,7 +2448,7 @@
       ],
       "url": "https://kalshi.com/markets/KXLUTNICKOUT",
       "volume": 566099.97,
-      "volume_24h": 44301.74,
+      "volume_24h": 44175.74,
       "relevance": 0.75
     },
     {
@@ -2526,7 +2508,7 @@
       ],
       "url": "https://kalshi.com/markets/KXRSIANNOUNCE",
       "volume": 6524.679999999999,
-      "volume_24h": 678.36,
+      "volume_24h": 697.21,
       "relevance": 0.6
     },
     {
@@ -3237,7 +3219,7 @@
         },
         {
           "prompt": "John McEntee",
-          "probability": 0.028
+          "probability": 0.03
         },
         {
           "prompt": "Larry Hogan",
@@ -3289,8 +3271,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXPRESNOMR",
-      "volume": 105477127.63,
-      "volume_24h": 1168553.92,
+      "volume": 105477795.32,
+      "volume_24h": 1179395.57,
       "relevance": 0.54
     },
     {
@@ -4556,7 +4538,7 @@
       ],
       "url": "https://kalshi.com/markets/KXNVDACHARGE",
       "volume": 216.91,
-      "volume_24h": 10.87,
+      "volume_24h": 216.91,
       "relevance": 0.98
     },
     {
@@ -5552,7 +5534,7 @@
       ],
       "url": "https://kalshi.com/markets/KXISRAELPM",
       "volume": 11560910.17,
-      "volume_24h": 73378.01,
+      "volume_24h": 73029.15000000001,
       "relevance": 0.75
     },
     {
@@ -5610,7 +5592,7 @@
       ],
       "url": "https://kalshi.com/markets/KXBRISRAELSENCOMBO",
       "volume": 52540.86,
-      "volume_24h": 2956.84,
+      "volume_24h": 2464.84,
       "relevance": 0.65
     },
     {
@@ -5972,7 +5954,7 @@
       ],
       "url": "https://kalshi.com/markets/KXHUANGTESTIFY",
       "volume": 1436400.75,
-      "volume_24h": 305050.94999999995,
+      "volume_24h": 305067.81,
       "relevance": 0.67
     },
     {
@@ -6014,7 +5996,7 @@
       ],
       "url": "https://kalshi.com/markets/KXCABLEAVE",
       "volume": 1961.84,
-      "volume_24h": 322.04,
+      "volume_24h": 321.94,
       "relevance": 0.6
     },
     {
@@ -6429,8 +6411,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXFRENCHPRES",
-      "volume": 6875964.1,
-      "volume_24h": 886424.24,
+      "volume": 6886551.16,
+      "volume_24h": 886434.29,
       "relevance": 0.79
     },
     {
@@ -7341,12 +7323,12 @@
         },
         {
           "prompt": "Hugging Face",
-          "probability": 0.48
+          "probability": 0.56
         }
       ],
       "url": "https://kalshi.com/markets/KXEARNINGSMENTIONNVDA",
-      "volume": 4161.43,
-      "volume_24h": 3374.63,
+      "volume": 4164.84,
+      "volume_24h": 3379.81,
       "relevance": 0.65
     },
     {
@@ -7562,7 +7544,7 @@
       ],
       "url": "https://kalshi.com/markets/KXGDPYEAR",
       "volume": 484633.95,
-      "volume_24h": 610.94,
+      "volume_24h": 620.94,
       "relevance": 1.0
     },
     {
@@ -8342,7 +8324,7 @@
       ],
       "url": "https://kalshi.com/markets/KXREDWAVECOMBO",
       "volume": 2188552.0,
-      "volume_24h": 17000.0,
+      "volume_24h": 16000.0,
       "relevance": 0.93
     },
     {
@@ -8474,7 +8456,7 @@
       ],
       "url": "https://kalshi.com/markets/KXDSENATESEATS",
       "volume": 27039483.99,
-      "volume_24h": 19603.2,
+      "volume_24h": 24578.19,
       "relevance": 0.88
     },
     {
@@ -8744,7 +8726,7 @@
       ],
       "url": "https://kalshi.com/markets/KXBLUETSUNAMICOMBO",
       "volume": 4814132.91,
-      "volume_24h": 369450.77,
+      "volume_24h": 461045.57,
       "relevance": 0.98
     },
     {
@@ -8864,7 +8846,7 @@
       ],
       "url": "https://kalshi.com/markets/KXFEDDECISION",
       "volume": 611245.78,
-      "volume_24h": 25616.920000000002,
+      "volume_24h": 25511.04,
       "relevance": 1.0
     },
     {
@@ -9068,7 +9050,7 @@
       ],
       "url": "https://kalshi.com/markets/KXECONSTATCPIYOY",
       "volume": 26327.77,
-      "volume_24h": 3944.0,
+      "volume_24h": 3960.0,
       "relevance": 0.91
     },
     {
@@ -9232,7 +9214,7 @@
       ],
       "url": "https://kalshi.com/markets/KXCPIYOY",
       "volume": 584301.4400000001,
-      "volume_24h": 62500.08,
+      "volume_24h": 62516.08,
       "relevance": 1.0
     },
     {
@@ -9458,7 +9440,7 @@
       ],
       "url": "https://kalshi.com/markets/KXUSCHINATRUCE",
       "volume": 2870.01,
-      "volume_24h": 260.01,
+      "volume_24h": 5.01,
       "relevance": 1.0
     },
     {
@@ -9518,7 +9500,7 @@
       ],
       "url": "https://kalshi.com/markets/KXUSIRANMEETING",
       "volume": 119043.09,
-      "volume_24h": 593.14,
+      "volume_24h": 4132.78,
       "relevance": 0.81
     },
     {
@@ -9658,7 +9640,7 @@
       ],
       "url": "https://kalshi.com/markets/KXRUSDIESELIMPORT",
       "volume": 65778.35,
-      "volume_24h": 441.42,
+      "volume_24h": 436.17,
       "relevance": 0.9
     },
     {
@@ -9826,7 +9808,7 @@
       ],
       "url": "https://kalshi.com/markets/KXCANADAUSTARIFFLOWER",
       "volume": 7716.46,
-      "volume_24h": 16.36,
+      "volume_24h": 6.36,
       "relevance": 0.82
     },
     {
@@ -9961,7 +9943,7 @@
         },
         {
           "prompt": "Howard Lutnick",
-          "probability": 0.098
+          "probability": 0.099
         },
         {
           "prompt": "Scott Bessent",
@@ -10129,8 +10111,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXTRUMPADMINLEAVE",
-      "volume": 11666614.81,
-      "volume_24h": 139157.26,
+      "volume": 11666686.81,
+      "volume_24h": 138524.25,
       "relevance": 0.58
     },
     {
@@ -10308,7 +10290,7 @@
       ],
       "url": "https://kalshi.com/markets/KXDIESELYE",
       "volume": 101733.55,
-      "volume_24h": 7637.7300000000005,
+      "volume_24h": 9273.85,
       "relevance": 0.84
     },
     {
@@ -10366,7 +10348,7 @@
       ],
       "url": "https://kalshi.com/markets/KXDIESELMINY",
       "volume": 53108.17,
-      "volume_24h": 6880.1,
+      "volume_24h": 6480.1,
       "relevance": 0.85
     },
     {
@@ -10544,7 +10526,7 @@
       ],
       "url": "https://kalshi.com/markets/KXSENMAJ",
       "volume": 6437068.260000001,
-      "volume_24h": 276310.4,
+      "volume_24h": 276928.17,
       "relevance": 0.74
     },
     {
@@ -10641,7 +10623,7 @@
         },
         {
           "prompt": "OpenAI",
-          "probability": 0.07
+          "probability": 0.04
         },
         {
           "prompt": "Baidu",
@@ -10661,7 +10643,7 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXTOPAI",
-      "volume": 505996.32,
+      "volume": 506054.11,
       "volume_24h": 3216.91,
       "relevance": 0.65
     },
@@ -10916,7 +10898,7 @@
       ],
       "url": "https://kalshi.com/markets/KXWTIMAX",
       "volume": 10933491.38,
-      "volume_24h": 70199.75,
+      "volume_24h": 77030.2,
       "relevance": 1.0
     },
     {
@@ -11048,7 +11030,7 @@
       ],
       "url": "https://kalshi.com/markets/KXUSDX",
       "volume": 80140.05,
-      "volume_24h": 1845.94,
+      "volume_24h": 1856.77,
       "relevance": 0.99
     },
     {
@@ -11098,7 +11080,7 @@
       ],
       "url": "https://kalshi.com/markets/KXUSAIRANAGREEMENT",
       "volume": 6436315.73,
-      "volume_24h": 7170.43,
+      "volume_24h": 7021.43,
       "relevance": 0.95
     },
     {
@@ -11180,7 +11162,7 @@
       ],
       "url": "https://kalshi.com/markets/KXUSACOMPANYSTAKE",
       "volume": 1295431.56,
-      "volume_24h": 11376.03,
+      "volume_24h": 11480.27,
       "relevance": 0.96
     },
     {
@@ -11482,7 +11464,7 @@
       ],
       "url": "https://kalshi.com/markets/KXRATECUT",
       "volume": 1867111.73,
-      "volume_24h": 4620.68,
+      "volume_24h": 4669.98,
       "relevance": 1.0
     },
     {
@@ -11659,8 +11641,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXNATLEMERGENCY",
-      "volume": 38945.7,
-      "volume_24h": 13793.53,
+      "volume": 39045.7,
+      "volume_24h": 15293.53,
       "relevance": 0.71
     },
     {
@@ -12312,7 +12294,7 @@
       ],
       "url": "https://kalshi.com/markets/KXELECTIONBILL",
       "volume": 1937935.5999999999,
-      "volume_24h": 1835.22,
+      "volume_24h": 1776.2,
       "relevance": 0.81
     },
     {
@@ -12512,7 +12494,7 @@
       ],
       "url": "https://kalshi.com/markets/KXCOMPANYLAYOFF",
       "volume": 47121.31,
-      "volume_24h": 4244.5599999999995,
+      "volume_24h": 4423.83,
       "relevance": 0.95
     },
     {
@@ -12570,7 +12552,7 @@
       ],
       "url": "https://kalshi.com/markets/KXBTCVSGOLD",
       "volume": 365837.73,
-      "volume_24h": 2999.28,
+      "volume_24h": 2986.08,
       "relevance": 0.86
     },
     {
@@ -13337,7 +13319,7 @@
         },
         {
           "prompt": "8,200 or above",
-          "probability": 0.069
+          "probability": 0.079
         },
         {
           "prompt": "8,400 or above",
@@ -13357,8 +13339,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXINXMAXY",
-      "volume": 1247750.93,
-      "volume_24h": 20852.510000000002,
+      "volume": 1247926.1099999999,
+      "volume_24h": 20971.23,
       "relevance": 0.99
     },
     {
@@ -13422,7 +13404,7 @@
       ],
       "url": "https://kalshi.com/markets/KXETHMINY",
       "volume": 1583306.74,
-      "volume_24h": 19326.05,
+      "volume_24h": 19438.31,
       "relevance": 0.55
     },
     {
@@ -13473,7 +13455,7 @@
       "bets": [
         {
           "prompt": "Below $55,000.00",
-          "probability": 0.48
+          "probability": 0.47
         },
         {
           "prompt": "Below $50,000.00",
@@ -13489,8 +13471,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXBTCMINY",
-      "volume": 7954660.21,
-      "volume_24h": 141860.88,
+      "volume": 7954663.85,
+      "volume_24h": 141997.53,
       "relevance": 0.99
     },
     {
@@ -13516,7 +13498,7 @@
       ],
       "url": "https://kalshi.com/markets/KXBTCMAX100",
       "volume": 4811621.1,
-      "volume_24h": 7680.1,
+      "volume_24h": 6744.91,
       "relevance": 0.89
     },
     {
@@ -14164,7 +14146,7 @@
       ],
       "url": "https://kalshi.com/markets/KXBTCMAXY",
       "volume": 5835010.82,
-      "volume_24h": 8549.98,
+      "volume_24h": 8609.98,
       "relevance": 0.84
     },
     {
@@ -14218,7 +14200,7 @@
       ],
       "url": "https://kalshi.com/markets/KXINXPOS",
       "volume": 2141052.82,
-      "volume_24h": 40022.18,
+      "volume_24h": 40482.02,
       "relevance": 1.0
     },
     {
@@ -14247,7 +14229,7 @@
         },
         {
           "prompt": "3,700 or above",
-          "probability": 0.57
+          "probability": 0.56
         },
         {
           "prompt": "3,800 or above",
@@ -14323,8 +14305,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXGOLDDIRY",
-      "volume": 571107.52,
-      "volume_24h": 13501.87,
+      "volume": 571109.25,
+      "volume_24h": 13438.99,
       "relevance": 0.99
     },
     {
@@ -14590,7 +14572,7 @@
       ],
       "url": "https://kalshi.com/markets/KXNASDAQ100Y",
       "volume": 7106875.98,
-      "volume_24h": 92093.17,
+      "volume_24h": 92377.17,
       "relevance": 0.93
     },
     {
@@ -14776,7 +14758,7 @@
       ],
       "url": "https://kalshi.com/markets/KXINXY",
       "volume": 10004382.87,
-      "volume_24h": 101756.27,
+      "volume_24h": 101679.27,
       "relevance": 0.98
     },
     {
@@ -14908,7 +14890,7 @@
       ],
       "url": "https://kalshi.com/markets/KXWTIDIRY",
       "volume": 238902.89,
-      "volume_24h": 4584.08,
+      "volume_24h": 4577.45,
       "relevance": 0.98
     },
     {
@@ -15060,7 +15042,7 @@
       ],
       "url": "https://kalshi.com/markets/KXVENEZUELALEADER",
       "volume": 6836643.58,
-      "volume_24h": 29022.7,
+      "volume_24h": 31130.96,
       "relevance": 0.68
     },
     {
@@ -15074,7 +15056,7 @@
       ],
       "url": "https://kalshi.com/markets/KXREACTOR",
       "volume": 877240.61,
-      "volume_24h": 1113.36,
+      "volume_24h": 1099.36,
       "relevance": 0.87
     },
     {
@@ -15191,12 +15173,12 @@
       "bets": [
         {
           "prompt": "In 2026",
-          "probability": 0.06
+          "probability": 0.05
         }
       ],
       "url": "https://kalshi.com/markets/KXJENSENOUT",
-      "volume": 38529.7,
-      "volume_24h": 38373.33,
+      "volume": 38682.79,
+      "volume_24h": 38529.7,
       "relevance": 0.99
     },
     {
@@ -16236,7 +16218,7 @@
       ],
       "url": "https://kalshi.com/markets/KXGOVTSHUTDOWN",
       "volume": 539117.04,
-      "volume_24h": 26343.45,
+      "volume_24h": 26492.88,
       "relevance": 0.93
     },
     {
@@ -16564,7 +16546,7 @@
       ],
       "url": "https://kalshi.com/markets/KXCPIYOY",
       "volume": 1744838.74,
-      "volume_24h": 114566.73,
+      "volume_24h": 113965.88,
       "relevance": 1.0
     },
     {
@@ -16701,7 +16683,7 @@
       "bets": [
         {
           "prompt": "Above -0.3%",
-          "probability": 0.92
+          "probability": 0.93
         },
         {
           "prompt": "Above -0.2%",
@@ -16737,7 +16719,7 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXCPI",
-      "volume": 798632.51,
+      "volume": 798634.51,
       "volume_24h": 95729.87,
       "relevance": 0.94
     },
@@ -16873,7 +16855,7 @@
         },
         {
           "prompt": "Fed maintains rate",
-          "probability": 0.04
+          "probability": 0.03
         },
         {
           "prompt": "Hike 25bps",
@@ -16885,8 +16867,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXFEDDECISION",
-      "volume": 23436421.59,
-      "volume_24h": 2375663.25,
+      "volume": 23439405.599999998,
+      "volume_24h": 2382340.34,
       "relevance": 1.0
     },
     {
@@ -17174,7 +17156,7 @@
       ],
       "url": "https://kalshi.com/markets/KXEARNINGSMENTIONDELL",
       "volume": 9109.46,
-      "volume_24h": 3172.38,
+      "volume_24h": 3609.78,
       "relevance": 0.69
     },
     {
@@ -17344,7 +17326,7 @@
       ],
       "url": "https://kalshi.com/markets/KXDIESELMON",
       "volume": 299430.9,
-      "volume_24h": 21968.83,
+      "volume_24h": 27269.190000000002,
       "relevance": 0.82
     },
     {
@@ -17806,7 +17788,7 @@
       ],
       "url": "https://kalshi.com/markets/KXNHSALES",
       "volume": 13666.76,
-      "volume_24h": 1161.63,
+      "volume_24h": 1159.07,
       "relevance": 0.85
     },
     {
@@ -18187,7 +18169,7 @@
         },
         {
           "prompt": "Above 5",
-          "probability": 0.47
+          "probability": 0.46
         },
         {
           "prompt": "Above 6",
@@ -18211,8 +18193,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXHORMUZPEAK",
-      "volume": 3945.24,
-      "volume_24h": 1998.54,
+      "volume": 4195.24,
+      "volume_24h": 1965.6000000000001,
       "relevance": 0.88
     },
     {
@@ -18408,7 +18390,7 @@
       ],
       "url": "https://kalshi.com/markets/KXAAAGASMINM",
       "volume": 290738.41000000003,
-      "volume_24h": 48166.8,
+      "volume_24h": 48164.78,
       "relevance": 0.55
     },
     {
@@ -18616,7 +18598,7 @@
       ],
       "url": "https://kalshi.com/markets/KXUST10AM",
       "volume": 2785.94,
-      "volume_24h": 1813.28,
+      "volume_24h": 1913.28,
       "relevance": 0.55
     },
     {
@@ -20112,7 +20094,7 @@
       ],
       "url": "https://kalshi.com/markets/KXAAAGASM",
       "volume": 2191347.64,
-      "volume_24h": 184738.74,
+      "volume_24h": 184593.63999999998,
       "relevance": 0.83
     },
     {
@@ -20525,7 +20507,7 @@
         },
         {
           "prompt": "Above 14",
-          "probability": 0.78
+          "probability": 0.74
         },
         {
           "prompt": "Above 15",
@@ -20565,8 +20547,8 @@
         }
       ],
       "url": "https://kalshi.com/markets/KXHORMUZWEEKLY",
-      "volume": 406765.19,
-      "volume_24h": 65393.86,
+      "volume": 406778.46,
+      "volume_24h": 64528.86,
       "relevance": 0.93
     },
     {
@@ -20666,7 +20648,7 @@
       ],
       "url": "https://kalshi.com/markets/KXBABELMANDEBWEEKLY",
       "volume": 264108.55,
-      "volume_24h": 34818.28,
+      "volume_24h": 34825.02,
       "relevance": 0.72
     },
     {
@@ -20684,7 +20666,7 @@
       ],
       "url": "https://kalshi.com/markets/KXELECTIONEMERGENCY",
       "volume": 1266352.03,
-      "volume_24h": 35177.76,
+      "volume_24h": 37068.17,
       "relevance": 0.82
     },
     {
@@ -20808,7 +20790,7 @@
       ],
       "url": "https://kalshi.com/markets/KXHORMUZNORM",
       "volume": 15815914.620000001,
-      "volume_24h": 38578.43,
+      "volume_24h": 38564.23,
       "relevance": 0.99
     },
     {
@@ -20960,7 +20942,7 @@
       ],
       "url": "https://kalshi.com/markets/KXTARIFFCHECKS",
       "volume": 1666445.81,
-      "volume_24h": 1932.96,
+      "volume_24h": 1894.52,
       "relevance": 0.92
     },
     {
@@ -21117,12 +21099,12 @@
         },
         {
           "prompt": "Before Jan 1, 2028",
-          "probability": 0.61
+          "probability": 0.59
         }
       ],
       "url": "https://kalshi.com/markets/KXIMPEACH",
-      "volume": 5705806.59,
-      "volume_24h": 24195.05,
+      "volume": 5706370.2,
+      "volume_24h": 24211.07,
       "relevance": 0.7
     },
     {
@@ -42984,89 +42966,395 @@
       "volume": 1030.2791889999999,
       "volume_24h": 0.02,
       "relevance": 1.0
+    },
+    {
+      "id": "k-KXTSLA-27APRDELIV",
+      "title": "Tesla deliveries in Q1 2027",
+      "bets": [
+        {
+          "prompt": "Above 225000",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Above 250000",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Above 275000",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Above 300,000",
+          "probability": 0.93
+        },
+        {
+          "prompt": "Above 325,000",
+          "probability": 0.92
+        },
+        {
+          "prompt": "Above 350,000",
+          "probability": 0.95
+        },
+        {
+          "prompt": "Above 375,000",
+          "probability": 0.8
+        },
+        {
+          "prompt": "Above 400,000",
+          "probability": 0.69
+        },
+        {
+          "prompt": "Above 425,000",
+          "probability": 0.52
+        },
+        {
+          "prompt": "Above 450,000",
+          "probability": 0.51
+        },
+        {
+          "prompt": "Above 475,000",
+          "probability": 0.41
+        },
+        {
+          "prompt": "Above 500,000",
+          "probability": 0.25
+        },
+        {
+          "prompt": "Above 525,000",
+          "probability": 0.18
+        },
+        {
+          "prompt": "Above 550,000",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Above 575,000",
+          "probability": 0.0
+        }
+      ],
+      "url": "https://kalshi.com/markets/KXTSLA",
+      "volume": 34726.05,
+      "volume_24h": 15.28,
+      "relevance": 0.95
+    },
+    {
+      "id": "k-KXEARNINGSMENTIONPFE-27FEB02",
+      "title": "What will Pfizer say during their next earnings call?",
+      "bets": [
+        {
+          "prompt": "Padcev",
+          "probability": 0.0
+        },
+        {
+          "prompt": "GLP-1 / GLP",
+          "probability": 0.89
+        },
+        {
+          "prompt": "China",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Innovent",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Paxlovid (3+ times)",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Eliquis (3+ times)",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Biologic",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Inflation Reduction Act / IRA",
+          "probability": 0.51
+        },
+        {
+          "prompt": "Comirnaty (3+ times)",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Tariff",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Subcutaneous",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Lorbrena (2+ times)",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Patent / Patented",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Abrysvo",
+          "probability": 0.25
+        },
+        {
+          "prompt": "Vyndaqel (2+ times)",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Cost Reduction",
+          "probability": 0.0
+        }
+      ],
+      "url": "https://kalshi.com/markets/KXEARNINGSMENTIONPFE",
+      "volume": 198.18,
+      "volume_24h": 0.18,
+      "relevance": 0.57
+    },
+    {
+      "id": "k-KXEARNINGSMENTIONCVX-27JAN29",
+      "title": "What will Chevron say during their next earnings call?",
+      "bets": [
+        {
+          "prompt": "Permian (3+ times)",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Venezuela (3+ times)",
+          "probability": 0.83
+        },
+        {
+          "prompt": "Bakken",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Leviathan",
+          "probability": 0.0
+        },
+        {
+          "prompt": "LNG / Liquefied Natural Gas (3+ times)",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Gorgon / Wheatstone",
+          "probability": 0.66
+        },
+        {
+          "prompt": "Tengiz / Tengizchevroil",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Guyana",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Buyback / Buy Back",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Ballymore / Whale / Anchor",
+          "probability": 0.6
+        },
+        {
+          "prompt": "Hess (3+ times)",
+          "probability": 0.53
+        },
+        {
+          "prompt": "Brent",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Tariff",
+          "probability": 0.0
+        },
+        {
+          "prompt": "Kazakhstan (3+ times)",
+          "probability": 0.0
+        }
+      ],
+      "url": "https://kalshi.com/markets/KXEARNINGSMENTIONCVX",
+      "volume": 164.7,
+      "volume_24h": 1.19,
+      "relevance": 0.6
+    },
+    {
+      "id": "k-KXSEMIPRODH-26",
+      "title": "US semiconductor production growth in 2026?",
+      "bets": [
+        {
+          "prompt": "Above 8%",
+          "probability": 0.97
+        },
+        {
+          "prompt": "Above 10%",
+          "probability": 0.98
+        },
+        {
+          "prompt": "Above 12%",
+          "probability": 0.9
+        },
+        {
+          "prompt": "Above 14%",
+          "probability": 0.98
+        },
+        {
+          "prompt": "Above 16%",
+          "probability": 0.86
+        },
+        {
+          "prompt": "Above 18%",
+          "probability": 0.48
+        },
+        {
+          "prompt": "Above 20%",
+          "probability": 0.28
+        },
+        {
+          "prompt": "Above 22%",
+          "probability": 0.2
+        },
+        {
+          "prompt": "Above 24%",
+          "probability": 0.19
+        }
+      ],
+      "url": "https://kalshi.com/markets/KXSEMIPRODH",
+      "volume": 5355.6900000000005,
+      "volume_24h": 15.0,
+      "relevance": 0.95
     }
   ],
   "upcoming_catalysts": [
     {
-      "title": "November 2026 FOMC Meeting & Rate Decision",
-      "when": "2026-12-16",
-      "url": null
+      "title": "U.S. October PCE Inflation Report (Fed\u2019s Preferred Gauge)",
+      "when": "2026-11-27",
+      "url": "https://www.bea.gov/news/2026/personal-income-and-outlays-october-2026"
     },
     {
-      "title": "Key U.S. November Jobs Report (Nonfarm Payrolls, Unemployment, AHE)",
-      "when": "2026-12-04",
-      "url": null
-    },
-    {
-      "title": "November U.S. CPI Inflation Print",
-      "when": "2026-12-10",
-      "url": null
-    },
-    {
-      "title": "U.S. Federal Government Funding Deadline / Potential Shutdown Risk (Current CR Expiry)",
-      "when": "2026-12-20",
-      "url": null
-    },
-    {
-      "title": "ECB December 2026 Policy Meeting",
-      "when": "2026-12-10",
-      "url": null
-    },
-    {
-      "title": "Bank of Japan December 2026 Policy Meeting (Yield Curve Control / Negative Rate Path)",
-      "when": "2026-12-18",
-      "url": null
-    },
-    {
-      "title": "OPEC+ Ministerial Meeting on 2027 Production Quotas",
+      "title": "OPEC+ Ministerial Meeting \u2013 Production Policy Decision",
       "when": "2026-11-30",
+      "url": "https://www.opec.org/opec_web/en/press_room/press_room.htm"
+    },
+    {
+      "title": "November U.S. Jobs Report (Nonfarm Payrolls, Unemployment Rate)",
+      "when": "2026-12-04",
+      "url": "https://www.bls.gov/schedule/news_release/empsit.htm"
+    },
+    {
+      "title": "November U.S. CPI Inflation Release",
+      "when": "2026-12-10",
+      "url": "https://www.bls.gov/schedule/news_release/cpi.htm"
+    },
+    {
+      "title": "November U.S. PPI Inflation Release",
+      "when": "2026-12-11",
+      "url": "https://www.bls.gov/schedule/news_release/ppi.htm"
+    },
+    {
+      "title": "FOMC December Policy Meeting and Dot Plot",
+      "when": "2026-12-16 (statement and press conference)",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    {
+      "title": "U.S. Q3 2026 GDP \u2013 Third Estimate",
+      "when": "2026-12-22",
+      "url": "https://www.bea.gov/news/schedule"
+    },
+    {
+      "title": "Potential U.S. Federal Government Funding Deadline (Appropriations/Lapse Risk)",
+      "when": "Late December 2026 (exact date dependent on current continuing resolution)",
+      "url": "https://www.congress.gov/resources/display/content/Calendars+and+Schedules"
+    },
+    {
+      "title": "November U.S. Core PCE Price Index Release",
+      "when": "2026-12-23",
+      "url": "https://www.bea.gov/news/schedule"
+    },
+    {
+      "title": "Japan Bank of Japan (BOJ) December Policy Meeting \u2013 Yield Curve Control / Rate Path",
+      "when": "2026-12-20 (approximate window based on BOJ calendar)",
+      "url": "https://www.boj.or.jp/en/announcements/calendar/index.htm"
+    },
+    {
+      "title": "ECB December Policy Meeting \u2013 Euro Area Rate and QT Guidance",
+      "when": "2026-12-17 (approximate based on ECB calendar)",
+      "url": "https://www.ecb.europa.eu/press/calendars/mgcg/html/index.en.html"
+    },
+    {
+      "title": "Bank of England December Policy Meeting",
+      "when": "Mid-December 2026",
+      "url": "https://www.bankofengland.co.uk/news/news-release-schedule"
+    },
+    {
+      "title": "Major U.S. Tech and Mega-Cap Earnings \u2013 Q4 2026 Pre-Announcements Window Begins",
+      "when": "Late December 2026 \u2013 early January 2027",
       "url": null
     },
     {
-      "title": "Major U.S. Tech Mega-Cap Earnings Cluster (AAPL, MSFT, GOOGL, AMZN, META, NVDA) \u2013 2026 Q4 Results",
-      "when": "Late January\u2013Mid February 2027",
+      "title": "U.S. December FOMC Minutes Release",
+      "when": "Early January 2027",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    {
+      "title": "Q4 2026 U.S. Earnings Season (Money Center Banks Kickoff)",
+      "when": "Mid-January 2027",
       "url": null
     },
     {
-      "title": "U.S. Q4 2026 Advance GDP Release",
-      "when": "2027-01-28",
+      "title": "U.S. December CPI Inflation Release",
+      "when": "Mid-January 2027",
+      "url": "https://www.bls.gov/schedule/news_release/cpi.htm"
+    },
+    {
+      "title": "U.S. December Jobs Report",
+      "when": "Early January 2027",
+      "url": "https://www.bls.gov/schedule/news_release/empsit.htm"
+    },
+    {
+      "title": "U.S. Q4 2026 GDP \u2013 Advance Estimate",
+      "when": "Late January 2027",
+      "url": "https://www.bea.gov/news/schedule"
+    },
+    {
+      "title": "Next Scheduled FOMC Policy Meeting After December",
+      "when": "Late January 2027",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    {
+      "title": "Quarterly 13F Filing Deadline for Institutional Investors (Positions as of 12/31/2026)",
+      "when": "2027-02-14 (approximate SEC deadline)",
+      "url": "https://www.sec.gov/filings/filing-index"
+    },
+    {
+      "title": "Major U.S. Supreme Court Opinion Window (Economic/Regulatory Cases) \u2013 2026 Term",
+      "when": "February\u2013June 2027, with first decisions typically around February",
+      "url": "https://www.supremecourt.gov/opinions/slipopinion/26"
+    },
+    {
+      "title": "Key U.S.\u2013China High-Level Economic / Trade Dialogue (anticipated annual winter meeting window)",
+      "when": "Winter 2026\u201327 (date TBD; typically announced a few weeks ahead)",
       "url": null
     },
     {
-      "title": "Treasury Quarterly Refunding Announcement (QRA) \u2013 Feb 2027 Cycle",
-      "when": "2027-01-31",
-      "url": null
+      "title": "EU Energy & Climate Ministerial Council \u2013 Policy/Target Adjustments with Implications for Energy/Utilities/EVs",
+      "when": "Early 2027 (specific council dates to be confirmed)",
+      "url": "https://www.consilium.europa.eu/en/council-eu/configurations/ecofin/"
     },
     {
-      "title": "U.S. January 2027 CPI Print \u2013 First Look at New-Year Pricing",
-      "when": "2027-02-10",
-      "url": null
+      "title": "U.S. Treasury Quarterly Refunding Announcement (Borrowing Needs / Duration Mix)",
+      "when": "Early February 2027",
+      "url": "https://home.treasury.gov/policy-issues/financing-the-government/quarterly-refunding"
     },
     {
-      "title": "Supreme Court: Expected Decisions on Key Business/Regulatory Cases in Current Term",
-      "when": "By June 2027 (rolling decisions and opinion days)",
-      "url": null
-    },
-    {
-      "title": "Potential U.S.\u2013China High-Level Trade / Economic Dialogue (Next Round)",
-      "when": "Next 3\u20136 months as scheduled by State/Commerce/Treasury",
-      "url": null
-    },
-    {
-      "title": "Upcoming Large-Cap Bank Earnings & Credit Cycle Color (JPM, BAC, WFC, C, GS, MS) \u2013 2026 Q4",
-      "when": "Mid\u2013Late January 2027",
-      "url": null
-    },
-    {
-      "title": "Upcoming U.S. Core PCE Prints (Fed\u2019s Preferred Inflation Gauge)",
-      "when": "Monthly over next 3\u20136 months (especially Dec 2026\u2013Mar 2027 releases)",
-      "url": null
+      "title": "Annual U.S. President\u2019s Budget Proposal for FY2028",
+      "when": "February 2027",
+      "url": "https://www.whitehouse.gov/omb/budget/"
     }
   ],
   "news_headlines": [
     {
       "title": "Jimmy Gomez will resign in wake of House Ethics report - Politico",
-      "description": "Jimmy Gomez will resign in wake of House Ethics report  PoliticoRep. Jimmy Gomez Resigns After Panel Alleges Unwanted Sexual Contact With Aide  The New York TimesDemocratic Rep. Jimmy Gomez to resign after Ethics Committee finds he engaged in sexual misconduct  NBC NewsDemocratic congressman resigns after damning House ethics report  CNNCalifornia Democrat Rep. Gomez resigns following ethics report on sexual misconduct allegations  NPR",
+      "description": "Jimmy Gomez will resign in wake of House Ethics report  PoliticoRep. Jimmy Gomez Resigns After Panel Alleges Unwanted Sexual Contact With Aide  The New York TimesDemocratic congressman resigns after damning House ethics report  CNNRep. Jimmy Gomez to resign after House Ethics panel finds evidence of sexual misconduct  CBS NewsCalifornia Democrat Rep. Gomez resigns following ethics report on sexual misconduct allegations  NPR",
       "published date": "Mon, 23 Nov 2026 22:07:00 GMT",
       "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPQ1FaNUp1Rno2b3F5Wk5zYndJSTJjajNrT3BYYllDX3lENlpOUG5MeWtBZGwtUWw2Y0FSNHNVNVZwaHYyZXZJNDlMYlVpR2QxM1I0RkxFVmJQbnY4WThoeXdOTHBZTXM5UGhibzh5ejhyR2JEUmJ2Z2Fva3RXQnBQZWxvSXRoZzJ1QWU5T2Fkc1c?oc=5&hl=en-US&gl=US&ceid=US:en",
       "publisher": {
@@ -43076,7 +43364,7 @@
     },
     {
       "title": "Trump orders US military not to detonate toxic explosives in Iowa without court approval - BBC",
-      "description": "Trump orders US military not to detonate toxic explosives in Iowa without court approval  BBCIn Iowa, Confusion Over Ammunition Explosion as Trump Calls for Delay  The New York TimesTrump pauses Army\u2019s plan to blow up explosive chemicals in Iowa  CNNArmy update on Iowa Army Ammunition Plant  Army.milAdvocacy groups drove 20,000 masks 200 miles over Iowa lead detonation threat: \"We're talking about a neurotoxin\"  CBS News",
+      "description": "Trump orders US military not to detonate toxic explosives in Iowa without court approval  BBCIn Iowa, Confusion Over Ammunition Explosion as Trump Calls for Delay  The New York TimesTrump orders military to halt plan to detonate stockpile of hazardous chemicals in Iowa  The Washington Post\u2018Not a time for panic\u2019: Governor says Missouri is prepared for possible lead fallout from Iowa blast  Missouri IndependentAdvocacy groups drove 20,000 masks 200 miles over Iowa lead detonation threat: \"We're talking about a neurotoxin\"  CBS News",
       "published date": "Mon, 23 Nov 2026 19:52:52 GMT",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE40VnF2eEk4MmUwaXUzaGh4QW5PYk5UM1loSWozMGlhVkFvaGs2aDdQSmlSZlBEQk5BVGZmMEhhU3BhSnY3cVVVTFZOc3FhbDgtR0dmdWtQRDIzQ2c?oc=5&hl=en-US&gl=US&ceid=US:en",
       "publisher": {
@@ -43086,7 +43374,7 @@
     },
     {
       "title": "Ukraine confirms it used naval drones to strike two Russian ships off Libya - The Guardian",
-      "description": "Ukraine confirms it used naval drones to strike two Russian ships off Libya  The GuardianUkraine Sinks Russian Warship, Hits Cargo Vessels Far From Warzone  WSJUkraine\u2019s Attack Off Coast of Libya Shows Reach of Its Naval Drones  The New York TimesRussia warns Ukraine of \u2018dangerous trend\u2019 after Libya and Baltic attacks  Al JazeeraZelenskyy praises \u2018exemplary\u2019 drone operation that sank Russian warship in a Libyan port  CNBC",
+      "description": "Ukraine confirms it used naval drones to strike two Russian ships off Libya  The GuardianUkraine Sinks Russian Warship, Hits Cargo Vessels Far From Warzone  WSJUkraine\u2019s Attack Off Coast of Libya Shows Reach of Its Naval Drones  The New York TimesRussian warship hit by Ukrainian drones in Libya, Zelensky says  BBCRussia warns Ukraine of \u2018dangerous trend\u2019 after Libya and Baltic attacks  Al Jazeera",
       "published date": "Mon, 23 Nov 2026 20:26:00 GMT",
       "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxONjlYcEJxcWh6djFUeEhBbnR4eHJKWHdqOVNOVHhwc2ZGM3QtWGtDNUN3bHA2eUN0WEV3SkxwRVVyNXgzZzVlVHU5YXBZVm5CQmRoNUQ5ck00Rk1lOGFGc3FLRUFFelRnckhkaF9oVmplSE9UR2lEdEFQbFBNRjMya2l0WmFsTVR3bDM4SjNGS0FwOGJhblBsRmNKTQ?oc=5&hl=en-US&gl=US&ceid=US:en",
       "publisher": {
@@ -43125,6 +43413,16 @@
       }
     },
     {
+      "title": "Appeals court opens door to moving Trump\u2019s criminal case to federal court - Politico",
+      "description": "Appeals court opens door to moving Trump\u2019s criminal case to federal court  PoliticoSee more headlines & perspectives on Google News",
+      "published date": "Mon, 23 Nov 2026 21:45:00 GMT",
+      "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQdHdhUWFwZnhYUHN6U1ZjVU5MVXpzeGFrT3l1OW1tdE5manRnbDBmQUpudkVuY1luRm84Uzl2WVUxakhiZFlhVXRza0tBNTUxaDQ1ZmowRlhnckIxRmtBYlk2ZXVSek9RWEpZNF9hVzdTMmlzLV9qU0ZqNklmbGh3T0ZVOENqV00tSkRKc3lzelR0YWFvRTJuYzd2QkNNV2xDczY0ejlsXy1ld0JxSUM4ejZmWQ?oc=5&hl=en-US&gl=US&ceid=US:en",
+      "publisher": {
+        "href": "https://www.politico.com",
+        "title": "Politico"
+      }
+    },
+    {
       "title": "Virginia School District Shaken by Sex Abuse Claims Closes for a Week - The New York Times",
       "description": "Virginia School District Shaken by Sex Abuse Claims Closes for a Week  The New York TimesMost Albemarle school employees cleared in state screenings  cbs19news.comVirginia school district shutters after finding 500 staff members weren\u2019t screened for child abuse  NBC NewsEducation Department puts Virginia DOE on high-risk status over Albemarle school failures  WJLASchool district closes after learning 500 new staff weren\u2019t screened for child abuse  KXAN Austin",
       "published date": "Mon, 23 Nov 2026 16:30:39 GMT",
@@ -43142,16 +43440,6 @@
       "publisher": {
         "href": "https://www.npr.org",
         "title": "NPR"
-      }
-    },
-    {
-      "title": "Rain Storms Overwhelm San Francisco\u2019s Sewers, Sending Wastewater Into the Streets - The New York Times",
-      "description": "Rain Storms Overwhelm San Francisco\u2019s Sewers, Sending Wastewater Into the Streets  The New York TimesHistoric San Francisco storm exposes cracks in city's aging infrastructure  ABC7 Bay AreaWhy San Francisco flooded so fast \u2014 and why next week could be worse  The San Francisco StandardBay Area storm live updates: Flash flood warning; Moscone Center ceiling gusher  San Francisco Chronicle\u2018It\u2019s just a disheveled craziness\u2019: Mission restaurants get a taste of Super El Ni\u00f1o  Mission Local",
-      "published date": "Mon, 23 Nov 2026 18:25:16 GMT",
-      "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNVWlXTkpVVnhUbjdFY1E0bmZXaGxuNmlLaGVwYnBxSTRkakZhS0djMTEza1VFbGhkTWpra1hKOW13bDVjQ0RnYWhTOG1PenVWSEd6UGVPTzhIT0sxUmk0dkFqaHFXQkFrMnFQdG9SaFdmZDVZblNjLW1WWWxuN2NLcnVfLVktY3VmSkE?oc=5&hl=en-US&gl=US&ceid=US:en",
-      "publisher": {
-        "href": "https://www.nytimes.com",
-        "title": "The New York Times"
       }
     },
     {
@@ -43205,10 +43493,10 @@
       }
     },
     {
-      "title": "Nvidia stock has best day since May 2003, gaining nearly $1T in market cap after Jensen Huang is reinstated as CEO - Yahoo Finance",
-      "description": "Nvidia stock has best day since May 2003, gaining nearly $1T in market cap after Jensen Huang is reinstated as CEO  Yahoo FinanceTrump Is Said to Have Directed Effort to Reinstate Nvidia Chief  The New York TimesNVIDIA Board Reinstates Jensen Huang as President, CEO and Board Director  NVIDIA NewsroomWhy Trump saved Jensen Huang  VoxEx-White House AI advisor weighs in on national security as Huang is back as Nvidia CEO  NPR",
-      "published date": "Mon, 23 Nov 2026 21:27:35 GMT",
-      "url": "https://news.google.com/rss/articles/CBMiggJBVV95cUxPWE52dEljX0cyZVo2a1A1dWJaNXFBemdNUE9jcU94RjNXc1JwMEJyZkpjd3h5cHF0VFUxZWpCOTRpTlRRSzJBTlJGa0tubHEwa3VROU9xRFd4a1czS1Z3d05tMklnTFdESzMyTVRpdVFUQXBoMmkwdE0zd0V4TkcxRnhocTdBSm9fS3pvcksteFlqRGtIMUpjdldDbElVQlgzX3hMNWotbEJXelczemJac2h0TWhKeW9PTmJrZlIwNVBpY2VQVFVaRHFadlNOV0d2bWN2aDl4WlVQeU9IVkFRRUNDSU9tSV9xcjNJcFdJVGhkQWw0cmpJbld3WWE5OHhKcnc?oc=5&hl=en-US&gl=US&ceid=US:en",
+      "title": "Nvidia live updates: Nvidia stock climbs more than 31% as board reinstates Jensen Huang as CEO - Yahoo Finance",
+      "description": "Nvidia live updates: Nvidia stock climbs more than 31% as board reinstates Jensen Huang as CEO  Yahoo FinanceNvidia stock has best day since May 2003, gaining nearly $1T in market cap after Jensen Huang is reinstated as CEO  Yahoo FinanceWhy Trump saved Jensen Huang  VoxNVIDIA Board Reinstates Jensen Huang as President, CEO and Board Director  NVIDIA NewsroomJensen Huang Ends Monday $34 Billion Richer After Being Reinstated As Nvidia CEO (Live Updates)  Forbes",
+      "published date": "Mon, 23 Nov 2026 22:30:28 GMT",
+      "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPSWh4SkxkZkVEYVE0bHF3bzR2azhpV1pRbVJVSzJ2dHYyTEFwcFNFNFlLb25Qa0NnekRUTUlOcXd3SDBfZlJsdDVtOFNTd0VQS0RCWC1WaWZJdURybFFnZFRCM2h1SHA2RXNpWjQzLXNNMURST3dULWp4QVBKMVkycGVmeXN1eXJCWEZkaXg5YmVaTlp2SlpfM0pidU1ZaVExbGxKZXc4VG1vLVZDQTVYSTF3R2RGalo0LWVvcmtzdzVscHl0OEpsUF9RQU1wM0MyRHhQcEQ2ZEg?oc=5&hl=en-US&gl=US&ceid=US:en",
       "publisher": {
         "href": "https://finance.yahoo.com",
         "title": "Yahoo Finance"
@@ -43265,6 +43553,16 @@
       }
     },
     {
+      "title": "Report: MacBook Neo 2 and Refresh for All iPads Coming in Spring - Gizmodo",
+      "description": "Report: MacBook Neo 2 and Refresh for All iPads Coming in Spring  GizmodoNew MacBook Neo now expected in spring 2027  AppleInsiderMacBook Neo Could Get New Colors and Upgrades Every Year  MacRumorsApple Could Launch Second-Generation MacBook Neo, iPhone 18e, iPhone 18 And More In Early 2027  ETV BharatApple puts grand plans for the MacBook Neo into action  PhoneArena",
+      "published date": "Mon, 23 Nov 2026 15:10:02 GMT",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE44WWEwV2xkLVh1VG84QUNrdm8tX3FWTjVZak1wNnJGa0hHbHhPSmUxRkFBeVp0R1JvQmUtYXVSb18tQjItc1RBN25uZmVfZjNjSVZ0QnhfaG56bzdVbWFXQzFUa1lkY3dWLU1EM240WW0?oc=5&hl=en-US&gl=US&ceid=US:en",
+      "publisher": {
+        "href": "https://gizmodo.com",
+        "title": "Gizmodo"
+      }
+    },
+    {
       "title": "AI Mode adding Google Drive, Wallet, & Gemini app integration - 9to5Google",
       "description": "AI Mode adding Google Drive, Wallet, & Gemini app integration  9to5GoogleA more tailored Google Search that\u2019s uniquely yours  blog.googleGoogle Search's AI Mode can now tap into Drive and Wallet for more personalized responses  TechCrunchGoogle Search PI: Wallet, Drive, Gemini Links (Nov 2026)  explainx.aiGoogle Wants You To Connect More Apps To Search In Return For Personally Relevant Responses  Search Engine Roundtable",
       "published date": "Mon, 23 Nov 2026 17:36:00 GMT",
@@ -43275,33 +43573,23 @@
       }
     },
     {
-      "title": "Apple Prepares to Launch Product(Red) HomePod Mini and AirPods Max - Bloomberg.com",
-      "description": "Apple Prepares to Launch Product(Red) HomePod Mini and AirPods Max  Bloomberg.comApple Bringing Back (PRODUCT)RED With Red HomePod Mini 2 and AirPods Max 2  MacRumorsApple plans to release Product (RED) devices ahead of holidays: report  Seeking AlphaReport: Apple Product(RED) color comes to two new products next week  MacworldAfter a hiatus of several years, Apple is set to relaunch its charitable co-branded initiative by introducing special (RED) editions of the HomePod mini 2 and AirPods Max 2.  \u5bcc\u9014\u725b\u725b",
-      "published date": "Mon, 23 Nov 2026 19:00:58 GMT",
-      "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNcE9KcUxjdGR3cENNM1Y2eDJDbldBWHdSaHpHNUdFQklINkg5NUdLRS1uSmd3aUswa3FFSjV5RTBwaUtoWmQ0X1NhSWNTcW90N1JvTjROU2o3YjVob0d4STloekZxckVqS0pESlRlNUt5QU8wQTVaSzgzMDhJSk5JWG5hSFE4cUIyaUQ5QnpXTERjZXRlb2xRS1VTUlVEbEFzdGJDQWcyY3VEekswU3RBMllwazZ6TDRSeGxzQTZyVDJSdUVReUdsTQ?oc=5&hl=en-US&gl=US&ceid=US:en",
+      "title": "Miley Cyrus wedding guest called out for breaking all-black dress code - USA Today",
+      "description": "Miley Cyrus wedding guest called out for breaking all-black dress code  USA TodayMiley Cyrus Gets Married  The New York TimesMiley Cyrus is married: What to know about her husband, wedding  ABC News - Breaking News, Latest News and VideosElizabeth Hurley Nailed Miley Cyrus's Wedding-Guest Dress Code in a Sheer Corseted Gown  Who What WearMiley Cyrus Shares First Close-Up Look at Her Bridal Jewelry, Including Her Wedding Band, After Marrying Maxx Morando  People.com",
+      "published date": "Mon, 23 Nov 2026 19:01:00 GMT",
+      "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxPRWJHeEdKd19TYWhxamRFbTlwM1FmX0UyZkljVkk0X0Mxb3RxdF9EVXZHZkwzdnJWQWY1Zk1mRi1NMXEyOU0xV1pidWFVSU52RkJjbmhycEh5NGEzeUdOUkhRb01zQ0FyT2ZaUjNfdXlHTzRWZzZ6Wm9RRWxVM1RtZ0RaeHkyclFMUGUxZV9SbV82WkNMN0dEQXNmSUFYUl9GVWNlNGxHUWhfM1ZjNXBJd3V6bmlUNjAw?oc=5&hl=en-US&gl=US&ceid=US:en",
       "publisher": {
-        "href": "https://www.bloomberg.com",
-        "title": "Bloomberg.com"
+        "href": "https://www.usatoday.com",
+        "title": "USA Today"
       }
     },
     {
       "title": "Ridley Scott's franchise adds female-led 'Blade Runner 2099' TV series - Reuters",
-      "description": "Ridley Scott's franchise adds female-led 'Blade Runner 2099' TV series  Reuters'Blade Runner 2099' Review: Michelle Yeoh in Amazon Sci-Fi Sequel  The Hollywood Reporter\u2018Blade Runner 2099\u2019 Review: Hunter Schafer Cements Her Status as a Genre Star, With Help from a Stunning Backdrop  Variety\u2018Euphoria\u2019 Star Is Transcendent in Chillingly Prescient Show  The Daily Beast'Blade Runner 2099' Review: A Brilliant Surface With No Human Soul  Time Magazine",
+      "description": "Ridley Scott's franchise adds female-led 'Blade Runner 2099' TV series  Reuters'Blade Runner 2099' Review: Michelle Yeoh in Amazon Sci-Fi Sequel  The Hollywood ReporterBlade Runner 2099 First Reviews: Hunter Schafer Shines in a Fresh Take on Familiar Material  Rotten Tomatoes\u2018Euphoria\u2019 Star Is Transcendent in Chillingly Prescient Show  The Daily BeastBlade Runner 2099: fans will have no idea what is happening in this sci-fi sequel. Why is it even on TV?  The Guardian",
       "published date": "Mon, 23 Nov 2026 11:10:50 GMT",
       "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxOREFSVVpvV1A2cVVnbUlJOFFrLWZUemwxV2hQRjVJMVZ4WncxaUhsVmVjNEM5YmlwY2JmOFFKdjJFREF5X1R0Q1dTMXQzVEVwTnMtV0xHa0FsTXhsZzdTcTZtd1hlYkJxRWtkTUsyVTBVTzNGRU9WT3UxRGdtbFl2Q3lNQW1lM19UeGdRZVdDMGFvOXdUc2s4dENlYUJPVlo2UmpLbVZockI0UE01dEFNNW5SZw?oc=5&hl=en-US&gl=US&ceid=US:en",
       "publisher": {
         "href": "https://www.reuters.com",
         "title": "Reuters"
-      }
-    },
-    {
-      "title": "Miley Cyrus marries drummer Maxx Morando in Palm Springs wedding - NBC News",
-      "description": "Miley Cyrus marries drummer Maxx Morando in Palm Springs wedding  NBC NewsMiley Cyrus Gets Married  The New York TimesMiley Cyrus is married: What to know about her husband, wedding  ABC News - Breaking News, Latest News and VideosElizabeth Hurley Nailed Miley Cyrus's Wedding-Guest Dress Code in a Sheer Corseted Gown  Who What WearMiley Cyrus Shares First Close-Up Look at Her Bridal Jewelry, Including Her Wedding Band, After Marrying Maxx Morando  People.com",
-      "published date": "Mon, 23 Nov 2026 08:59:09 GMT",
-      "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxNeFNIWVdfZW5qUFB1eDNmMzVYY2xSTzRKUnh2MEF3alZGUUVBcFRxZkFFMnQ5UHRMN2NSa3R1SFVQNFRMWHlTSlozbW1kazRwOWk1Yy1Zb2VfVGZDMWtzOVgtZW90cVQtWVlyMnhldlVqX01CZ1AxcXAxUENVYWNtd0xXNHBxbWZxUEVaSzNxWTVjSzg0cFpCMUFMcjg4azJWZktpWXlsZlp2TlNWaDZuTWhERHNfNG40R0ljbzgtcTNPZFU?oc=5&hl=en-US&gl=US&ceid=US:en",
-      "publisher": {
-        "href": "https://www.nbcnews.com",
-        "title": "NBC News"
       }
     },
     {
@@ -43385,13 +43673,13 @@
       }
     },
     {
-      "title": "Voyager 1 Has Sped Through Space at 38,000 Mph Since 1977. This Wednesday, It Will Finally Reach 1 Light-Day From Earth. - ScienceAlert",
-      "description": "Voyager 1 Has Sped Through Space at 38,000 Mph Since 1977. This Wednesday, It Will Finally Reach 1 Light-Day From Earth.  ScienceAlertNASA\u2019s Voyager 1 Makes History Reaching One Light-Day from Earth  NASA Jet Propulsion Laboratory (JPL) (.gov)Three space milestones that sound like science fiction  Scientific AmericanVoyager 1's light-day milestone: 50 years of amazing solar system discoveries in photos  Live ScienceA New Milestone for Life on Earth  The Atlantic",
-      "published date": "Tue, 17 Nov 2026 02:02:41 GMT",
-      "url": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxQM1FXWjhiSEVEaFRZdnkzOTZ2ZkZIbndFd1F0M1poVmpkUnZJVmtzZVN2NW41ei00c1FlYUloU3BzLXpIVDRiU0JqSjIzUnRYTFN0TnVBSmNIZ0xYaFBwNVBjWVBlbmQ4c3VTTlF5QTVXX2pPTkFGMnYzc0FmWUZ4eDJJb0dndkJESkxlRm50bXVJRVd4T0tVdC0yekl5YXBMYlhEdzhEaGd1aXJjWDdIOVN0V0ppOEdraGkwY1pQNk43TW5QcVRpaDdGNWlmeGphd0FQLUtR?oc=5&hl=en-US&gl=US&ceid=US:en",
+      "title": "Voyager 1 reaches a light-day from Earth in golden milestone - AccuWeather",
+      "description": "Voyager 1 reaches a light-day from Earth in golden milestone  AccuWeatherNASA\u2019s Voyager 1 Makes History Reaching One Light-Day from Earth  NASA Jet Propulsion Laboratory (JPL) (.gov)Three space milestones that sound like science fiction  Scientific AmericanVoyager 1's light-day milestone: 50 years of amazing solar system discoveries in photos  Live ScienceA New Milestone for Life on Earth  The Atlantic",
+      "published date": "Thu, 19 Nov 2026 20:25:02 GMT",
+      "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPXzl3TEJqb2lxNnJBRmh5Y0s4RG9mdGtRUzZJa1hyc29DV1J4VVRzdUY2MnVNWWhEbnV2TnloNGl6S2NGVEZaMmt6TkZHRDZlV1g1WDNUVU80NzZuM29HM0tLczR4X3VFRHpUS3JObmFYekhHNmsyUEFuM0dfUzA5dG02Vm9NMG5sOHdrRUk2SFQ0Z2dpX3RRYXlmY0RHT1plZHpZcGowcEhfQjZoc3kw?oc=5&hl=en-US&gl=US&ceid=US:en",
       "publisher": {
-        "href": "https://www.sciencealert.com",
-        "title": "ScienceAlert"
+        "href": "https://www.accuweather.com",
+        "title": "AccuWeather"
       }
     },
     {
@@ -43416,7 +43704,7 @@
     },
     {
       "title": "Virginia reports first measles-linked death of 2026 in child younger than 5 - Al Jazeera",
-      "description": "Virginia reports first measles-linked death of 2026 in child younger than 5  Al JazeeraVirginia reports young child has died of measles, first since 1978  The Washington PostVirginia reports young child is the state\u2019s first measles death in 2026  AP NewsChild who tested positive for measles has died, Virginia health officials report  9NEWSYoung child dies of measles, marking first death of year in Virginia, VDH says  WJLA",
+      "description": "Virginia reports first measles-linked death of 2026 in child younger than 5  Al JazeeraVirginia reports young child has died of measles, first since 1978  The Washington PostChild with measles dies in Virginia, marking state's 1st measles-related death this year  ABC News - Breaking News, Latest News and VideosChild who tested positive for measles has died, Virginia health officials report  9NEWS41 measles cases reported in Central Virginia in just over a month  WRIC ABC 8News",
       "published date": "Sun, 22 Nov 2026 18:11:07 GMT",
       "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxQWVVlY2JXaFRVTkdvVXZaR0hDRWlFbHdSdU40NjA5Q25SS25TY29BYkl5aTNPN1hFTFVHVGtmTllHcG9EQUQyV2hFVUxILW9EZUE4V2FYTF90WTRWVDRGZUdoLXZLeW50NGJpYUszeWpWcTQ3bmExNk1zSmdvUGR2SVpsOGlQcTJPT3l6RGo2STlSMGoyUktTR3VRZGxWajVEc1o5eDZlRUo3Z2VzNVpKSjNnSFhjQ0NQ0gG-AUFVX3lxTFBsQjg2RnZfX1ZodV8xaVc2QlRxVjBpM2xnQnkwb3RJNWNJNXQySlNlWGhSR0VaLTI1SFFEQ0tRWWRwSGlxemRVMGRiRWtJakFkT0R1RUw5U2Q3UUFpS1ltVDdQdlV0STk3b3A0VU5pa3ZqSzQtNzVwaVd2RFVmV2lVZVNLUEpUN0NhcjlmQm83b1RRUldKUExZaGx2c244bU1Fc3VnOG9MSy1JOUk2N3NzTWFlRHhJOHVWSVFHLVE?oc=5&hl=en-US&gl=US&ceid=US:en",
       "publisher": {
@@ -43426,7 +43714,7 @@
     },
     {
       "title": "SD doctor, mom react to measles cases concerns - KELOLAND.com",
-      "description": "SD doctor, mom react to measles cases concerns  KELOLAND.comUS Loses Measles Elimination Status: What You Need to Know  Johns Hopkins MedicineU.S. Loses Its Measles Elimination Status, a Historic Setback for American Health  The New York TimesHow Kennedy let measles run wild in America  ReutersIt\u2019s official: For the first time in decades, U.S. is sick with measles  Harvard Gazette",
+      "description": "SD doctor, mom react to measles cases concerns  KELOLAND.comU.S. Loses Its Measles Elimination Status, a Historic Setback for American Health  The New York TimesHow Kennedy let measles run wild in America  ReutersPAHO urges countries to step up efforts to stop measles outbreaks and move towards elimination in the Americas  Pan American Health Organization (PAHO)How misinformation helped measles make its comeback  Financial Times",
       "published date": "Mon, 23 Nov 2026 00:15:16 GMT",
       "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxPem1CZVJXSmJGOGZ0UzAxTmtaYW5ORmpHd1lPclNuUWpGSlozTl9obkVlcHduWGF6OU9oRXZ2V2dyek1tei10ZmY2VG1HYkJ1X0Y2dks3bDJYZ05PQmFuVlJlQVo4WHJ5U2xid2xMdUVPVXYxR21FTzFMZWhVNkR4RHJVY0V4NG5TMDJjMHlzYnrSAZYBQVVfeXFMTWpRNTlVSDdvWHRlaTJyaTVQWVJKRXVRVElRQXd4c25ZblU5cGFmeFRjUGVaaFJaamtKcTBNMkVma1hXQms1STlRWXNEM0ZRMGpvZ0JPN0dhc2dEWEpJRGR3ZGJ2N0dPTkt6a1EzX2s4bUhoTVF0VmJiY015aDJsSXE5SjZRbWlhTWtLSHpTQkR0ZmhHeGhn?oc=5&hl=en-US&gl=US&ceid=US:en",
       "publisher": {
@@ -44674,7 +44962,7 @@
       "value": "11",
       "value_classification": "Extreme Fear",
       "timestamp": "1795392000",
-      "time_until_update": "4024"
+      "time_until_update": "3862"
     },
     {
       "value": "11",
