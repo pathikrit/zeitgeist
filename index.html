@@ -587,59 +587,34 @@ function paginate(state, items, renderPage) {
   });
 }
 
-// ── Render: Predictions ───────────────────────────────────────────────────────
-function makePredRow(p) {
-  const frag = tpl('tpl-pred-row');
-  const qTd  = frag.querySelector('.question');
-  qTd.appendChild(p.url ? linkEl(p.url, '') : document.createElement('span'));
-  const titleTarget = qTd.firstChild;
-  hi(titleTarget, p.title);
-  frag.querySelector('.answers').appendChild(makeBets(p));
+// ── Render: Predictions & Consensus ──────────────────────────────────────────
+// Both tables share one row layout and differ only in how the bets column is drawn.
+function makePredRow(p, makeBetsFn) {
+  const frag  = tpl('tpl-pred-row');
+  const title = frag.querySelector('.question').appendChild(p.url ? linkEl(p.url, '') : document.createElement('span'));
+  hi(title, p.title);
+  frag.querySelector('.answers').appendChild(makeBetsFn(p));
   frag.querySelector('.topics').appendChild(makeTags(p.topics, true));
   return frag;
 }
 
-function makeConsensusRow(p) {
-  const frag = tpl('tpl-pred-row');
-  const qTd  = frag.querySelector('.question');
-  qTd.appendChild(p.url ? linkEl(p.url, '') : document.createElement('span'));
-  hi(qTd.firstChild, p.title);
-  frag.querySelector('.answers').appendChild(makeConsensusBets(p));
-  frag.querySelector('.topics').appendChild(makeTags(p.topics, true));
-  return frag;
-}
-
-function renderPredictions(rows) {
-  const tbody     = $('pred-tbody');
-  const noResults = $('pred-no-results');
+// `prefix` is the id prefix of the table's tbody / no-results / pagination elements
+function renderPredTable(prefix, state, rows, makeBetsFn) {
+  const tbody = $(`${prefix}-tbody`);
+  $(`${prefix}-no-results`).classList.toggle('hidden', rows.length > 0);
   if (!rows.length) {
     tbody.innerHTML = '';
-    $('pred-pagination').classList.add('hidden');
-    noResults.classList.remove('hidden');
+    $(state.paginationId).classList.add('hidden');
     return;
   }
-  noResults.classList.add('hidden');
-  paginate(predState, rows, page => {
+  paginate(state, rows, page => {
     tbody.innerHTML = '';
-    page.forEach(p => tbody.appendChild(makePredRow(p)));
+    page.forEach(p => tbody.appendChild(makePredRow(p, makeBetsFn)));
   });
 }
 
-function renderConsensus(rows) {
-  const tbody     = $('consensus-tbody');
-  const noResults = $('consensus-no-results');
-  if (!rows.length) {
-    tbody.innerHTML = '';
-    $('consensus-pagination').classList.add('hidden');
-    noResults.classList.remove('hidden');
-    return;
-  }
-  noResults.classList.add('hidden');
-  paginate(consensusState, rows, page => {
-    tbody.innerHTML = '';
-    page.forEach(p => tbody.appendChild(makeConsensusRow(p)));
-  });
-}
+const renderPredictions = rows => renderPredTable('pred',      predState,      rows, makeBets);
+const renderConsensus   = rows => renderPredTable('consensus', consensusState, rows, makeConsensusBets);
 
 // ── Render: Catalysts ─────────────────────────────────────────────────────────
 function renderCatalysts(items) {
@@ -879,14 +854,13 @@ function renderFred(items) {
 // ── State ─────────────────────────────────────────────────────────────────────
 let allPredictions = [], allConsensusPredictions = [], allCatalysts = [], allNews = [], allFred = [];
 let predIdx, consensusIdx, catIdx, newsIdx, fredIdx;
-let currentPredRows = [], currentConsensusRows = [], currentCatRows = [], currentNewsRows = [];
 
 const predState      = { page: 0, paginationId: 'pred-pagination',      scrollTarget: 'pred-table-wrap'      };
 const consensusState = { page: 0, paginationId: 'consensus-pagination',  scrollTarget: 'consensus-table-wrap' };
 const catState       = { page: 0, paginationId: 'cat-pagination',        scrollTarget: 'catalyst-wrap'        };
 const newsState      = { page: 0, paginationId: 'news-pagination',       scrollTarget: 'news-wrap'            };
 
-// ── Search & indexing ─────────────────────────────────────────────────────────
+// ── Indexing & ranking ─────────────────────────────────────────────────────────
 function getTags(p) {
   return (p.topics || '').split(/[,;]/).map(t => t.trim().toLowerCase()).filter(Boolean);
 }
@@ -937,40 +911,6 @@ function buildIndexes() {
   fredIdx      = mkIdx(allFred,      f => ({ title: f.title || '' }));
 }
 
-function applySearch(q) {
-  q = q.trim().toLowerCase();
-  currentQuery = q;
-  const search = (idx, all) => q ? idxSearch(idx, q, all) : all;
-
-  const filteredPreds = search(predIdx, allPredictions);
-  $('pred-count').textContent = q ? `${filteredPreds.length} / ${allPredictions.length}` : allPredictions.length;
-  predState.page  = 0;
-  currentPredRows = q ? filteredPreds : diverseSort(filteredPreds);
-  renderPredictions(currentPredRows);
-
-  const filteredConsensus = search(consensusIdx, allConsensusPredictions);
-  $('consensus-count').textContent = q ? `${filteredConsensus.length} / ${allConsensusPredictions.length}` : allConsensusPredictions.length;
-  consensusState.page  = 0;
-  currentConsensusRows = q ? filteredConsensus : diverseSort(filteredConsensus);
-  renderConsensus(currentConsensusRows);
-
-  const filteredCats = search(catIdx, allCatalysts);
-  $('cat-count').textContent = q ? `${filteredCats.length} / ${allCatalysts.length}` : allCatalysts.length;
-  catState.page  = 0;
-  currentCatRows = filteredCats;
-  renderCatalysts(currentCatRows);
-
-  const filteredNews = search(newsIdx, allNews);
-  $('news-count').textContent = q ? `${filteredNews.length} / ${allNews.length}` : allNews.length;
-  newsState.page  = 0;
-  currentNewsRows = filteredNews;
-  renderNews(currentNewsRows);
-
-  const filteredFred = search(fredIdx, allFred);
-  $('fred-count').textContent = q ? `${filteredFred.length} / ${allFred.length}` : allFred.length;
-  renderFred(filteredFred);
-}
-
 // ── Search ────────────────────────────────────────────────────────────────────
 // Always runs both keyword (FlexSearch) and semantic (all-MiniLM-L6-v2) search.
 // Keyword results render immediately; semantic results enrich after 350 ms of
@@ -1006,21 +946,36 @@ function _unionByPop(kw, sem) {
   return combined.sort((a, b) => (b.volume_24h || 0) - (a.volume_24h || 0));
 }
 
+// Renders every searchable section from the first page; counts read "shown / total" while searching.
+function renderAll({ preds, consensus, cats, news, fred }) {
+  const setCount = (id, shown, all) => {
+    $(id).textContent = currentQuery ? `${shown.length} / ${all.length}` : all.length;
+  };
+  setCount('pred-count',      preds,     allPredictions);
+  setCount('consensus-count', consensus, allConsensusPredictions);
+  setCount('cat-count',       cats,      allCatalysts);
+  setCount('news-count',      news,      allNews);
+  predState.page = consensusState.page = catState.page = newsState.page = 0;
+  renderPredictions(preds);
+  renderConsensus(consensus);
+  renderCatalysts(cats);
+  renderNews(news);
+  renderFred(fred);
+}
+
 function applySearch(q) {
   q = q.trim().toLowerCase();
   currentQuery = q;
   clearTimeout(_semTimer);
 
   if (!q) {
-    $('pred-count').textContent      = allPredictions.length;
-    predState.page = 0; currentPredRows = diverseSort(allPredictions); renderPredictions(currentPredRows);
-    $('consensus-count').textContent = allConsensusPredictions.length;
-    consensusState.page = 0; currentConsensusRows = diverseSort(allConsensusPredictions); renderConsensus(currentConsensusRows);
-    $('cat-count').textContent       = allCatalysts.length;
-    catState.page = 0; currentCatRows = allCatalysts; renderCatalysts(currentCatRows);
-    $('news-count').textContent      = allNews.length;
-    newsState.page = 0; currentNewsRows = allNews; renderNews(currentNewsRows);
-    $('fred-count').textContent      = allFred.length; renderFred(allFred);
+    renderAll({
+      preds:     diverseSort(allPredictions),
+      consensus: diverseSort(allConsensusPredictions),
+      cats:      allCatalysts,
+      news:      allNews,
+      fred:      allFred,
+    });
     return;
   }
 
@@ -1032,19 +987,7 @@ function applySearch(q) {
     news:      idxSearch(newsIdx,      q, allNews),
     fred:      idxSearch(fredIdx,      q, allFred),
   };
-
-  const renderAll = (preds, consensus, cats, news, fred) => {
-    $('pred-count').textContent      = `${preds.length} / ${allPredictions.length}`;
-    predState.page = 0; currentPredRows = preds; renderPredictions(preds);
-    $('consensus-count').textContent = `${consensus.length} / ${allConsensusPredictions.length}`;
-    consensusState.page = 0; currentConsensusRows = consensus; renderConsensus(consensus);
-    $('cat-count').textContent       = `${cats.length} / ${allCatalysts.length}`;
-    catState.page = 0; currentCatRows = cats; renderCatalysts(cats);
-    $('news-count').textContent      = `${news.length} / ${allNews.length}`;
-    newsState.page = 0; currentNewsRows = news; renderNews(news);
-    $('fred-count').textContent      = `${fred.length} / ${allFred.length}`; renderFred(fred);
-  };
-  renderAll(kw.preds, kw.consensus, kw.cats, kw.news, kw.fred);
+  renderAll(kw);
 
   // Phase 2: semantic enrichment (debounced; updates results once model is ready)
   _semTimer = setTimeout(async () => {
@@ -1057,22 +1000,19 @@ function applySearch(q) {
       const qEmb = Array.from(out.data);
       const pMap = embs.predictions || {};
 
-      const semPreds     = allPredictions.map(x => ({ x, s: _dot(qEmb, pMap[x.id] || []) }))
-                             .filter(({ s }) => s >= SEMANTIC_THRESHOLD).map(({ x }) => x);
-      const semConsensus = allConsensusPredictions.map(x => ({ x, s: _dot(qEmb, pMap[x.id] || []) }))
-                             .filter(({ s }) => s >= SEMANTIC_THRESHOLD).map(({ x }) => x);
-      const semCats      = allCatalysts.map((x, i) => ({ x, s: _dot(qEmb, (embs.catalysts || [])[i] || []) }))
-                             .filter(({ s }) => s >= SEMANTIC_THRESHOLD).map(({ x }) => x);
-      const semNews      = allNews.map((x, i) => ({ x, s: _dot(qEmb, (embs.news || [])[i] || []) }))
-                             .filter(({ s }) => s >= SEMANTIC_THRESHOLD).map(({ x }) => x);
+      // Items whose embedding (looked up by embOf) is close enough to the query; no embedding = no match
+      const semantic = (items, embOf) => items.filter((x, i) => {
+        const emb = embOf(x, i);
+        return emb && _dot(qEmb, emb) >= SEMANTIC_THRESHOLD;
+      });
 
-      renderAll(
-        _unionByPop(kw.preds, semPreds),
-        _unionByPop(kw.consensus, semConsensus),
-        _unionByPop(kw.cats, semCats),
-        _unionByPop(kw.news, semNews),
-        kw.fred
-      );
+      renderAll({
+        preds:     _unionByPop(kw.preds,     semantic(allPredictions,          x => pMap[x.id])),
+        consensus: _unionByPop(kw.consensus, semantic(allConsensusPredictions, x => pMap[x.id])),
+        cats:      _unionByPop(kw.cats,      semantic(allCatalysts, (_, i) => embs.catalysts?.[i])),
+        news:      _unionByPop(kw.news,      semantic(allNews,      (_, i) => embs.news?.[i])),
+        fred:      kw.fred,
+      });
     } catch (err) {
       console.warn('Semantic search unavailable:', err);
     }
