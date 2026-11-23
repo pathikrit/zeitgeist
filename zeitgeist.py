@@ -1,11 +1,13 @@
 import asyncio
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+import hashlib
 import json
 from pathlib import Path
 import os
 import logging as log
 import re
 import shutil
+import sqlite3
 
 import polars as pl
 from pydantic import BaseModel, Field
@@ -38,6 +40,10 @@ MAX_BETS_PER_QUESTION = 20 # only the most likely outcomes are shown to the mode
 DECISIONS_USD_PER_1M_INPUT_TOKENS = 0.10 # uncached; output tokens are free
 
 EVENTS_MODEL = "openai:gpt-5.1-2025-11-13"
+
+# SQLite database kept between runs (see the workflow): cached relevance scores + daily snapshots
+DB_FILE = Path(".data/zeitgeist.db")
+DB_RETENTION_DAYS = 30 # forget markets not seen for this long
 
 
 today = date.today()
@@ -204,11 +210,71 @@ def get_fred_data() -> pl.DataFrame | None:
 
 RELEVANCE_INPUT = templates.get_template("relevance_input.mako").render(today=today)
 RELEVANCE_QUESTION = "Would the outcome of this prediction market have a VERY obvious impact on this investor?"
+# A cached score is only reused while the model and prompt are unchanged (the date in the prompt is ignored)
+PROMPT_HASH = hashlib.sha256("\n".join([
+    RELEVANCE_MODEL,
+    templates.get_template("relevance_input.mako").render(today=date(2000, 1, 1)),
+    RELEVANCE_QUESTION,
+]).encode()).hexdigest()[:16]
+
+def open_db() -> sqlite3.Connection:
+    DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+    db = sqlite3.connect(DB_FILE)
+    db.executescript("""
+        CREATE TABLE IF NOT EXISTS markets (
+            id TEXT PRIMARY KEY, source TEXT, title TEXT, url TEXT,
+            relevance REAL, prompt_hash TEXT, first_seen TEXT, last_seen TEXT
+        );
+        CREATE TABLE IF NOT EXISTS snapshots (
+            market_id TEXT, date TEXT, bets_json TEXT, volume REAL, volume_24h REAL,
+            PRIMARY KEY (market_id, date)
+        );
+    """)
+    return db
+
+def cached_scores(db: sqlite3.Connection) -> dict[str, float]:
+    """Relevance scores already computed with the current model and prompt, by market id."""
+    return dict(db.execute("SELECT id, relevance FROM markets WHERE prompt_hash = ?", (PROMPT_HASH,)))
+
+def save_scores(db: sqlite3.Connection, predictions: pl.DataFrame, scores: dict[str, float]):
+    """Upsert every scored market seen today, so tomorrow's run can skip it."""
+    db.executemany(
+        """
+        INSERT INTO markets (id, source, title, url, relevance, prompt_hash, first_seen, last_seen)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT (id) DO UPDATE SET
+            title = excluded.title, url = excluded.url, relevance = excluded.relevance,
+            prompt_hash = excluded.prompt_hash, last_seen = excluded.last_seen
+        """,
+        [
+            (p["id"], "kalshi" if p["id"].startswith("k-") else "polymarket", p["title"], p["url"],
+             scores[p["id"]], PROMPT_HASH, today.isoformat(), today.isoformat())
+            for p in predictions.select("id", "title", "url").to_dicts() if p["id"] in scores
+        ],
+    )
+    db.commit()
+
+def save_snapshots(db: sqlite3.Connection, relevant: pl.DataFrame):
+    """Record today's odds and volume for the relevant markets, building up a history."""
+    db.executemany(
+        "INSERT OR REPLACE INTO snapshots (market_id, date, bets_json, volume, volume_24h) VALUES (?, ?, ?, ?, ?)",
+        [(p["id"], today.isoformat(), json.dumps(p["bets"]), p["volume"], p["volume_24h"]) for p in relevant.to_dicts()],
+    )
+    db.commit()
+
+def prune_db(db: sqlite3.Connection):
+    cutoff = (today - timedelta(days=DB_RETENTION_DAYS)).isoformat()
+    db.execute("DELETE FROM snapshots WHERE market_id IN (SELECT id FROM markets WHERE last_seen < ?)", (cutoff,))
+    deleted = db.execute("DELETE FROM markets WHERE last_seen < ?", (cutoff,)).rowcount
+    db.commit()
+    db.execute("VACUUM")
+    log.info(f"Pruned {deleted} markets not seen since {cutoff}")
 
 def relevance_question(prediction: dict) -> dict:
     """One predicate question for the Decisions API; its name is the prediction id so the answer maps back."""
     bets = sorted(prediction["bets"] or [], key=lambda b: b["probability"], reverse=True)[:MAX_BETS_PER_QUESTION]
-    outcomes = "; ".join(f"{b['prompt']} ({b['probability']:.0%})" for b in bets)
+    # No odds in the text: the score should describe the market, not today's prices, so it can be cached
+    outcomes = "; ".join(b["prompt"] for b in bets)
     return {
         "type": "predicate",
         "name": prediction["id"],
@@ -236,8 +302,11 @@ async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> dic
         return resp.json()
     raise RuntimeError(f"Decisions API request failed: {error}")
 
-async def find_relevant_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
-    """Score every prediction's relevance with the Decisions API and keep those above RELEVANCE_THRESHOLD."""
+async def find_relevant_predictions(predictions: pl.DataFrame, db: sqlite3.Connection) -> pl.DataFrame:
+    """Score the predictions not already in the database with the Decisions API; keep those above RELEVANCE_THRESHOLD."""
+    cached = cached_scores(db)
+    to_score = predictions.filter(~pl.col("id").is_in(list(cached)))
+    log.info(f"{len(predictions) - len(to_score)} predictions already scored, {len(to_score)} new ones to score")
     semaphore = asyncio.Semaphore(DECISIONS_CONCURRENCY)
     input_tokens = 0
 
@@ -264,14 +333,16 @@ async def find_relevant_predictions(predictions: pl.DataFrame) -> pl.DataFrame:
     ) as client:
         results = await asyncio.gather(*[
             process_batch(i, batch, client)
-            for i, batch in enumerate(predictions.select("id", "title", "bets").iter_slices(DECISIONS_BATCH_SIZE))
+            for i, batch in enumerate(to_score.select("id", "title", "bets").iter_slices(DECISIONS_BATCH_SIZE))
         ])
 
-    scores = [score for batch_scores in results for score in batch_scores]
-    assert scores, "Decisions API returned no answers"
-    relevance = pl.DataFrame(scores, schema={"id": pl.String, "relevance": pl.Float64})
+    new_scores = {score["id"]: score["relevance"] for batch_scores in results for score in batch_scores}
+    assert new_scores or not len(to_score), "Decisions API returned no answers"
+    scores = cached | new_scores
+    save_scores(db, predictions, scores)
+    relevance = pl.DataFrame(list(scores.items()), schema={"id": pl.String, "relevance": pl.Float64}, orient="row")
     relevant = predictions.join(relevance, on="id", how="inner").filter(pl.col("relevance") >= RELEVANCE_THRESHOLD)
-    log.info(f"Picked {len(relevant)} relevant predictions from {len(predictions)} ({len(scores)} scored)")
+    log.info(f"Picked {len(relevant)} relevant predictions from {len(predictions)} ({len(new_scores)} scored now)")
     log.info(f"Decisions API usage: {input_tokens:,} input tokens ~ ${input_tokens * DECISIONS_USD_PER_1M_INPUT_TOKENS / 1e6:.3f}")
     return relevant
 
@@ -413,14 +484,19 @@ async def main():
     predictions = predictions.filter(pl.col("volume_24h") > 0)
     log.info(f"After volume filter = {len(predictions)} predictions")
 
+    db = open_db()
     relevant_predictions, events, news, fred_data, fear_greed, gdpnow = await asyncio.gather(
-        find_relevant_predictions(predictions),
+        find_relevant_predictions(predictions, db),
         get_events(),
         asyncio.to_thread(get_news),
         asyncio.to_thread(get_fred_data),
         get_fear_greed(),
         get_gdpnow(),
     )
+
+    save_snapshots(db, relevant_predictions)
+    prune_db(db)
+    db.close()
 
     output_dir = Path(".reports")
     output_dir.mkdir(parents=True, exist_ok=True)

@@ -30,11 +30,34 @@ jobs:
           path: ~/.cache/fastembed
           key: fastembed-all-minilm-l6-v2-v1
 
+      # The database (cached relevance scores + daily snapshots) lives as an asset on the "data" release
+      - name: Restore database
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if assets=$(gh release view data --json assets --jq '.assets[].name' 2>&1); then
+            if grep -qx zeitgeist.db <<< "$assets"; then
+              gh release download data --pattern zeitgeist.db --dir .data
+            fi
+          elif grep -q "release not found" <<< "$assets"; then
+            echo "No database yet; starting fresh"
+          else
+            echo "$assets"; exit 1 # do not start fresh (and later overwrite the database) on a transient error
+          fi
+
       - name: Generate report
         run: uv run python zeitgeist.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+
+      - name: Save database
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view data > /dev/null 2>&1 || gh release create data --title "Data" --notes "SQLite database maintained by the daily report" --latest=false
+          gh release upload data .data/zeitgeist.db --clobber
 
       - name: Publish report
         uses: peaceiris/actions-gh-pages@v4
