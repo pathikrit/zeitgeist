@@ -28,6 +28,9 @@
   body { margin: 0; font-family: var(--font-family-body); background: var(--color-background-body); }
   /* The timeline index fills its panel; a vertical Astryx Slider is 160px tall otherwise */
   .astryx-slider[data-orientation="vertical"] { flex: 1; }
+  /* An outcome's bar takes its colour from its probability: see betColor(). An even bet is white on a dark page, grey on a light one */
+  html { --bet-even: light-dark(var(--color-icon-disabled), var(--color-on-dark)); }
+  .astryx-progress-bar-fill { background-color: var(--bet-color); }
 </style>
 </head>
 <body>
@@ -57,7 +60,11 @@ const SEMANTIC_THRESHOLD = 0.20;  // cosine similarity between the search text a
 const SEMANTIC_DELAY_MS = 350;
 
 // ── Icons: Font Awesome duotone everywhere, including the ones Astryx draws inside its own components ──
-const fa = name => h('i', {className: `fa-duotone fa-solid fa-${name}`, 'aria-hidden': true});
+// `hue` is one of Astryx's colour names (blue, orange, purple, ...); without it the icon takes the text colour
+const fa = (name, hue) => h('i', {
+  className: `fa-duotone fa-solid fa-${name}`, 'aria-hidden': true, style: hue && {color: `var(--color-icon-${hue})`},
+});
+const textColor = hue => ({color: `var(--color-text-${hue})`});
 registerIcons(Object.fromEntries(Object.entries({
   close: 'xmark', chevronDown: 'chevron-down', chevronLeft: 'chevron-left', chevronRight: 'chevron-right',
   chevronsLeft: 'chevrons-left', chevronsRight: 'chevrons-right', check: 'check', success: 'circle-check',
@@ -75,6 +82,7 @@ const monthDate = number => new Date(Date.UTC(Math.floor(number / 12), number % 
 const longMonth = number => utc({month: 'long', year: 'numeric'}).format(monthDate(number));
 const shortMonth = number => utc({month: 'short', year: 'numeric'}).format(monthDate(number));
 const day = iso => utc({month: 'short', day: 'numeric', year: 'numeric'}).format(new Date(iso));
+const dayOfMonth = iso => utc({month: 'short', day: 'numeric'}).format(new Date(iso));
 const isDate = text => /^\d{4}-\d{2}-\d{2}$/.test(text);
 const compact = new Intl.NumberFormat('en-US', {notation: 'compact', maximumFractionDigits: 1});
 const plural = (count, noun) => `${count.toLocaleString('en-US')} ${noun}${count === 1 ? '' : 's'}`;
@@ -129,28 +137,37 @@ async function loadJson(file) {
   return response.json();
 }
 
+// Red at 0%, through white at 50%, to green at 100%
+function betColor(probability) {
+  const [end, share] = probability < 0.5 ? ['error', 1 - probability * 2] : ['success', probability * 2 - 1];
+  return `color-mix(in oklab, var(--color-${end}) ${Math.round(share * 100)}%, var(--bet-even))`;
+}
+
 // ── Components ──
-function Outcome({bet, isLeading}) {
+function Outcome({bet}) {
   return h(ProgressBar, {
     label: bet.prompt,
     value: Math.round(bet.probability * 100),
     hasValueLabel: true,
     formatValueLabel: value => `${value}%`,
-    variant: isLeading ? 'accent' : 'neutral',
+    style: {'--bet-color': betColor(bet.probability)},
   });
 }
 
-function Question({question}) {
-  const {resolution_date: resolves, outcomes: bets} = question;
+// The date line of a card; the year is left out under a month heading, which already says it
+function When({iso, hasYear, hue}) {
+  return h(Text, {type: 'supporting', weight: 'semibold', style: textColor(hue)},
+    fa('calendar-day', hue), ' ', !iso ? 'No date' : hasYear ? day(iso) : dayOfMonth(iso));
+}
+
+function Question({question, hasYear}) {
+  const bets = question.outcomes;
   const rest = bets.slice(MAX_OUTCOMES);
   return h(Card, null, h(VStack, {gap: 3},
-    h(HStack, {gap: 2, align: 'center', wrap: 'wrap'},
-      h(Badge, {label: resolves ? day(resolves) : 'No end date', icon: fa('calendar-day')}),
-      question.isConsensus && h(Badge, {label: 'Consensus', variant: 'success', icon: fa('circle-check')}),
-    ),
-    h(Link, {href: question.url, target: '_blank', weight: 'semibold'}, question.title),
+    h(When, {iso: question.resolution_date, hasYear, hue: 'orange'}),
+    h(Link, {href: question.url, target: '_blank', weight: 'semibold', style: textColor('blue')}, question.title),
     bets.length === 0 && h(Text, {type: 'supporting'}, 'No outcome is priced above 1%'),
-    ...bets.slice(0, MAX_OUTCOMES).map((bet, i) => h(Outcome, {key: bet.prompt, bet, isLeading: i === 0})),
+    ...bets.slice(0, MAX_OUTCOMES).map(bet => h(Outcome, {key: bet.prompt, bet})),
     rest.length > 0 && h(Collapsible, {trigger: h(Text, {type: 'supporting'}, plural(rest.length, 'more outcome')), defaultIsOpen: false},
       h(VStack, {gap: 3, paddingBlockStart: 3}, rest.map(bet => h(Outcome, {key: bet.prompt, bet}))),
     ),
@@ -164,7 +181,7 @@ function Month({group}) {
   const hidden = questions.length - shown;
   return h(VStack, {gap: 4, as: 'section', id: `month-${group.bucket}`},
     h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
-      h(Heading, {level: 2}, group.label),
+      h(Heading, {level: 2, style: textColor('orange')}, fa('calendar-days', 'orange'), ' ', group.label),
       questions.length > 0 && h(Badge, {label: plural(questions.length, 'question'), variant: 'blue', icon: fa('scale-balanced')}),
       catalysts.length > 0 && h(Badge, {label: plural(catalysts.length, 'catalyst'), variant: 'purple', icon: fa('bolt')}),
     ),
@@ -178,7 +195,7 @@ function Month({group}) {
       }))),
     ),
     questions.length > 0 && h(Grid, {columns: {minWidth: 320, max: 3}, gap: 4},
-      questions.slice(0, shown).map(question => h(Question, {key: question.id, question})),
+      questions.slice(0, shown).map(question => h(Question, {key: question.id, question, hasYear: group.bucket === LATER})),
     ),
     hidden > 0 && h(HStack, {justify: 'center'}, h(Button, {
       label: `Show ${Math.min(hidden, QUESTIONS_PER_PAGE)} more of ${hidden.toLocaleString('en-US')}`,
