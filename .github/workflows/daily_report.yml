@@ -50,7 +50,6 @@ jobs:
         run: uv run python zeitgeist.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
 
       - name: Save database
         env:

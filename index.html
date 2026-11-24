@@ -1,1027 +1,306 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-astryx-theme="neutral">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zeitgeist Dashboard</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeitgeist</title>
+
+<!-- Astryx components without a build step; stylesheet order and import map follow its "No build step (CDN)" recipe:
+     https://github.com/meta/astryx/blob/main/packages/core/README.md -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@astryxdesign/theme-neutral@0.7.17/fonts.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@astryxdesign/core@0.7.17/src/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@astryxdesign/core@0.7.17/dist/astryx.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@astryxdesign/theme-neutral@0.7.17/dist/theme.css">
+<link rel="stylesheet" href="https://kit.fontawesome.com/a22be8527e.css" crossorigin="anonymous">
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.2.0",
+    "react/jsx-runtime": "https://esm.sh/react@19.2.0/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@19.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.2.0/client",
+    "@astryxdesign/core": "https://esm.sh/@astryxdesign/core@0.7.17?external=react,react-dom"
+  }
+}
+</script>
 <style>
-  /* ── Reset & base ──────────────────────────────────────────────────────── */
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: #0d0d0f;
-    color: #e0e0e5;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  .hidden { display: none !important; }
-
-  /* ── Topbar ────────────────────────────────────────────────────────────── */
-  .topbar {
-    background: #0d0d0f;
-    padding: 16px 32px 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .topbar input {
-    width: 100%;
-    padding: 10px 16px;
-    border: 1px solid #2a2a2e;
-    border-radius: 10px;
-    font-size: 15px;
-    outline: none;
-    background: #141416;
-    color: #e0e0e5;
-    transition: border-color .15s;
-  }
-  .topbar input::placeholder { color: #3a3a3e; }
-  .topbar input:focus { border-color: #3a7bd5; background: #16161a; }
-  .search-wrap { position: relative; }
-
-  /* ── Layout ────────────────────────────────────────────────────────────── */
-  .container {
-    max-width: 1800px;
-    margin: 0 auto;
-    padding: 12px 32px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-  }
-  section { background: #141416; border-radius: 12px; border: 1px solid #2a2a2e; overflow: hidden; }
-  .section-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid #222226;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-header h2 { font-size: 15px; font-weight: 600; color: #f0f0f5; }
-  .count {
-    background: #222226;
-    color: #777;
-    border-radius: 20px;
-    padding: 1px 8px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  /* ── Predictions table ─────────────────────────────────────────────────── */
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    text-align: left;
-    padding: 10px 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: #555;
-    background: #111113;
-    border-bottom: 1px solid #222226;
-    position: sticky;
-    top: 57px;
-  }
-  tbody tr { border-bottom: 1px solid #1c1c20; transition: background .1s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: #1a1a1e; }
-  td { padding: 12px 20px; vertical-align: top; }
-  td.question { max-width: 600px; color: #4a9eff; font-weight: 500; }
-  td.question a { color: #4a9eff; text-decoration: none; }
-  td.question a:hover { text-decoration: underline; }
-  td.answers { min-width: 380px; }
-
-  /* ── Bets ──────────────────────────────────────────────────────────────── */
-  .bet { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 13px; }
-  .bet:last-child { margin-bottom: 0; }
-  .bet-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #aaa; }
-  .bet-bar-wrap { width: 160px; height: 6px; background: #2a2a2e; border-radius: 3px; flex-shrink: 0; }
-  .bet-bar { height: 6px; border-radius: 3px; background: #3a7bd5; width: var(--bar-pct, 0%); }
-  .bet-bar.high  { background: #2ea84a; }
-  .bet-bar.low   { background: #c0392b; }
-  .bet-bar.other { opacity: .4; }
-  .bet-pct { width: 36px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: #ccc; font-size: 12px; }
-
-  mark { background: #7c5c00; color: #ffd060; border-radius: 2px; padding: 0 1px; }
-
-  /* ── Other/toggle bets ─────────────────────────────────────────────────── */
-  .other-toggle { cursor: pointer; opacity: .6; }
-  .other-toggle:hover { opacity: 1; }
-  .other-label { font-style: italic; }
-  .other-bets { padding-left: 8px; border-left: 1px solid #2a2a2e; margin: 2px 0 4px; }
-  .no-results { padding: 40px 20px; text-align: center; color: #444; }
-
-  /* ── Pagination ────────────────────────────────────────────────────────── */
-  .pagination { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border-top: 1px solid #1c1c20; }
-  .pagination button { background: #1e1e22; border: 1px solid #2a2a2e; color: #aaa; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-  .pagination button:hover:not(:disabled) { background: #2a2a2e; color: #fff; }
-  .pagination button:disabled { opacity: .3; cursor: default; }
-  .pagination button.active { background: #3a7bd5; border-color: #3a7bd5; color: #fff; }
-  .pagination-info { font-size: 12px; color: #555; margin-left: 4px; }
-  .pagination-ellipsis { font-size: 12px; color: #555; padding: 0 4px; }
-
-  /* ── Catalysts ─────────────────────────────────────────────────────────── */
-  .catalyst-list { display: flex; flex-direction: column; }
-  .catalyst-row { display: flex; align-items: baseline; gap: 12px; padding: 11px 20px; border-bottom: 1px solid #1c1c20; }
-  .catalyst-row:last-child { border-bottom: none; }
-  .catalyst-when { flex-shrink: 0; font-size: 12px; color: #555; width: 300px; }
-  .catalyst-title { flex: 1; color: #ccc; }
-  .catalyst-title a { color: #4a9eff; text-decoration: none; }
-  .catalyst-title a:hover { text-decoration: underline; }
-
-  /* ── News ──────────────────────────────────────────────────────────────── */
-  .news-list { display: flex; flex-direction: column; }
-  .news-row { padding: 11px 20px; border-bottom: 1px solid #1c1c20; }
-  .news-row:last-child { border-bottom: none; }
-  .news-row a { color: #ddd; text-decoration: none; font-weight: 500; }
-  .news-row a:hover { color: #4a9eff; }
-  .news-desc { color: #555; font-size: 13px; margin-top: 2px; }
-
-  /* ── Macro / yield curve ───────────────────────────────────────────────── */
-  .macro-top { display: flex; border-bottom: 1px solid #1c1c20; }
-  .yield-curve-card { flex: 1; padding: 14px 20px 10px; border-right: 1px solid #1c1c20; min-width: 0; }
-  .yield-curve-title { font-weight: 600; font-size: 13px; color: #aaa; margin-bottom: 8px; }
-  svg.yield-curve { display: block; width: 100%; overflow: visible; }
-  .fg-card { width: 200px; flex-shrink: 0; padding: 14px 20px; display: flex; flex-direction: column; gap: 3px; }
-  .fg-title { font-weight: 600; font-size: 13px; color: #aaa; }
-  .fg-title a { color: inherit; text-decoration: none; }
-  .fg-value { font-size: 48px; font-weight: 300; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
-  .fg-value-unit { font-size: 18px; color: #888; }
-  .fg-label { font-size: 13px; font-weight: 600; }
-  .fg-date  { font-size: 12px; color: #444; margin-bottom: 6px; }
-  #gdpnow-card { border-right: 1px solid #1c1c20; }
-
-  /* Sentiment color classes (Fear & Greed + GDPNow) */
-  .color-red    { color: #c0392b; }
-  .color-orange { color: #e67e22; }
-  .color-yellow { color: #d4ac0d; }
-  .color-green  { color: #27ae60; }
-  .color-dkgreen{ color: #1e8449; }
-
-  /* ── FRED grid ─────────────────────────────────────────────────────────── */
-  .fred-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0; }
-  .fred-card { padding: 14px 20px; border-right: 1px solid #1c1c20; border-bottom: 1px solid #1c1c20; }
-  .fred-card:hover { background: #1a1a1e; }
-  .fred-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; color: #aaa; }
-  .fred-title a { color: #aaa; text-decoration: none; }
-  .fred-title a:hover { color: #4a9eff; }
-  .fred-latest { font-size: 22px; font-weight: 300; font-variant-numeric: tabular-nums; margin-bottom: 6px; color: #f0f0f5; }
-  .fred-latest-date { font-size: 13px; color: #444; font-weight: 400; margin-left: 6px; }
-  svg.sparkline { display: block; overflow: visible; }
-
-  /* ── Error banner ──────────────────────────────────────────────────────── */
-  #error-banner {
-    background: #2a1f10;
-    border: 1px solid #5a3a10;
-    border-radius: 8px;
-    padding: 16px 20px;
-    margin: 24px 32px 0;
-    font-size: 13px;
-    color: #c8893a;
-  }
-  #error-banner code { background: #1a1208; padding: 1px 4px; border-radius: 3px; font-family: monospace; }
+  html, body, #root { height: 100%; }
+  body { margin: 0; font-family: var(--font-family-body); background: var(--color-background-body); }
 </style>
 </head>
 <body>
-
-<div class="topbar">
-  <div class="search-wrap">
-    <input type="search" id="pred-search" placeholder="Search…" autocomplete="off">
-  </div>
-</div>
-
-<div id="error-banner" class="hidden">
-  Could not load <strong>.reports/output.json</strong>. If opening from <code>file://</code>, serve locally instead:<br>
-  <code>python3 -m http.server 8000</code> then open <code>http://localhost:8000</code>
-</div>
-
-<div class="container">
-
-  <section id="section-predictions">
-    <div class="section-header">
-      <h2>Prediction Markets</h2>
-      <span class="count" id="pred-count"></span>
-    </div>
-    <div id="pred-table-wrap">
-      <table>
-        <thead class="hidden"></thead>
-        <tbody id="pred-tbody"></tbody>
-      </table>
-      <div class="no-results hidden" id="pred-no-results">No matching predictions</div>
-      <div class="pagination hidden" id="pred-pagination"></div>
-    </div>
-  </section>
-
-  <section id="section-consensus">
-    <div class="section-header">
-      <h2>Consensus</h2>
-      <span class="count" id="consensus-count"></span>
-    </div>
-    <div id="consensus-table-wrap">
-      <table>
-        <thead class="hidden"></thead>
-        <tbody id="consensus-tbody"></tbody>
-      </table>
-      <div class="no-results hidden" id="consensus-no-results">No matching predictions</div>
-      <div class="pagination hidden" id="consensus-pagination"></div>
-    </div>
-  </section>
-
-  <section id="section-catalysts">
-    <div class="section-header">
-      <h2>Upcoming Catalysts</h2>
-      <span class="count" id="cat-count"></span>
-    </div>
-    <div id="catalyst-wrap">
-      <div class="catalyst-list" id="catalyst-list"></div>
-      <div class="pagination hidden" id="cat-pagination"></div>
-    </div>
-  </section>
-
-  <section id="section-news">
-    <div class="section-header">
-      <h2>News Headlines</h2>
-      <span class="count" id="news-count"></span>
-    </div>
-    <div id="news-wrap">
-      <div class="news-list" id="news-list"></div>
-      <div class="pagination hidden" id="news-pagination"></div>
-    </div>
-  </section>
-
-  <section id="section-fred">
-    <div class="section-header">
-      <h2>Macro Indicators</h2>
-      <span class="count" id="fred-count"></span>
-    </div>
-    <div class="macro-top" id="macro-top">
-      <div class="yield-curve-card" id="yield-curve-card"></div>
-      <div class="fg-card" id="gdpnow-card"></div>
-      <div class="fg-card" id="fg-card"></div>
-    </div>
-    <div class="fred-grid" id="fred-grid"></div>
-  </section>
-
-</div>
-
-<!-- ── Templates ─────────────────────────────────────────────────────────── -->
-
-<template id="tpl-pred-row">
-  <tr>
-    <td class="question"></td>
-    <td class="answers"></td>
-  </tr>
-</template>
-
-<template id="tpl-bet">
-  <div class="bet">
-    <span class="bet-label"></span>
-    <div class="bet-bar-wrap"><div class="bet-bar"></div></div>
-    <span class="bet-pct"></span>
-  </div>
-</template>
-
-<template id="tpl-other-toggle">
-  <div class="bet other-toggle">
-    <span class="bet-label other-label"></span>
-  </div>
-  <div class="other-bets hidden"></div>
-</template>
-
-<template id="tpl-catalyst-row">
-  <div class="catalyst-row">
-    <span class="catalyst-when"></span>
-    <span class="catalyst-title"></span>
-  </div>
-</template>
-
-<template id="tpl-news-row">
-  <div class="news-row">
-    <div class="news-headline"></div>
-    <div class="news-desc"></div>
-  </div>
-</template>
-
-<template id="tpl-fred-card">
-  <div class="fred-card">
-    <div class="fred-title"></div>
-    <div class="fred-latest">
-      <span class="fred-latest-val"></span><span class="fred-latest-date"></span>
-    </div>
-  </div>
-</template>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FlexSearch/0.8.2/flexsearch.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>
-// ── Constants ────────────────────────────────────────────────────────────────
-const PAGE_SIZE = 10;
-const COLLAPSE_THRESHOLD   = 3;
-const HIGH_CERTAINTY       = 0.98;
-const LOW_CERTAINTY        = 0.02;
-const CONSENSUS_CERTAINTY  = 0.95; // a single answer above this (all others below CONSENSUS_REST_MAX) is consensus
-const CONSENSUS_REST_MAX   = 0.50;
-const BAR_HIGH_THRESHOLD   = 0.65;
-const BAR_LOW_THRESHOLD    = 0.25;
-const MIN_BET_PROBABILITY  = 0.01;
-const VISIBLE_BET_THRESHOLD = 0.05;
-
-const YIELD_CURVE_CODES = new Set(['DGS3MO', 'DGS2', 'DGS5', 'DGS10', 'DGS30']);
-const YIELD_MATURITIES  = [
-  { code: 'DGS3MO', label: '3M'  },
-  { code: 'DGS2',   label: '2Y'  },
-  { code: 'DGS5',   label: '5Y'  },
-  { code: 'DGS10',  label: '10Y' },
-  { code: 'DGS30',  label: '30Y' },
-];
-
-const FG_THRESHOLDS = [
-  { max: 24,       cls: 'color-red'     },
-  { max: 44,       cls: 'color-orange'  },
-  { max: 55,       cls: 'color-yellow'  },
-  { max: 75,       cls: 'color-green'   },
-  { max: Infinity, cls: 'color-dkgreen' },
-];
-
-const SPARKLINE_W   = 120;
-const SPARKLINE_H   = 32;
-const SPARKLINE_PAD = 2;
-
-const YIELD_W    = 500;
-const YIELD_H    = 100;
-const YIELD_PAD  = { l: 32, r: 12, t: 20, b: 22 };
-
-// ── DOM helpers ───────────────────────────────────────────────────────────────
-const $  = id => document.getElementById(id);
-const tpl = id => document.getElementById(id).content.cloneNode(true);
-
-function linkEl(url, text) {
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener';
-  a.textContent = text;
-  return a;
-}
-
-// ── Highlight helper (mutates a DOM element) ──────────────────────────────────
-let currentQuery = '';
-
-function hi(el, text) {
-  if (!currentQuery) { el.textContent = text; return; }
-  const escaped = currentQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  // Capturing group → odd-indexed parts of split() are the matches
-  const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
-  parts.forEach((part, i) => {
-    if (!part) return;
-    if (i % 2 === 1) {
-      const mark = document.createElement('mark');
-      mark.textContent = part;
-      el.appendChild(mark);
-    } else {
-      el.appendChild(document.createTextNode(part));
-    }
-  });
-}
-
-// ── Bets ──────────────────────────────────────────────────────────────────────
-function barColorClass(p) {
-  if (p >= BAR_HIGH_THRESHOLD) return 'high';
-  if (p <= BAR_LOW_THRESHOLD)  return 'low';
-  return null;
-}
-
-function makeBet(b, { fullWidth = false, dimmed = false } = {}) {
-  const frag = tpl('tpl-bet');
-  const pct  = Math.round(b.probability * 100);
-  const label = frag.querySelector('.bet-label');
-  label.title = b.prompt;
-  hi(label, b.prompt);
-  const bar = frag.querySelector('.bet-bar');
-  bar.style.setProperty('--bar-pct', fullWidth ? '100%' : pct + '%');
-  const cls = fullWidth ? 'high' : barColorClass(b.probability);
-  if (cls) bar.classList.add(cls);
-  if (dimmed) bar.classList.add('other');
-  frag.querySelector('.bet-pct').textContent = pct + '%';
-  return frag;
-}
-
-// Renders the toggle row + collapsed panel for "others" groups
-function makeOtherToggle(oid, labelText, betItems, { showBar = false, barPct = 0 } = {}) {
-  const frag   = tpl('tpl-other-toggle');
-  const toggle = frag.querySelector('.other-toggle');
-  toggle.dataset.oid = oid;
-  toggle.querySelector('.other-label').textContent = `\u25B6 ${labelText}`;
-  if (showBar) {
-    const wrap = document.createElement('div');
-    wrap.className = 'bet-bar-wrap';
-    const bar = document.createElement('div');
-    bar.className = 'bet-bar other';
-    bar.style.setProperty('--bar-pct', barPct + '%');
-    wrap.appendChild(bar);
-    toggle.appendChild(wrap);
-    const pctEl = document.createElement('span');
-    pctEl.className = 'bet-pct';
-    pctEl.textContent = barPct + '%';
-    toggle.appendChild(pctEl);
-  }
-  const panel = frag.querySelector('.other-bets');
-  panel.id = oid;
-  betItems.forEach(f => panel.appendChild(f));
-  return frag;
-}
-
-// Shared collapse logic for >COLLAPSE_THRESHOLD high-certainty bets
-function buildCollapsedHighBets(sorted, idPrefix) {
-  const frag        = document.createDocumentFragment();
-  const highCertain = sorted.filter(b => b.probability >= HIGH_CERTAINTY);
-  const rest        = sorted.filter(b => b.probability <  HIGH_CERTAINTY);
-  const shown       = highCertain[highCertain.length - 1]; // lowest p = most restrictive
-  const collapsed   = highCertain.slice(0, -1);
-  frag.appendChild(makeBet(shown));
-  frag.appendChild(makeOtherToggle(
-    idPrefix,
-    `Others \u003E98% (${collapsed.length})`,
-    collapsed.map(b => makeBet(b)),
-  ));
-  rest.forEach(b => frag.appendChild(makeBet(b)));
-  return frag;
-}
-
-function makeBets(p) {
-  const isBinary = bets => bets.length === 2 && bets.every(b => /^(yes|no|up|down)$/i.test((b.prompt || '').trim()));
-  const raw    = (p.bets || []).filter(b => b.probability > MIN_BET_PROBABILITY);
-  const sorted = (isBinary(raw) ? [raw.sort((a, b) => b.probability - a.probability)[0]] : raw)
-    .sort((a, b) => b.probability - a.probability);
-
-  const highCertain = sorted.filter(b => b.probability >= HIGH_CERTAINTY);
-  if (highCertain.length > COLLAPSE_THRESHOLD) {
-    return buildCollapsedHighBets(sorted, `other-${p.id}`);
-  }
-
-  const frag  = document.createDocumentFragment();
-  const main  = sorted.filter(b => b.probability >= VISIBLE_BET_THRESHOLD);
-  const other = sorted.filter(b => b.probability <  VISIBLE_BET_THRESHOLD);
-  main.forEach(b => frag.appendChild(makeBet(b)));
-  if (other.length > 1) {
-    const otherPct = Math.round(other.reduce((s, b) => s + b.probability, 0) * 100);
-    frag.appendChild(makeOtherToggle(
-      `other-${p.id}`,
-      `Others (${other.length})`,
-      other.map(b => makeBet(b)),
-      { showBar: true, barPct: otherPct },
-    ));
-  } else {
-    other.forEach(b => frag.appendChild(makeBet(b)));
-  }
-  return frag;
-}
-
-function makeConsensusBets(p) {
-  const highBets = (p.bets || [])
-    .filter(b => b.probability > CONSENSUS_CERTAINTY)
-    .sort((a, b) => a.probability - b.probability); // ascending: lowest p first
-
-  if (highBets.length > COLLAPSE_THRESHOLD) {
-    const shown    = highBets[0]; // most restrictive
-    const collapsed = highBets.slice(1);
-    const frag = document.createDocumentFragment();
-    frag.appendChild(makeBet(shown, { fullWidth: true }));
-    frag.appendChild(makeOtherToggle(
-      `cons-other-${p.id}`,
-      `Others \u003E95% (${collapsed.length})`,
-      collapsed.map(b => makeBet(b, { fullWidth: true })),
-    ));
-    return frag;
-  }
-
-  const winner = highBets[highBets.length - 1]; // highest p for simple case
-  return winner ? makeBet(winner, { fullWidth: true }) : document.createDocumentFragment();
-}
-
-// ── Pagination ────────────────────────────────────────────────────────────────
-function windowedPages(cur, total) {
-  const delta = 2;
-  const pages = new Set([0, total - 1]);
-  for (let i = Math.max(0, cur - delta); i <= Math.min(total - 1, cur + delta); i++) pages.add(i);
-  const sorted = [...pages].sort((a, b) => a - b);
-  const result = [];
-  let prev = -1;
-  for (const p of sorted) {
-    if (p - prev > 1) result.push(null); // null = ellipsis
-    result.push(p);
-    prev = p;
-  }
-  return result;
-}
-
-function buildPagination(container, cur, total, totalItems, onPage) {
-  container.innerHTML = '';
-  const mkBtn = (label, page, disabled, active) => {
-    const btn = document.createElement('button');
-    btn.textContent = label;
-    if (disabled) { btn.disabled = true; }
-    if (active)   { btn.classList.add('active'); }
-    if (!disabled) btn.addEventListener('click', () => onPage(page));
-    return btn;
-  };
-  container.appendChild(mkBtn('\u2039', cur - 1, cur === 0, false));
-  windowedPages(cur, total).forEach(p => {
-    if (p === null) {
-      const el = document.createElement('span');
-      el.className = 'pagination-ellipsis';
-      el.textContent = '\u2026';
-      container.appendChild(el);
-    } else {
-      container.appendChild(mkBtn(p + 1, p, false, p === cur));
-    }
-  });
-  container.appendChild(mkBtn('\u203A', cur + 1, cur >= total - 1, false));
-  const info = document.createElement('span');
-  info.className = 'pagination-info';
-  info.textContent = `${cur * PAGE_SIZE + 1}\u2013${Math.min((cur + 1) * PAGE_SIZE, totalItems)} of ${totalItems}`;
-  container.appendChild(info);
-}
-
-// Generic paginator — renders one page and wires the nav controls
-function paginate(state, items, renderPage) {
-  const total = Math.ceil(items.length / PAGE_SIZE);
-  state.page  = Math.min(state.page, Math.max(0, total - 1));
-  renderPage(items.slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE));
-  const pagEl = $(state.paginationId);
-  if (total <= 1) { pagEl.classList.add('hidden'); return; }
-  pagEl.classList.remove('hidden');
-  buildPagination(pagEl, state.page, total, items.length, n => {
-    state.page = n;
-    paginate(state, items, renderPage);
-    $(state.scrollTarget).scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-}
-
-// ── Render: Predictions & Consensus ──────────────────────────────────────────
-// Both tables share one row layout and differ only in how the bets column is drawn.
-function makePredRow(p, makeBetsFn) {
-  const frag  = tpl('tpl-pred-row');
-  const title = frag.querySelector('.question').appendChild(p.url ? linkEl(p.url, '') : document.createElement('span'));
-  hi(title, p.title);
-  frag.querySelector('.answers').appendChild(makeBetsFn(p));
-  return frag;
-}
-
-// `prefix` is the id prefix of the table's tbody / no-results / pagination elements
-function renderPredTable(prefix, state, rows, makeBetsFn) {
-  const tbody = $(`${prefix}-tbody`);
-  $(`${prefix}-no-results`).classList.toggle('hidden', rows.length > 0);
-  if (!rows.length) {
-    tbody.innerHTML = '';
-    $(state.paginationId).classList.add('hidden');
-    return;
-  }
-  paginate(state, rows, page => {
-    tbody.innerHTML = '';
-    page.forEach(p => tbody.appendChild(makePredRow(p, makeBetsFn)));
-  });
-}
-
-const renderPredictions = rows => renderPredTable('pred',      predState,      rows, makeBets);
-const renderConsensus   = rows => renderPredTable('consensus', consensusState, rows, makeConsensusBets);
-
-// ── Render: Catalysts ─────────────────────────────────────────────────────────
-function renderCatalysts(items) {
-  const list = $('catalyst-list');
-  paginate(catState, items, page => {
-    list.innerHTML = '';
-    page.forEach(c => {
-      const frag    = tpl('tpl-catalyst-row');
-      frag.querySelector('.catalyst-when').textContent = c.when || '';
-      const titleEl = frag.querySelector('.catalyst-title');
-      titleEl.appendChild(c.url ? linkEl(c.url, c.title) : document.createTextNode(c.title));
-      list.appendChild(frag);
-    });
-  });
-}
-
-// ── Render: News ──────────────────────────────────────────────────────────────
-function renderNews(items) {
-  const list = $('news-list');
-  paginate(newsState, items, page => {
-    list.innerHTML = '';
-    page.forEach(n => {
-      const frag    = tpl('tpl-news-row');
-      const headEl  = frag.querySelector('.news-headline');
-      headEl.appendChild(n.url ? linkEl(n.url, n.title) : document.createTextNode(n.title));
-      const descEl  = frag.querySelector('.news-desc');
-      if (n.description) descEl.textContent = n.description;
-      else               descEl.remove();
-      list.appendChild(frag);
-    });
-  });
-}
-
-// ── Sparkline ─────────────────────────────────────────────────────────────────
-function sparkline(data, width = SPARKLINE_W, height = SPARKLINE_H) {
-  const vals = data.map(d => d.value).filter(v => v != null && !isNaN(v));
-  if (vals.length < 2) return null;
-  const min   = Math.min(...vals);
-  const max   = Math.max(...vals);
-  const range = max - min || 1;
-  const pad   = SPARKLINE_PAD;
-  const pts   = vals.map((v, i) => {
-    const x = pad + (i / (vals.length - 1)) * (width  - pad * 2);
-    const y = pad + (1 - (v - min) / range)  * (height - pad * 2);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(' ');
-
-  const ns   = 'http://www.w3.org/2000/svg';
-  const svg  = document.createElementNS(ns, 'svg');
-  svg.setAttribute('class', 'sparkline');
-  svg.setAttribute('width', width);
-  svg.setAttribute('height', height);
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-
-  const poly = document.createElementNS(ns, 'polyline');
-  poly.setAttribute('points', pts);
-  poly.setAttribute('fill', 'none');
-  poly.setAttribute('stroke', '#3a7bd5');
-  poly.setAttribute('stroke-width', '1.5');
-  poly.setAttribute('stroke-linejoin', 'round');
-  poly.setAttribute('stroke-linecap', 'round');
-  svg.appendChild(poly);
-  return svg;
-}
-
-// ── Render: Yield Curve ───────────────────────────────────────────────────────
-function renderYieldCurve(fredItems) {
-  const byCode = Object.fromEntries(fredItems.filter(f => f.code).map(f => [f.code, f]));
-  const points = YIELD_MATURITIES.map(m => {
-    const s = byCode[m.code];
-    if (!s?.data?.length) return null;
-    const v = parseFloat(s.data[s.data.length - 1].value);
-    return isNaN(v) ? null : { label: m.label, value: v };
-  }).filter(Boolean);
-
-  const el = $('yield-curve-card');
-  if (points.length < 2) { el.classList.add('hidden'); return; }
-
-  const { l: padL, r: padR, t: padT, b: padB } = YIELD_PAD;
-  const innerW = YIELD_W - padL - padR;
-  const innerH = YIELD_H - padT - padB;
-  const vals   = points.map(p => p.value);
-  const minV   = Math.min(...vals);
-  const maxV   = Math.max(...vals);
-  const range  = maxV - minV || 0.5;
-  const xStep  = innerW / (points.length - 1);
-
-  const svgPts = points.map((p, i) => ({
-    ...p,
-    x: padL + i * xStep,
-    y: padT + (1 - (p.value - minV) / range) * innerH,
-  }));
-
-  const ns   = 'http://www.w3.org/2000/svg';
-  const mkSvgEl = (tag, attrs) => {
-    const el = document.createElementNS(ns, tag);
-    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-    return el;
-  };
-
-  const svg = mkSvgEl('svg', { class: 'yield-curve', viewBox: `0 0 ${YIELD_W} ${YIELD_H}` });
-
-  svg.appendChild(mkSvgEl('line', {
-    x1: padL, y1: padT, x2: padL, y2: padT + innerH,
-    stroke: '#2a2a2e', 'stroke-width': 1,
-  }));
-
-  [minV, (minV + maxV) / 2, maxV].forEach(v => {
-    const y = padT + (1 - (v - minV) / range) * innerH;
-    const t = mkSvgEl('text', { x: padL - 4, y: y.toFixed(1), 'text-anchor': 'end', 'dominant-baseline': 'middle', fill: '#444', 'font-size': 9 });
-    t.textContent = v.toFixed(2);
-    svg.appendChild(t);
-  });
-
-  svg.appendChild(mkSvgEl('polyline', {
-    points: svgPts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '),
-    fill: 'none', stroke: '#3a7bd5', 'stroke-width': 1.5,
-    'stroke-linejoin': 'round', 'stroke-linecap': 'round',
-  }));
-
-  svgPts.forEach(p => {
-    svg.appendChild(mkSvgEl('circle', { cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 3, fill: '#3a7bd5' }));
-    const valT = mkSvgEl('text', { x: p.x.toFixed(1), y: (p.y - 7).toFixed(1), 'text-anchor': 'middle', fill: '#aaa', 'font-size': 9 });
-    valT.textContent = p.value.toFixed(2);
-    svg.appendChild(valT);
-    const lblT = mkSvgEl('text', { x: p.x.toFixed(1), y: (YIELD_H - 4).toFixed(1), 'text-anchor': 'middle', fill: '#555', 'font-size': 9 });
-    lblT.textContent = p.label;
-    svg.appendChild(lblT);
-  });
-
-  el.innerHTML = '';
-  const title = document.createElement('div');
-  title.className = 'yield-curve-title';
-  title.textContent = 'Yield Curve';
-  el.appendChild(title);
-  el.appendChild(svg);
-}
-
-// ── Render: GDPNow ────────────────────────────────────────────────────────────
-function renderGDPNow(data) {
-  const el = $('gdpnow-card');
-  if (!data) { el.classList.add('hidden'); return; }
-
-  const colorCls = data.estimate >= 0 ? 'color-green' : 'color-red';
-  const sign     = data.estimate >= 0 ? '+' : '';
-
-  const titleDiv = document.createElement('div');
-  titleDiv.className = 'fg-title';
-  titleDiv.appendChild(linkEl(data.url, 'GDPNow'));
-
-  const valDiv = document.createElement('div');
-  valDiv.className = `fg-value ${colorCls}`;
-  valDiv.appendChild(document.createTextNode(`${sign}${data.estimate.toFixed(1)}`));
-  const unit = document.createElement('span');
-  unit.className = 'fg-value-unit';
-  unit.textContent = '%';
-  valDiv.appendChild(unit);
-
-  const labelDiv = document.createElement('div');
-  labelDiv.className = `fg-label ${colorCls}`;
-  labelDiv.textContent = data.quarter;
-
-  const dateDiv = document.createElement('div');
-  dateDiv.className = 'fg-date';
-  dateDiv.textContent = data.date;
-
-  el.innerHTML = '';
-  [titleDiv, valDiv, labelDiv, dateDiv].forEach(d => el.appendChild(d));
-  const spark = sparkline((data.history || []).map(d => ({ value: d.value })), 160, 36);
-  if (spark) el.appendChild(spark);
-}
-
-// ── Render: Fear & Greed ──────────────────────────────────────────────────────
-function fgColorClass(v) {
-  return FG_THRESHOLDS.find(t => v <= t.max).cls;
-}
-
-function renderFearGreed(data) {
-  const el = $('fg-card');
-  if (!data?.length) { el.classList.add('hidden'); return; }
-
-  const latest   = data[0];
-  const val      = parseInt(latest.value, 10);
-  const colorCls = fgColorClass(val);
-  const date     = latest.timestamp
-    ? new Date(parseInt(latest.timestamp, 10) * 1000).toLocaleDateString()
-    : '';
-
-  const titleDiv = document.createElement('div');
-  titleDiv.className = 'fg-title';
-  titleDiv.textContent = 'Crypto Fear & Greed';
-
-  const valDiv = document.createElement('div');
-  valDiv.className = `fg-value ${colorCls}`;
-  valDiv.textContent = val;
-
-  const labelDiv = document.createElement('div');
-  labelDiv.className = `fg-label ${colorCls}`;
-  labelDiv.textContent = latest.value_classification || '';
-
-  const dateDiv = document.createElement('div');
-  dateDiv.className = 'fg-date';
-  dateDiv.textContent = date;
-
-  el.innerHTML = '';
-  [titleDiv, valDiv, labelDiv, dateDiv].forEach(d => el.appendChild(d));
-  const spark = sparkline([...data].reverse().map(d => ({ value: parseFloat(d.value) })), 160, 36);
-  if (spark) el.appendChild(spark);
-}
-
-// ── Render: FRED grid ─────────────────────────────────────────────────────────
-function renderFred(items) {
-  const gridEl    = $('fred-grid');
-  const gridItems = items.filter(f => !YIELD_CURVE_CODES.has(f.code));
-  $('fred-count').textContent = gridItems.length;
-  gridEl.innerHTML = '';
-  gridItems.forEach(f => {
-    const frag   = tpl('tpl-fred-card');
-    const titleEl = frag.querySelector('.fred-title');
-    titleEl.appendChild(f.url ? linkEl(f.url, f.title) : document.createTextNode(f.title));
-    const data   = f.data || [];
-    const latest = data[data.length - 1];
-    frag.querySelector('.fred-latest-val').textContent  = latest
-      ? Number(latest.value).toLocaleString(undefined, { maximumFractionDigits: 2 })
-      : 'N/A';
-    frag.querySelector('.fred-latest-date').textContent = latest?.date || '';
-    const card  = frag.querySelector('.fred-card');
-    const spark = sparkline(data);
-    if (spark) card.appendChild(spark);
-    gridEl.appendChild(frag);
-  });
-}
-
-// ── State ─────────────────────────────────────────────────────────────────────
-let allPredictions = [], allConsensusPredictions = [], allCatalysts = [], allNews = [], allFred = [];
-let predIdx, consensusIdx, catIdx, newsIdx, fredIdx;
-
-const predState      = { page: 0, paginationId: 'pred-pagination',      scrollTarget: 'pred-table-wrap'      };
-const consensusState = { page: 0, paginationId: 'consensus-pagination',  scrollTarget: 'consensus-table-wrap' };
-const catState       = { page: 0, paginationId: 'cat-pagination',        scrollTarget: 'catalyst-wrap'        };
-const newsState      = { page: 0, paginationId: 'news-pagination',       scrollTarget: 'news-wrap'            };
-
-// ── Indexing & ranking ─────────────────────────────────────────────────────────
-function idxSearch(idx, q, items) {
-  const hits = new Set(idx.search(q).flatMap(r => r.result));
-  return items.filter((_, i) => hits.has(i));
-}
-
-function buildIndexes() {
-  const mkIdx = (items, getDoc) => {
-    const fields = Object.keys(getDoc(items[0] || {}));
-    const idx    = new FlexSearch.Document({ tokenize: 'forward', document: { id: 'id', index: fields } });
-    items.forEach((item, i) => idx.add({ id: i, ...getDoc(item) }));
-    return idx;
-  };
-  const predDoc = p => ({
-    title:  p.title   || '',
-    bets:   (p.bets || []).map(b => b.prompt || '').filter(s => !/^(yes|no|up|down)$/i.test(s.trim())).join(' '),
-  });
-  predIdx      = mkIdx(allPredictions,          predDoc);
-  consensusIdx = mkIdx(allConsensusPredictions,  predDoc);
-  catIdx       = mkIdx(allCatalysts, c => ({ title: c.title || '', when: c.when || '' }));
-  newsIdx      = mkIdx(allNews,      n => ({ title: n.title || '', description: n.description || '' }));
-  fredIdx      = mkIdx(allFred,      f => ({ title: f.title || '' }));
-}
-
-// ── Search ────────────────────────────────────────────────────────────────────
-// Always runs both keyword (FlexSearch) and semantic (all-MiniLM-L6-v2) search.
-// Keyword results render immediately; semantic results enrich after 350 ms of
-// inactivity. Combined results are ranked by popularity (volume_24h desc).
-
-let _embCache = null, _pipeCache = null, _pipePromise = null, _semTimer = null;
-const SEMANTIC_THRESHOLD = 0.20;
-
-async function _loadPipeline() {
-  if (_pipeCache) return _pipeCache;
-  if (!_pipePromise) {
-    _pipePromise = import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2')
-      .then(({ pipeline }) => pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2'))
-      .then(p => { _pipeCache = p; return p; });
-  }
-  return _pipePromise;
-}
-
-async function _loadEmbs() {
-  if (_embCache) return _embCache;
-  const r = await fetch('embeddings.json').then(r => r.ok ? r : fetch('.reports/embeddings.json'));
-  if (!r.ok) throw new Error('embeddings.json not found');
-  _embCache = await r.json();
-  return _embCache;
-}
-
-function _dot(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; }
-
-// Union of keyword and semantic matches, ranked by popularity (volume_24h desc).
-function _unionByPop(kw, sem) {
-  const kwSet = new Set(kw);
-  const combined = [...kw, ...sem.filter(x => !kwSet.has(x))];
-  return combined.sort((a, b) => (b.volume_24h || 0) - (a.volume_24h || 0));
-}
-
-// Renders every searchable section from the first page; counts read "shown / total" while searching.
-function renderAll({ preds, consensus, cats, news, fred }) {
-  const setCount = (id, shown, all) => {
-    $(id).textContent = currentQuery ? `${shown.length} / ${all.length}` : all.length;
-  };
-  setCount('pred-count',      preds,     allPredictions);
-  setCount('consensus-count', consensus, allConsensusPredictions);
-  setCount('cat-count',       cats,      allCatalysts);
-  setCount('news-count',      news,      allNews);
-  predState.page = consensusState.page = catState.page = newsState.page = 0;
-  renderPredictions(preds);
-  renderConsensus(consensus);
-  renderCatalysts(cats);
-  renderNews(news);
-  renderFred(fred);
-}
-
-function applySearch(q) {
-  q = q.trim().toLowerCase();
-  currentQuery = q;
-  clearTimeout(_semTimer);
-
-  if (!q) {
-    renderAll({
-      preds:     allPredictions,
-      consensus: allConsensusPredictions,
-      cats:      allCatalysts,
-      news:      allNews,
-      fred:      allFred,
-    });
-    return;
-  }
-
-  // Phase 1: keyword results (synchronous, immediate)
-  const kw = {
-    preds:     idxSearch(predIdx,      q, allPredictions),
-    consensus: idxSearch(consensusIdx, q, allConsensusPredictions),
-    cats:      idxSearch(catIdx,       q, allCatalysts),
-    news:      idxSearch(newsIdx,      q, allNews),
-    fred:      idxSearch(fredIdx,      q, allFred),
-  };
-  renderAll(kw);
-
-  // Phase 2: semantic enrichment (debounced; updates results once model is ready)
-  _semTimer = setTimeout(async () => {
-    if (currentQuery !== q) return;
-    try {
-      const [pipe, embs] = await Promise.all([_loadPipeline(), _loadEmbs()]);
-      if (currentQuery !== q) return;
-      const out  = await pipe(q, { pooling: 'mean', normalize: true });
-      if (currentQuery !== q) return;
-      const qEmb = Array.from(out.data);
-      const pMap = embs.predictions || {};
-
-      // Items whose embedding (looked up by embOf) is close enough to the query; no embedding = no match
-      const semantic = (items, embOf) => items.filter((x, i) => {
-        const emb = embOf(x, i);
-        return emb && _dot(qEmb, emb) >= SEMANTIC_THRESHOLD;
-      });
-
-      renderAll({
-        preds:     _unionByPop(kw.preds,     semantic(allPredictions,          x => pMap[x.id])),
-        consensus: _unionByPop(kw.consensus, semantic(allConsensusPredictions, x => pMap[x.id])),
-        cats:      _unionByPop(kw.cats,      semantic(allCatalysts, (_, i) => embs.catalysts?.[i])),
-        news:      _unionByPop(kw.news,      semantic(allNews,      (_, i) => embs.news?.[i])),
-        fred:      kw.fred,
-      });
-    } catch (err) {
-      console.warn('Semantic search unavailable:', err);
-    }
-  }, 350);
-}
-
-// ── Event delegation ──────────────────────────────────────────────────────────
-$('pred-search').addEventListener('input', function () {
-  applySearch(this.value);
-});
-
-['pred-tbody', 'consensus-tbody', 'catalyst-list'].forEach(id => {
-  $(id).addEventListener('click', e => {
-    const toggle = e.target.closest('.other-toggle');
-    if (toggle) {
-      const panel    = $(toggle.dataset.oid);
-      if (!panel) return;
-      const expanded = !panel.classList.contains('hidden');
-      panel.classList.toggle('hidden', expanded);
-      const label = toggle.querySelector('.other-label');
-      label.textContent = (expanded ? '\u25B6' : '\u25BC') + label.textContent.slice(1);
-    }
-  });
-});
-
-// ── Data loading ──────────────────────────────────────────────────────────────
-function isConsensus(p) {
-  const bets = (p.bets || []).filter(b => b.probability > 0);
+<div id="root"></div>
+<script type="module">
+import {createElement as h, useDeferredValue, useEffect, useMemo, useState} from 'react';
+import {createRoot} from 'react-dom/client';
+import {
+  Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
+  LayoutHeader, Link, List, ListItem, ProgressBar, SegmentedControl, SegmentedControlItem, Slider, Spinner, Text,
+  TextInput, VStack, registerIcons,
+} from '@astryxdesign/core';
+
+const HORIZON_MONTHS = 60;        // the slider runs from this month to this many months ahead
+const DEFAULT_HORIZON = 3;
+const LATER = HORIZON_MONTHS + 1; // bucket for questions that resolve after the slider's range, or have no date
+const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is pressed
+const QUESTIONS_PER_PAGE = 24;
+const MAX_OUTCOMES = 4;           // shown per question; the rest sit behind "N more outcomes"
+const MIN_PROBABILITY = 0.01;
+const NEAR_CERTAIN = 0.98;
+const NEAR_IMPOSSIBLE = 0.02;
+const CONSENSUS_CERTAINTY = 0.95; // a single answer above this (all others below CONSENSUS_REST_MAX) is consensus
+const CONSENSUS_REST_MAX = 0.50;
+const SEMANTIC_THRESHOLD = 0.20;  // cosine similarity between the search text and a question for a semantic match
+const SEMANTIC_DELAY_MS = 350;
+
+// ── Icons: Font Awesome duotone everywhere, including the ones Astryx draws inside its own components ──
+const fa = name => h('i', {className: `fa-duotone fa-solid fa-${name}`, 'aria-hidden': true});
+registerIcons(Object.fromEntries(Object.entries({
+  close: 'xmark', chevronDown: 'chevron-down', chevronLeft: 'chevron-left', chevronRight: 'chevron-right',
+  chevronsLeft: 'chevrons-left', chevronsRight: 'chevrons-right', check: 'check', success: 'circle-check',
+  error: 'circle-xmark', warning: 'triangle-exclamation', info: 'circle-info', calendar: 'calendar', clock: 'clock',
+  externalLink: 'arrow-up-right-from-square', menu: 'bars', moreHorizontal: 'ellipsis', search: 'magnifying-glass',
+  upload: 'upload', arrowUp: 'arrow-up', arrowDown: 'arrow-down', arrowsUpDown: 'arrow-up-arrow-down',
+  funnel: 'filter', eyeSlash: 'eye-slash', viewColumns: 'columns-3', copy: 'copy', checkDouble: 'check-double',
+  wrench: 'wrench', stop: 'stop', microphone: 'microphone',
+}).map(([name, icon]) => [name, fa(icon)])));
+
+// ── Dates: everything is a YYYY-MM-DD string; months are counted from the month of the report ──
+const monthNumber = iso => Number(iso.slice(0, 4)) * 12 + Number(iso.slice(5, 7)) - 1;
+const utc = options => new Intl.DateTimeFormat('en-US', {timeZone: 'UTC', ...options});
+const monthDate = number => new Date(Date.UTC(Math.floor(number / 12), number % 12, 1));
+const longMonth = number => utc({month: 'long', year: 'numeric'}).format(monthDate(number));
+const shortMonth = number => utc({month: 'short', year: 'numeric'}).format(monthDate(number));
+const day = iso => utc({month: 'short', day: 'numeric', year: 'numeric'}).format(new Date(iso));
+const isDate = text => /^\d{4}-\d{2}-\d{2}$/.test(text);
+const compact = new Intl.NumberFormat('en-US', {notation: 'compact', maximumFractionDigits: 1});
+const plural = (count, noun) => `${count.toLocaleString('en-US')} ${noun}${count === 1 ? '' : 's'}`;
+
+// ── Questions ──
+function isConsensus(question) {
+  const bets = (question.bets ?? []).filter(b => b.probability > 0);
   // Exactly one answer above 95% with every other answer below 50% ...
   const single = bets.filter(b => b.probability > CONSENSUS_CERTAINTY).length === 1
     && bets.every(b => b.probability > CONSENSUS_CERTAINTY || b.probability < CONSENSUS_REST_MAX);
   // ... or every answer is either near-certain or near-impossible (e.g. several rungs of a ladder at 99%)
-  const settled = bets.some(b => b.probability >= HIGH_CERTAINTY)
-    && bets.every(b => b.probability >= HIGH_CERTAINTY || b.probability < LOW_CERTAINTY);
+  const settled = bets.some(b => b.probability >= NEAR_CERTAIN)
+    && bets.every(b => b.probability >= NEAR_CERTAIN || b.probability < NEAR_IMPOSSIBLE);
   return single || settled;
 }
 
-fetch('output.json')
-  .then(r => r.ok ? r : fetch('.reports/output.json'))
-  .then(r => { if (!r.ok) throw new Error(r.statusText); return r.text(); })
-  .then(t => JSON.parse(t.replace(/:\s*NaN\b/g, ': null')))
-  .then(data => {
-    const active = (data.relevant_predictions || [])
-      .filter(p => p.volume_24h > 0)
-      .sort((a, b) => b.volume_24h - a.volume_24h);
-    allConsensusPredictions = active.filter(isConsensus);
-    allPredictions          = active.filter(p => !isConsensus(p));
-    allCatalysts = data.upcoming_catalysts || [];
-    allNews      = data.news_headlines     || [];
-    allFred      = data.fred_data          || [];
+// The outcomes worth showing, most likely first
+function outcomes(question) {
+  let bets = (question.bets ?? []).filter(b => b.probability > MIN_PROBABILITY).sort((a, b) => b.probability - a.probability);
+  // Yes/No markets: the leading side says it all
+  if (bets.length === 2 && bets.every(b => /^(yes|no|up|down)$/i.test(b.prompt.trim()))) bets = bets.slice(0, 1);
+  // A ladder ("above 3%", "above 3.25%", ...) has many near-certain rungs; only the least likely of them is informative
+  const nearCertain = bets.filter(b => b.probability >= NEAR_CERTAIN).length;
+  return nearCertain > 3 ? bets.slice(nearCertain - 1) : bets;
+}
 
-    buildIndexes();
-    applySearch('');
+// ── Semantic search: the report ships an embedding per question and catalyst (all-MiniLM-L6-v2); the same model
+//    runs in the browser on the search text, so a dot product is the cosine similarity ──
+let embedder, embeddings;
+async function semanticMatches(query) {
+  embedder ??= import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2')
+    .then(({pipeline, env}) => {
+      env.allowLocalModels = false; // the model comes from the Hugging Face hub, not from this site
+      return pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+    });
+  embeddings ??= loadJson('embeddings.json');
+  const [embed, vectors] = await Promise.all([embedder, embeddings]);
+  const queryVector = (await embed(query, {pooling: 'mean', normalize: true})).data;
+  const isNear = vector => vector.reduce((sum, x, i) => sum + x * queryVector[i], 0) >= SEMANTIC_THRESHOLD;
+  return {
+    query,
+    questions: new Set(Object.entries(vectors.predictions ?? {}).filter(([, vector]) => isNear(vector)).map(([id]) => id)),
+    catalysts: new Set((vectors.catalysts ?? []).flatMap((vector, index) => isNear(vector) ? [index] : [])),
+  };
+}
 
-    renderYieldCurve(allFred);
-    renderGDPNow(data.gdpnow      || null);
-    renderFearGreed(data.fear_greed || null);
+// The report is next to this page once published; from the repository root it is under .reports/
+async function loadJson(file) {
+  let response = await fetch(file);
+  if (!response.ok) response = await fetch(`.reports/${file}`);
+  if (!response.ok) throw new Error(`${file}: ${response.status} ${response.statusText}`);
+  return response.json();
+}
 
-    const hasMacro = allFred.length || data.fear_greed?.length || data.gdpnow;
-    if (!hasMacro)        $('section-fred').classList.add('hidden');
-    if (!allNews.length)  $('section-news').classList.add('hidden');
-  })
-  .catch(err => {
-    console.error(err);
-    const banner = $('error-banner');
-    banner.classList.remove('hidden');
-    banner.appendChild(document.createElement('br'));
-    const code = document.createElement('code');
-    code.textContent = String(err);
-    banner.appendChild(code);
+// ── Components ──
+function Outcome({bet, isLeading}) {
+  return h(ProgressBar, {
+    label: bet.prompt,
+    value: Math.round(bet.probability * 100),
+    hasValueLabel: true,
+    formatValueLabel: value => `${value}%`,
+    variant: isLeading ? 'accent' : 'neutral',
   });
+}
+
+function Question({question, reportDate}) {
+  const {resolution_date: resolves, outcomes: bets} = question;
+  const rest = bets.slice(MAX_OUTCOMES);
+  return h(Card, null, h(VStack, {gap: 3},
+    h(HStack, {gap: 2, align: 'center', wrap: 'wrap'},
+      h(Badge, {label: resolves ? day(resolves) : 'No end date', icon: fa('calendar-day')}),
+      resolves && resolves < reportDate && h(Badge, {label: 'Past due', variant: 'warning', icon: fa('hourglass-end')}),
+      question.isConsensus && h(Badge, {label: 'Consensus', variant: 'success', icon: fa('circle-check')}),
+    ),
+    h(Link, {href: question.url, target: '_blank', weight: 'semibold'}, question.title),
+    bets.length === 0 && h(Text, {type: 'supporting'}, 'No outcome is priced above 1%'),
+    ...bets.slice(0, MAX_OUTCOMES).map((bet, i) => h(Outcome, {key: bet.prompt, bet, isLeading: i === 0})),
+    rest.length > 0 && h(Collapsible, {trigger: h(Text, {type: 'supporting'}, plural(rest.length, 'more outcome')), defaultIsOpen: false},
+      h(VStack, {gap: 3, paddingBlockStart: 3}, rest.map(bet => h(Outcome, {key: bet.prompt, bet}))),
+    ),
+    h(Text, {type: 'supporting'}, fa('chart-simple'), ` ${compact.format(question.volume_24h)} traded in 24h on ${question.source}`),
+  ));
+}
+
+function Month({group, reportDate}) {
+  const [shown, setShown] = useState(QUESTIONS_PER_MONTH);
+  const {catalysts, questions} = group;
+  const hidden = questions.length - shown;
+  return h(VStack, {gap: 4, as: 'section'},
+    h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
+      h(Heading, {level: 2}, group.label),
+      questions.length > 0 && h(Badge, {label: plural(questions.length, 'question'), variant: 'blue', icon: fa('scale-balanced')}),
+      catalysts.length > 0 && h(Badge, {label: plural(catalysts.length, 'catalyst'), variant: 'purple', icon: fa('bolt')}),
+    ),
+    catalysts.length > 0 && h(Card, {variant: 'muted', padding: 2},
+      h(List, {density: 'compact', hasDividers: true}, catalysts.map(catalyst => h(ListItem, {
+        key: catalyst.index,
+        label: catalyst.title,
+        description: isDate(catalyst.when) ? day(catalyst.when) : catalyst.when,
+        startContent: fa('bolt'),
+        ...(catalyst.url && {href: catalyst.url, target: '_blank', endContent: fa('arrow-up-right-from-square')}),
+      }))),
+    ),
+    questions.length > 0 && h(Grid, {columns: {minWidth: 320, max: 3}, gap: 4},
+      questions.slice(0, shown).map(question => h(Question, {key: question.id, question, reportDate})),
+    ),
+    hidden > 0 && h(HStack, {justify: 'center'}, h(Button, {
+      label: `Show ${Math.min(hidden, QUESTIONS_PER_PAGE)} more of ${hidden.toLocaleString('en-US')}`,
+      variant: 'ghost',
+      icon: fa('chevron-down'),
+      onClick: () => setShown(shown + QUESTIONS_PER_PAGE),
+    })),
+  );
+}
+
+function App() {
+  const [report, setReport] = useState(null);
+  const [error, setError] = useState(null);
+  const [horizon, setHorizon] = useState(DEFAULT_HORIZON);
+  const [show, setShow] = useState('all');
+  const [query, setQuery] = useState('');
+  const [semantic, setSemantic] = useState(null);
+  const shownHorizon = useDeferredValue(horizon); // the slider stays responsive while the timeline catches up
+
+  useEffect(() => { loadJson('output.json').then(setReport, setError); }, []);
+
+  // Keyword matches show at once; semantic matches join them once the model has answered
+  useEffect(() => {
+    if (!query.trim()) return;
+    const timer = setTimeout(() => semanticMatches(query).then(setSemantic, e => console.warn('Semantic search unavailable:', e)), SEMANTIC_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const items = useMemo(() => {
+    if (!report) return null;
+    const thisMonth = monthNumber(report.date);
+    const bucket = iso => iso ? Math.min(Math.max(monthNumber(iso) - thisMonth, 0), LATER) : LATER; // past due counts as this month
+    return {
+      thisMonth,
+      questions: (report.relevant_predictions ?? []).map(p => ({
+        ...p,
+        bucket: bucket(p.resolution_date),
+        source: p.id.startsWith('k-') ? 'Kalshi' : 'Polymarket',
+        outcomes: outcomes(p),
+        isConsensus: isConsensus(p),
+        text: [p.title, ...(p.bets ?? []).map(b => b.prompt)].join(' ').toLowerCase(),
+      })).sort((a, b) => b.volume_24h - a.volume_24h),
+      catalysts: (report.upcoming_catalysts ?? []).map((c, index) => ({
+        ...c, index, bucket: bucket(c.expected_date), text: `${c.title} ${c.when}`.toLowerCase(),
+      })).sort((a, b) => (a.expected_date ?? '').localeCompare(b.expected_date ?? '')),
+    };
+  }, [report]);
+
+  const groups = useMemo(() => {
+    if (!items) return [];
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const near = semantic?.query === query ? semantic : null;
+    const matches = (item, isNear) => !terms.length || terms.every(term => item.text.includes(term)) || isNear;
+    const lastBucket = shownHorizon === HORIZON_MONTHS ? LATER : shownHorizon; // the last stop also shows everything later
+    const byBucket = new Map();
+    const add = (kind, item) => {
+      if (item.bucket > lastBucket) return;
+      if (!byBucket.has(item.bucket)) byBucket.set(item.bucket, {bucket: item.bucket, questions: [], catalysts: []});
+      byBucket.get(item.bucket)[kind].push(item);
+    };
+    for (const q of items.questions) {
+      if ((show === 'all' || (show === 'consensus') === q.isConsensus) && matches(q, near?.questions.has(q.id))) add('questions', q);
+    }
+    for (const c of items.catalysts) if (matches(c, near?.catalysts.has(c.index))) add('catalysts', c);
+    return [...byBucket.values()].sort((a, b) => a.bucket - b.bucket).map(group => ({
+      ...group, label: group.bucket === LATER ? 'Later or undated' : longMonth(items.thisMonth + group.bucket),
+    }));
+  }, [items, shownHorizon, show, query, semantic]);
+
+  if (error) {
+    return h(Center, {height: '100%', padding: 6}, h(Banner, {
+      status: 'error',
+      title: 'Could not load the report',
+      description: `${error.message}. If you opened this file directly, serve it instead: python3 -m http.server 8000`,
+    }));
+  }
+  if (!items) return h(Center, {height: '100%'}, h(Spinner, {size: 'xl', label: 'Loading the report'}));
+
+  const horizonLabel = value => shortMonth(items.thisMonth + value) + (value === HORIZON_MONTHS ? ' or later' : '');
+  const count = kind => groups.reduce((sum, group) => sum + group[kind].length, 0);
+  const summary = `${plural(count('questions'), 'question')} and ${plural(count('catalysts'), 'catalyst')} `
+    + (shownHorizon === HORIZON_MONTHS ? 'in total' : `by the end of ${horizonLabel(shownHorizon)}`);
+  const yearMarks = Array.from({length: HORIZON_MONTHS + 1}, (_, value) => value)
+    .filter(value => value > 0 && (items.thisMonth + value) % 12 === 0)
+    .map(value => ({value, label: String((items.thisMonth + value) / 12)}));
+
+  return h(Layout, {
+    contentWidth: 1280,
+    header: h(LayoutHeader, {hasDivider: true, label: 'Time horizon'}, h(VStack, {gap: 3},
+      h(HStack, {gap: 4, align: 'center', justify: 'between', wrap: 'wrap'},
+        h(HStack, {gap: 3, align: 'center'},
+          h(Heading, {level: 3, accessibilityLevel: 1}, fa('crystal-ball'), ' Zeitgeist'),
+          h(Text, {type: 'supporting'}, `What markets expect, as of ${day(report.date)}`),
+        ),
+        h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
+          h(SegmentedControl, {label: 'Which questions to show', value: show, onChange: setShow, size: 'sm'},
+            h(SegmentedControlItem, {value: 'all', label: 'All'}),
+            h(SegmentedControlItem, {value: 'contested', label: 'Contested', icon: fa('scale-unbalanced')}),
+            h(SegmentedControlItem, {value: 'consensus', label: 'Consensus', icon: fa('circle-check')}),
+          ),
+          h(TextInput, {
+            type: 'search', label: 'Search', isLabelHidden: true, placeholder: 'Search questions and catalysts',
+            value: query, onChange: setQuery, startIcon: fa('magnifying-glass'), hasClear: true, size: 'sm', width: 300,
+          }),
+        ),
+      ),
+      h(Slider, {
+        label: 'Resolving by', value: horizon, onChange: setHorizon, min: 0, max: HORIZON_MONTHS, step: 1,
+        formatValue: horizonLabel, valueDisplay: 'text', marks: yearMarks, width: '100%',
+        description: summary,
+      }),
+    )),
+    content: h(LayoutContent, {label: 'Timeline'}, groups.length === 0
+      ? h(EmptyState, {
+          icon: fa('telescope fa-2xl'),
+          title: 'Nothing resolves by then',
+          description: 'Move the slider further out, or widen the search.',
+        })
+      : h(VStack, {gap: 8}, groups.map(group => h(Month, {key: group.bucket, group, reportDate: report.date}))),
+    ),
+  });
+}
+
+createRoot(document.getElementById('root')).render(h(App));
 </script>
 </body>
 </html>
