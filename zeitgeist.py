@@ -175,7 +175,7 @@ def relevance_input(day: date) -> str:
 RELEVANCE_INPUT = relevance_input(today)
 # The two questions asked about each prediction, by the key of the score they give
 QUESTIONS = {
-    "relevance": {"type": "predicate", "instructions": "Is it very clear that the result of this prediction market will change the investments of the investor?"},
+    "relevance": {"type": "predicate", "instructions": "Does the result of this prediction market have a very clear effect on the investor?"},
     "tag": {"type": "choice", "instructions": "Which tag does this prediction market get?", "choices": [{"value": tag} for tag in TAGS]},
 }
 # A cached score is only reused while the model and prompt are unchanged (the date in the prompt is ignored)

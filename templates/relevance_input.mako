@@ -13,11 +13,10 @@ Obey these rules:
 </task>
 
 <relevance>
-A prediction market is relevant only if it is very clear that its result will change the investments of the investor.
-Be very strict. Most prediction markets are not relevant.
-If you are not sure that a prediction market is relevant, answer that it is not relevant.
+A prediction market is relevant only if its result has a very clear effect on the investor.
+Be very strict and careful.
 
-The prediction markets in this list are not relevant, unless there is a very clear effect on the investments of the investor:
+The prediction markets in this list usually have no effect on the investor. They are relevant only if there is a good reason:
   - News about famous persons. Example: the number of posts that Elon Musk writes in one week.
   - Sports. Example: the transfer of a football player to a different team.
   - Events that are more than 10 years in the future. Example: India is the host of the Olympic Games before 2040.
