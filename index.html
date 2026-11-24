@@ -236,7 +236,7 @@ function App() {
         outcomes: outcomes(p),
         isConsensus: isConsensus(p),
         text: [p.title, ...(p.bets ?? []).map(b => b.prompt)].join(' ').toLowerCase(),
-      })).sort((a, b) => b.volume_24h - a.volume_24h),
+      })).sort((a, b) => (a.resolution_date ?? '').localeCompare(b.resolution_date ?? '') || b.volume_24h - a.volume_24h), // most traded first within a day
       catalysts: (report.upcoming_catalysts ?? []).map((c, index) => ({
         ...c, index, bucket: bucket(c.expected_date), text: `${c.title} ${c.when}`.toLowerCase(),
       })).sort((a, b) => (a.expected_date ?? '').localeCompare(b.expected_date ?? '')),
