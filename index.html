@@ -40,7 +40,7 @@ import {createElement as h, useEffect, useMemo, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
   Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
-  LayoutHeader, LayoutPanel, Link, List, ListItem, ProgressBar, SegmentedControl, SegmentedControlItem, Slider, Spinner, Text,
+  LayoutHeader, LayoutPanel, Link, ProgressBar, SegmentedControl, SegmentedControlItem, Slider, Spinner, Text,
   TextInput, VStack, registerIcons,
 } from '@astryxdesign/core';
 
@@ -154,16 +154,25 @@ function Outcome({bet}) {
 }
 
 // The date line of a card; the year is left out under a month heading, which already says it
-function When({iso, hasYear, hue}) {
+function When({iso, hasYear, hue, icon}) {
   return h(Text, {type: 'supporting', weight: 'semibold', style: textColor(hue)},
-    fa('calendar-day', hue), ' ', !iso ? 'No date' : hasYear ? day(iso) : dayOfMonth(iso));
+    fa(icon, hue), ' ', !iso ? 'No date' : !isDate(iso) ? iso : hasYear ? day(iso) : dayOfMonth(iso));
+}
+
+// A catalyst looks like a question, in its own colour; a vague `when` ("late January 2027") is shown as written
+function Catalyst({catalyst, hasYear}) {
+  const title = {weight: 'semibold', style: textColor('purple')};
+  return h(Card, {variant: 'purple'}, h(VStack, {gap: 3},
+    h(When, {iso: isDate(catalyst.when) ? catalyst.expected_date : catalyst.when, hasYear, hue: 'purple', icon: 'bolt'}),
+    catalyst.url ? h(Link, {href: catalyst.url, target: '_blank', ...title}, catalyst.title) : h(Text, title, catalyst.title),
+  ));
 }
 
 function Question({question, hasYear}) {
   const bets = question.outcomes;
   const rest = bets.slice(MAX_OUTCOMES);
   return h(Card, null, h(VStack, {gap: 3},
-    h(When, {iso: question.resolution_date, hasYear, hue: 'orange'}),
+    h(When, {iso: question.resolution_date, hasYear, hue: 'orange', icon: 'calendar-day'}),
     h(Link, {href: question.url, target: '_blank', weight: 'semibold', style: textColor('blue')}, question.title),
     bets.length === 0 && h(Text, {type: 'supporting'}, 'No outcome is priced above 1%'),
     ...bets.slice(0, MAX_OUTCOMES).map(bet => h(Outcome, {key: bet.prompt, bet})),
@@ -176,6 +185,7 @@ function Question({question, hasYear}) {
 function Month({group}) {
   const [shown, setShown] = useState(QUESTIONS_PER_MONTH);
   const {catalysts, questions} = group;
+  const hasYear = group.bucket === LATER;
   const hidden = questions.length - shown;
   return h(VStack, {gap: 4, as: 'section', id: `month-${group.bucket}`},
     h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
@@ -183,17 +193,9 @@ function Month({group}) {
       questions.length > 0 && h(Badge, {label: plural(questions.length, 'question'), variant: 'blue', icon: fa('scale-balanced')}),
       catalysts.length > 0 && h(Badge, {label: plural(catalysts.length, 'catalyst'), variant: 'purple', icon: fa('bolt')}),
     ),
-    catalysts.length > 0 && h(Card, {variant: 'muted', padding: 2},
-      h(List, {density: 'compact', hasDividers: true}, catalysts.map(catalyst => h(ListItem, {
-        key: catalyst.index,
-        label: catalyst.title,
-        description: isDate(catalyst.when) ? day(catalyst.when) : catalyst.when,
-        startContent: fa('bolt'),
-        ...(catalyst.url && {href: catalyst.url, target: '_blank', endContent: fa('arrow-up-right-from-square')}),
-      }))),
-    ),
-    questions.length > 0 && h(Grid, {columns: {minWidth: 320, max: 3}, gap: 4},
-      questions.slice(0, shown).map(question => h(Question, {key: question.id, question, hasYear: group.bucket === LATER})),
+    h(Grid, {columns: {minWidth: 320, max: 3}, gap: 4},
+      catalysts.map(catalyst => h(Catalyst, {key: `catalyst-${catalyst.index}`, catalyst, hasYear})),
+      questions.slice(0, shown).map(question => h(Question, {key: question.id, question, hasYear})),
     ),
     hidden > 0 && h(HStack, {justify: 'center'}, h(Button, {
       label: `Show ${Math.min(hidden, QUESTIONS_PER_PAGE)} more of ${hidden.toLocaleString('en-US')}`,
