@@ -26,22 +26,25 @@
 <style>
   html, body, #root { height: 100%; }
   body { margin: 0; font-family: var(--font-family-body); background: var(--color-background-body); }
+  /* The timeline index fills its panel; a vertical Astryx Slider is 160px tall otherwise */
+  .astryx-slider[data-orientation="vertical"] { flex: 1; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="module">
-import {createElement as h, useDeferredValue, useEffect, useMemo, useState} from 'react';
+import {createElement as h, useEffect, useMemo, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
   Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
-  LayoutHeader, Link, List, ListItem, ProgressBar, SegmentedControl, SegmentedControlItem, Slider, Spinner, Text,
+  LayoutHeader, LayoutPanel, Link, List, ListItem, ProgressBar, SegmentedControl, SegmentedControlItem, Slider, Spinner, Text,
   TextInput, VStack, registerIcons,
 } from '@astryxdesign/core';
 
-const HORIZON_MONTHS = 60;        // the slider runs from this month to this many months ahead
-const DEFAULT_HORIZON = 3;
-const LATER = HORIZON_MONTHS + 1; // bucket for questions that resolve after the slider's range, or have no date
+const HORIZON_MONTHS = 60;        // the timeline index runs from this month to this many months ahead ...
+const LATER = HORIZON_MONTHS + 1; // ... plus one last stop for whatever resolves after that, or has no date
+const JUMP_SETTLE_MS = 200;       // after the index scrolls the timeline, ignore scroll events for this long
+const YEAR_LABEL_CLEARANCE = 3;   // months around the index's thumb in which a year label would collide with its label
 const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is pressed
 const QUESTIONS_PER_PAGE = 24;
 const MAX_OUTCOMES = 4;           // shown per question; the rest sit behind "N more outcomes"
@@ -160,7 +163,7 @@ function Month({group, reportDate}) {
   const [shown, setShown] = useState(QUESTIONS_PER_MONTH);
   const {catalysts, questions} = group;
   const hidden = questions.length - shown;
-  return h(VStack, {gap: 4, as: 'section'},
+  return h(VStack, {gap: 4, as: 'section', id: `month-${group.bucket}`},
     h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
       h(Heading, {level: 2}, group.label),
       questions.length > 0 && h(Badge, {label: plural(questions.length, 'question'), variant: 'blue', icon: fa('scale-balanced')}),
@@ -190,11 +193,12 @@ function Month({group, reportDate}) {
 function App() {
   const [report, setReport] = useState(null);
   const [error, setError] = useState(null);
-  const [horizon, setHorizon] = useState(DEFAULT_HORIZON);
+  const [month, setMonth] = useState(0); // where the timeline index points, in months from now
+  const timeline = useRef(null);
+  const jumpedAt = useRef(0);
   const [show, setShow] = useState('all');
   const [query, setQuery] = useState('');
   const [semantic, setSemantic] = useState(null);
-  const shownHorizon = useDeferredValue(horizon); // the slider stays responsive while the timeline catches up
 
   useEffect(() => { loadJson('output.json').then(setReport, setError); }, []);
 
@@ -230,10 +234,8 @@ function App() {
     const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
     const near = semantic?.query === query ? semantic : null;
     const matches = (item, isNear) => !terms.length || terms.every(term => item.text.includes(term)) || isNear;
-    const lastBucket = shownHorizon === HORIZON_MONTHS ? LATER : shownHorizon; // the last stop also shows everything later
     const byBucket = new Map();
     const add = (kind, item) => {
-      if (item.bucket > lastBucket) return;
       if (!byBucket.has(item.bucket)) byBucket.set(item.bucket, {bucket: item.bucket, questions: [], catalysts: []});
       byBucket.get(item.bucket)[kind].push(item);
     };
@@ -242,9 +244,31 @@ function App() {
     }
     for (const c of items.catalysts) if (matches(c, near?.catalysts.has(c.index))) add('catalysts', c);
     return [...byBucket.values()].sort((a, b) => a.bucket - b.bucket).map(group => ({
-      ...group, label: group.bucket === LATER ? 'Later or undated' : longMonth(items.thisMonth + group.bucket),
+      ...group, label: group.bucket === LATER ? 'Later' : longMonth(items.thisMonth + group.bucket),
     }));
-  }, [items, shownHorizon, show, query, semantic]);
+  }, [items, show, query, semantic]);
+
+  // Scrolling the timeline moves the index to the month being read ...
+  useEffect(() => {
+    const scroller = timeline.current;
+    if (!scroller) return;
+    const onScroll = () => {
+      if (performance.now() - jumpedAt.current < JUMP_SETTLE_MS) return; // the index itself scrolled here
+      const readingLine = scroller.getBoundingClientRect().top + scroller.clientHeight / 3;
+      const reading = groups.findLast(group => document.getElementById(`month-${group.bucket}`).getBoundingClientRect().top <= readingLine);
+      setMonth((reading ?? groups[0])?.bucket ?? 0);
+    };
+    scroller.addEventListener('scroll', onScroll, {passive: true});
+    return () => scroller.removeEventListener('scroll', onScroll);
+  }, [groups]);
+
+  // ... and moving the index scrolls the timeline to that month, or to the next one that has anything in it
+  const jumpTo = value => {
+    setMonth(value);
+    jumpedAt.current = performance.now();
+    const group = groups.find(group => group.bucket >= value) ?? groups.at(-1);
+    if (group) document.getElementById(`month-${group.bucket}`).scrollIntoView();
+  };
 
   if (error) {
     return h(Center, {height: '100%', padding: 6}, h(Banner, {
@@ -255,17 +279,20 @@ function App() {
   }
   if (!items) return h(Center, {height: '100%'}, h(Spinner, {size: 'xl', label: 'Loading the report'}));
 
-  const horizonLabel = value => shortMonth(items.thisMonth + value) + (value === HORIZON_MONTHS ? ' or later' : '');
-  const count = kind => groups.reduce((sum, group) => sum + group[kind].length, 0);
-  const summary = `${plural(count('questions'), 'question')} and ${plural(count('catalysts'), 'catalyst')} `
-    + (shownHorizon === HORIZON_MONTHS ? 'in total' : `by the end of ${horizonLabel(shownHorizon)}`);
-  const yearMarks = Array.from({length: HORIZON_MONTHS + 1}, (_, value) => value)
-    .filter(value => value > 0 && (items.thisMonth + value) % 12 === 0)
-    .map(value => ({value, label: String((items.thisMonth + value) / 12)}));
+  // A vertical Slider has its minimum at the bottom, so the index counts down: now is the top, LATER the bottom.
+  // The month being read is a labelled mark at the thumb; each January is a mark labelled with its year,
+  // unless the thumb's label would sit on top of it.
+  const monthLabel = value => value === LATER ? 'Later' : shortMonth(items.thisMonth + value);
+  const marks = [
+    {value: LATER - month, label: monthLabel(month)},
+    ...Array.from({length: HORIZON_MONTHS}, (_, i) => i + 1)
+      .filter(value => (items.thisMonth + value) % 12 === 0)
+      .map(value => ({value: LATER - value, label: Math.abs(value - month) > YEAR_LABEL_CLEARANCE ? String((items.thisMonth + value) / 12) : undefined})),
+  ];
 
   return h(Layout, {
     contentWidth: 1280,
-    header: h(LayoutHeader, {hasDivider: true, label: 'Time horizon'}, h(VStack, {gap: 3},
+    header: h(LayoutHeader, {hasDivider: true},
       h(HStack, {gap: 4, align: 'center', justify: 'between', wrap: 'wrap'},
         h(Heading, {level: 3, accessibilityLevel: 1}, fa('crystal-ball'), ' Zeitgeist'),
         h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
@@ -280,17 +307,19 @@ function App() {
           }),
         ),
       ),
+    ),
+    start: h(LayoutPanel, {width: 136, isScrollable: false, role: 'navigation', label: 'Timeline index'},
       h(Slider, {
-        label: 'Resolving by', value: horizon, onChange: setHorizon, min: 0, max: HORIZON_MONTHS, step: 1,
-        formatValue: horizonLabel, valueDisplay: 'text', marks: yearMarks, width: '100%',
-        description: summary,
+        label: 'Jump to month', isLabelHidden: true, orientation: 'vertical', min: 0, max: LATER, step: 1,
+        value: LATER - month, onChange: value => jumpTo(LATER - value), formatValue: value => monthLabel(LATER - value),
+        valueDisplay: 'none', marks, containerStyle: {height: '100%'}, controlStyle: {height: '100%'},
       }),
-    )),
-    content: h(LayoutContent, {label: 'Timeline'}, groups.length === 0
+    ),
+    content: h(LayoutContent, {label: 'Timeline', ref: timeline}, groups.length === 0
       ? h(EmptyState, {
           icon: fa('telescope fa-2xl'),
-          title: 'Nothing resolves by then',
-          description: 'Move the slider further out, or widen the search.',
+          title: 'No matches',
+          description: 'Try a broader search.',
         })
       : h(VStack, {gap: 8}, groups.map(group => h(Month, {key: group.bucket, group, reportDate: report.date}))),
     ),
