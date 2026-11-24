@@ -13,7 +13,7 @@ Daily forward-looking dashboard for an equities investor: prediction markets -> 
 5. Publish `output.json` + `index.html` to GitHub Pages
    - Left to right: a timeline index, the questions and catalysts as cards in date order, and the memo
    - Selecting tags filters the cards and swaps the combined memo for the memos of those tags
-   - `index.html` has no build step: [Astryx](https://astryx.atmeta.com/) components and Font Awesome icons load from CDNs
+   - `index.html` has no build step: [Astryx](https://astryx.atmeta.com/) components, [noUiSlider](https://refreshless.com/nouislider/) (the ruler of the timeline index) and Font Awesome icons load from CDNs
 
 ## Pipeline
 The run is one [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview) graph (`pipeline` in `zeitgeist.py`):

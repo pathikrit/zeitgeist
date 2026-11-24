@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@astryxdesign/core@0.7.17/dist/astryx.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@astryxdesign/theme-neutral@0.7.17/dist/theme.css">
 <link rel="stylesheet" href="https://kit.fontawesome.com/a22be8527e.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css">
 <script type="importmap">
 {
   "imports": {
@@ -19,15 +20,36 @@
     "react/jsx-runtime": "https://esm.sh/react@19.2.0/jsx-runtime",
     "react-dom": "https://esm.sh/react-dom@19.2.0",
     "react-dom/client": "https://esm.sh/react-dom@19.2.0/client",
-    "@astryxdesign/core": "https://esm.sh/@astryxdesign/core@0.7.17?external=react,react-dom"
+    "@astryxdesign/core": "https://esm.sh/@astryxdesign/core@0.7.17?external=react,react-dom",
+    "nouislider": "https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.mjs"
   }
 }
 </script>
 <style>
   html, body, #root { height: 100%; }
   body { margin: 0; font-family: var(--font-family-body); background: var(--color-background-body); }
-  /* The timeline index fills its panel; a vertical Astryx Slider is 160px tall otherwise */
-  .astryx-slider[data-orientation="vertical"] { flex: 1; }
+  /* The timeline index is a ruler (noUiSlider's "pips") along a line: a tick for each month, a longer labelled one for each year.
+     A dot on the line marks the month being read and carries its name. Nothing is filled in, and a click anywhere on the ruler jumps there. */
+  .timeline-index { height: 100%; box-sizing: border-box; padding-block: 12px; }
+  .timeline-index .noUi-target {
+    height: 100%; width: 100%; cursor: pointer;
+    background: none; box-shadow: none; border: 0; border-radius: 0; border-left: 2px solid var(--color-border-emphasized);
+  }
+  .timeline-index .noUi-origin { left: 0; right: auto; }
+  .timeline-index .noUi-handle {
+    width: 12px; height: 12px; left: -7px; right: auto; bottom: -6px; cursor: grab;
+    background: var(--color-icon-purple); box-shadow: none; border: 0; border-radius: var(--radius-full);
+  }
+  .timeline-index .noUi-handle::before, .timeline-index .noUi-handle::after { display: none; }
+  .timeline-index .noUi-tooltip {
+    left: 20px; right: auto; padding: 2px 8px; border: 0; border-radius: var(--radius-full);
+    background: var(--color-background-purple); color: var(--color-text-purple);
+    font-size: var(--text-supporting-size); font-weight: var(--font-weight-semibold);
+  }
+  .timeline-index .noUi-pips { left: 0; padding: 0; color: var(--color-text-secondary); font-size: var(--text-supporting-size); }
+  .timeline-index .noUi-marker { width: 6px; height: 1px; margin-top: 0; background: var(--color-border-emphasized); }
+  .timeline-index .noUi-marker-large { width: 16px; height: 2px; margin-top: -1px; background: var(--color-text-secondary); }
+  .timeline-index .noUi-value { padding-left: 24px; }
   /* An outcome's bar takes its colour from its probability: see betColor(). An even bet is white on a dark page, grey on a light one */
   html { --bet-even: light-dark(var(--color-icon-disabled), var(--color-on-dark)); }
   .astryx-progress-bar-fill { background-color: var(--bet-color); }
@@ -40,9 +62,10 @@ import {createElement as h, useEffect, useMemo, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
   Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
-  LayoutHeader, LayoutPanel, Link, Markdown, ProgressBar, Slider, Spinner, Text,
+  LayoutHeader, LayoutPanel, Link, Markdown, ProgressBar, Spinner, Text,
   ToggleButton, ToggleButtonGroup, VStack, registerIcons, useMediaQuery,
 } from '@astryxdesign/core';
+import noUiSlider from 'nouislider';
 
 const HORIZON_MONTHS = 60;        // the timeline index runs from this month to this many months ahead ...
 const LATER = HORIZON_MONTHS + 1; // ... plus one last stop for whatever resolves after that, or has no date
@@ -51,8 +74,7 @@ const INDEX_MIN_WIDTH = 720;      // page width in px from which the timeline in
 const INDEX_WIDTH = 112;          // px, the timeline index panel
 const CARDS_WIDTH = 760;          // px, the cards beside the memo: room for two columns; the memo takes the rest
 const MEMO_MIN_WIDTH = 1300;      // page width in px from which the memo is a column beside the cards
-const INDEX_TRACK_WIDTH = 20;     // px; the index's labels hang off its track into the rest of the panel
-const YEAR_LABEL_CLEARANCE = 3;   // months around the index's thumb in which a year label would collide with its label
+const YEAR_LABEL_CLEARANCE = 3;   // months before the index's "Later" in which a year label would collide with it
 const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is pressed
 const QUESTIONS_PER_PAGE = 24;
 const CARD_MIN_WIDTH = 320;       // px; a narrower page gets fewer columns of cards
@@ -205,6 +227,50 @@ function Month({group, maxColumns}) {
   );
 }
 
+// The timeline index: a ruler of months, from the month of the report at the top to "Later" at the bottom, with a
+// mark on the month being read. Dragging the mark, clicking the ruler or the arrow keys call onJump(month).
+function TimelineIndex({month, thisMonth, onJump}) {
+  const element = useRef(null);
+  const jump = useRef(onJump);
+  jump.current = onJump;
+  const slidAt = useRef(0);
+
+  useEffect(() => {
+    const isJanuary = value => (thisMonth + value) % 12 === 0;
+    const monthLabel = value => value === LATER ? 'Later' : shortMonth(thisMonth + Math.round(value));
+    const ruler = noUiSlider.create(element.current, {
+      orientation: 'vertical', range: {min: 0, max: LATER}, step: 1, start: 0,
+      behaviour: 'tap-snap', // a click on the ruler moves the mark there, and it can be dragged on from that same click
+      tooltips: {to: monthLabel},
+      ariaFormat: {to: monthLabel},
+      handleAttributes: [{'aria-label': 'Jump to month'}],
+      pips: {
+        mode: 'steps',
+        density: 100, // no ticks between the months
+        // 1 = a long tick with a label, 0 = a short tick
+        filter: value => value === LATER || (isJanuary(value) && LATER - value > YEAR_LABEL_CLEARANCE) ? 1 : 0,
+        format: {to: value => value === LATER ? 'Later' : String((thisMonth + value) / 12)},
+      },
+    });
+    // 'slide' is only what the reader does (a drag, a click, an arrow key), not set() below
+    ruler.on('slide', (_formatted, _handle, [value]) => { slidAt.current = performance.now(); jump.current(Math.round(value)); });
+    // The month name beside the mark would half cover a year label that is right next to it
+    ruler.on('update', (_formatted, _handle, [value]) => element.current.querySelectorAll('.noUi-value').forEach(label => {
+      label.style.visibility = Math.abs(label.dataset.value - value) <= 1 ? 'hidden' : '';
+    }));
+    return () => ruler.destroy();
+  }, [thisMonth]);
+
+  // Follow the month being read. Right after the reader moved the mark, `month` can still be an older value on its way
+  // through React; set() would then pull the mark from under the pointer and freeze it for a moment.
+  useEffect(() => {
+    const ruler = element.current.noUiSlider;
+    if (performance.now() - slidAt.current > JUMP_SETTLE_MS && Math.round(ruler.get(true)) !== month) ruler.set(month, false);
+  }, [month, thisMonth]);
+
+  return h('div', {className: 'timeline-index'}, h('div', {ref: element}));
+}
+
 // The memo: the combined one, or the memo of the selected tag
 function Memo({memos, tag}) {
   if (!memos) return h(EmptyState, {isCompact: true, icon: fa('file-lines fa-xl'), title: 'No memo yet', description: 'A new one is written every few days.'});
@@ -300,17 +366,6 @@ function App() {
   }
   if (!items) return h(Center, {height: '100%'}, h(Spinner, {size: 'xl', label: 'Loading the report'}));
 
-  // A vertical Slider has its minimum at the bottom, so the index counts down: now is the top, LATER the bottom.
-  // The month being read is a labelled mark at the thumb; every other January is a mark labelled with its year,
-  // unless the thumb's label would sit on top of it.
-  const monthLabel = value => value === LATER ? 'Later' : shortMonth(items.thisMonth + value);
-  const marks = [
-    {value: LATER - month, label: monthLabel(month)},
-    ...Array.from({length: HORIZON_MONTHS}, (_, i) => i + 1)
-      .filter(value => (items.thisMonth + value) % 12 === 0 && value !== month)
-      .map(value => ({value: LATER - value, label: Math.abs(value - month) > YEAR_LABEL_CLEARANCE ? String((items.thisMonth + value) / 12) : undefined})),
-  ];
-
   const memo = h(Memo, {memos: report.memos, tag});
 
   return h(Layout, {
@@ -328,11 +383,7 @@ function App() {
       ),
     ),
     start: isWide && h(LayoutPanel, {width: INDEX_WIDTH, isScrollable: false, role: 'navigation', label: 'Timeline index'},
-      h(Slider, {
-        label: 'Jump to month', isLabelHidden: true, orientation: 'vertical', min: 0, max: LATER, step: 1,
-        value: LATER - month, onChange: value => jumpTo(LATER - value), formatValue: value => monthLabel(LATER - value),
-        valueDisplay: 'none', marks, containerStyle: {height: '100%'}, controlStyle: {height: '100%', flex: 'none', width: INDEX_TRACK_WIDTH},
-      }),
+      h(TimelineIndex, {month, thisMonth: items.thisMonth, onJump: jumpTo}),
     ),
     content: h(LayoutContent, {label: 'Timeline', ref: timeline}, h(VStack, {gap: 8},
       !hasMemoColumn && h(Collapsible, {trigger: 'Memo', defaultIsOpen: false}, memo),
