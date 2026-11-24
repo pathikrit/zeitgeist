@@ -109,7 +109,7 @@
       "url": "https://kalshi.com/markets/KXUSHEALTHCARE",
       "resolution_date": "2030-01-07",
       "volume": 4050.35,
-      "volume_24h": 175.18,
+      "volume_24h": 182.18,
       "relevance": 0.86,
       "tag": "Govt"
     },
@@ -151,7 +151,7 @@
       "bets": [
         {
           "prompt": "Before Jan 1, 2027",
-          "probability": 0.015
+          "probability": 0.01
         },
         {
           "prompt": "Before Jan 1, 2028",
@@ -168,8 +168,8 @@
       ],
       "url": "https://kalshi.com/markets/KXTAIWANLVL4",
       "resolution_date": "2030-01-01",
-      "volume": 323509.56,
-      "volume_24h": 27.79,
+      "volume": 323517.36,
+      "volume_24h": 7.8,
       "relevance": 0.51,
       "tag": "Geopolitical"
     },
@@ -513,7 +513,7 @@
       "url": "https://kalshi.com/markets/KXTRUMPRESIGN",
       "resolution_date": "2029-01-21",
       "volume": 844500.33,
-      "volume_24h": 3995.99,
+      "volume_24h": 3994.8,
       "relevance": 0.95,
       "tag": "Govt"
     },
@@ -527,7 +527,7 @@
         },
         {
           "prompt": "Alexandria Ocasio-Cortez",
-          "probability": 0.1
+          "probability": 0.11
         },
         {
           "prompt": "Pete Buttigieg",
@@ -611,7 +611,7 @@
         },
         {
           "prompt": "Jon Ossoff",
-          "probability": 0.17
+          "probability": 0.18
         },
         {
           "prompt": "Mark Kelly",
@@ -736,8 +736,8 @@
       ],
       "url": "https://kalshi.com/markets/KXPRESPERSON",
       "resolution_date": "2029-01-21",
-      "volume": 111291580.47,
-      "volume_24h": 1567625.87,
+      "volume": 111291769.9,
+      "volume_24h": 1590580.5,
       "relevance": 0.99,
       "tag": "Govt"
     },
@@ -757,7 +757,7 @@
       "url": "https://kalshi.com/markets/KXPRESPARTY",
       "resolution_date": "2029-01-21",
       "volume": 927395.5900000001,
-      "volume_24h": 4379.76,
+      "volume_24h": 3877.08,
       "relevance": 0.88,
       "tag": "Govt"
     },
@@ -777,7 +777,7 @@
       "url": "https://kalshi.com/markets/KXGREENTERRITORY",
       "resolution_date": "2029-01-21",
       "volume": 3592905.42,
-      "volume_24h": 2864.71,
+      "volume_24h": 2659.0,
       "relevance": 0.84,
       "tag": "Geopolitical"
     },
@@ -997,7 +997,7 @@
       "url": "https://kalshi.com/markets/KXIMPEACH",
       "resolution_date": "2029-01-20",
       "volume": 1112096.67,
-      "volume_24h": 20869.51,
+      "volume_24h": 20881.33,
       "relevance": 0.78,
       "tag": "Govt"
     },
@@ -1017,7 +1017,7 @@
       "url": "https://kalshi.com/markets/KXGREENLAND",
       "resolution_date": "2029-01-20",
       "volume": 5355858.21,
-      "volume_24h": 12619.25,
+      "volume_24h": 12616.72,
       "relevance": 0.56,
       "tag": "Govt"
     },
@@ -1088,8 +1088,8 @@
       ],
       "url": "https://kalshi.com/markets/KXRUBIOANNOUNCEOUT",
       "resolution_date": "2029-01-01",
-      "volume": 267655.97,
-      "volume_24h": 47412.82,
+      "volume": 267706.41,
+      "volume_24h": 47468.299999999996,
       "relevance": 0.55,
       "tag": "Govt"
     },
@@ -1197,7 +1197,7 @@
       "url": "https://kalshi.com/markets/KXLUTNICKOUT",
       "resolution_date": "2029-01-01",
       "volume": 588561.07,
-      "volume_24h": 24449.29,
+      "volume_24h": 24460.55,
       "relevance": 0.62,
       "tag": "Govt"
     },
@@ -1875,7 +1875,7 @@
         },
         {
           "prompt": "Stephen Miller",
-          "probability": 0.01
+          "probability": 0.012
         },
         {
           "prompt": "Brandon Gill",
@@ -1924,8 +1924,8 @@
       ],
       "url": "https://kalshi.com/markets/KXPRESNOMR",
       "resolution_date": "2028-11-07",
-      "volume": 106866753.51,
-      "volume_24h": 1530712.04,
+      "volume": 106973180.1,
+      "volume_24h": 1624503.19,
       "relevance": 0.61,
       "tag": "Govt"
     },
@@ -2177,7 +2177,7 @@
       "url": "https://kalshi.com/markets/KXPRESOUTCOME",
       "resolution_date": "2028-11-07",
       "volume": 222565.26,
-      "volume_24h": 3413.57,
+      "volume_24h": 2739.33,
       "relevance": 0.82,
       "tag": "Govt"
     },
@@ -2308,8 +2308,8 @@
       ],
       "url": "https://kalshi.com/markets/KXPRESMATCHUP",
       "resolution_date": "2028-11-07",
-      "volume": 436974.63,
-      "volume_24h": 25904.39,
+      "volume": 437029.91,
+      "volume_24h": 25959.670000000002,
       "relevance": 0.61,
       "tag": "Govt"
     },
@@ -2413,7 +2413,7 @@
       "url": "https://kalshi.com/markets/KXFRPRESADVANCE",
       "resolution_date": "2028-04-17",
       "volume": 24226.01,
-      "volume_24h": 1103.35,
+      "volume_24h": 1093.35,
       "relevance": 0.88,
       "tag": "International"
     },
@@ -2727,7 +2727,7 @@
         },
         {
           "prompt": "Scott Bessent",
-          "probability": 0.42
+          "probability": 0.41
         },
         {
           "prompt": "Jamieson Greer",
@@ -2844,37 +2844,9 @@
       ],
       "url": "https://kalshi.com/markets/KXTRUMPADMINLEAVE",
       "resolution_date": "2028-01-01",
-      "volume": 25364.5,
+      "volume": 25384.2,
       "volume_24h": 547.9,
       "relevance": 0.87,
-      "tag": "Govt"
-    },
-    {
-      "id": "k-KXENTITYLIST-26NOV",
-      "title": "Which companies will Commerce add to the Entity List?",
-      "bets": [
-        {
-          "prompt": "Megaspeed",
-          "probability": 0.97
-        },
-        {
-          "prompt": "Speedmatrix",
-          "probability": 0.83
-        },
-        {
-          "prompt": "DeepSeek",
-          "probability": 0.15
-        },
-        {
-          "prompt": "CXMT",
-          "probability": 0.25
-        }
-      ],
-      "url": "https://kalshi.com/markets/KXENTITYLIST",
-      "resolution_date": "2028-01-08",
-      "volume": 23860.4,
-      "volume_24h": 1256.0,
-      "relevance": 0.79,
       "tag": "Govt"
     },
     {
@@ -2993,7 +2965,7 @@
       "url": "https://kalshi.com/markets/KXTRUMPRUN",
       "resolution_date": "2028-01-01",
       "volume": 185513.47,
-      "volume_24h": 607.83,
+      "volume_24h": 578.0500000000001,
       "relevance": 0.61,
       "tag": "Govt"
     },
@@ -3660,7 +3632,7 @@
       ],
       "url": "https://kalshi.com/markets/KXTHCLEGALSALE3MG",
       "resolution_date": "2027-11-19",
-      "volume": 81708.81999999999,
+      "volume": 81710.04,
       "volume_24h": 611.73,
       "relevance": 0.73,
       "tag": "Govt"
@@ -3699,7 +3671,7 @@
         },
         {
           "prompt": "Democrats, 12 to 14%",
-          "probability": 0.06
+          "probability": 0.041
         },
         {
           "prompt": "Democrats, 14 to 16%",
@@ -3712,7 +3684,7 @@
       ],
       "url": "https://kalshi.com/markets/KXHOUSEPOPVOTEMARGIN",
       "resolution_date": "2027-11-03",
-      "volume": 9081140.59,
+      "volume": 9081710.790000001,
       "volume_24h": 13905.18,
       "relevance": 0.8,
       "tag": "Govt"
@@ -3885,7 +3857,7 @@
       "url": "https://kalshi.com/markets/KXISRAELPM",
       "resolution_date": "2027-10-27",
       "volume": 11618203.84,
-      "volume_24h": 57465.770000000004,
+      "volume_24h": 57820.3,
       "relevance": 0.91,
       "tag": "International"
     },
@@ -3972,8 +3944,8 @@
       ],
       "url": "https://kalshi.com/markets/KXBTCPRICE",
       "resolution_date": "2027-07-08",
-      "volume": 331412.73,
-      "volume_24h": 23461.670000000002,
+      "volume": 331422.13,
+      "volume_24h": 23490.04,
       "relevance": 0.8,
       "tag": "Crypto"
     },
@@ -4291,12 +4263,12 @@
         },
         {
           "prompt": "Before Jun 30, 2027",
-          "probability": 0.02
+          "probability": 0.05
         }
       ],
       "url": "https://kalshi.com/markets/KXIPOSTARLINK",
       "resolution_date": "2027-06-01",
-      "volume": 273369.43,
+      "volume": 273463.19,
       "volume_24h": 849.62,
       "relevance": 0.62,
       "tag": "Market"
@@ -4383,11 +4355,11 @@
         },
         {
           "prompt": "Before Jan 1, 2027",
-          "probability": 0.47
+          "probability": 0.44
         },
         {
           "prompt": "Before Feb 1, 2027",
-          "probability": 0.66
+          "probability": 0.6
         },
         {
           "prompt": "Before Mar 1, 2027",
@@ -4395,7 +4367,7 @@
         },
         {
           "prompt": "Before Apr 1, 2027",
-          "probability": 0.71
+          "probability": 0.7
         },
         {
           "prompt": "Before May 1, 2027",
@@ -4408,8 +4380,8 @@
       ],
       "url": "https://kalshi.com/markets/KXCOMPANYACTIONMERGER",
       "resolution_date": "2027-06-01",
-      "volume": 1471513.27,
-      "volume_24h": 38457.9,
+      "volume": 1472753.61,
+      "volume_24h": 38458.56,
       "relevance": 0.88,
       "tag": "Market"
     },
@@ -4545,7 +4517,7 @@
       "url": "https://kalshi.com/markets/KXFRENCHPRES",
       "resolution_date": "2027-05-31",
       "volume": 7591452.55,
-      "volume_24h": 1429731.84,
+      "volume_24h": 1416341.66,
       "relevance": 0.6900000000000001,
       "tag": "International"
     },
@@ -5149,7 +5121,7 @@
       "url": "https://kalshi.com/markets/KXEARNINGSMENTIONNVDA",
       "resolution_date": "2027-03-10",
       "volume": 5894.89,
-      "volume_24h": 2035.6399999999999,
+      "volume_24h": 2007.92,
       "relevance": 0.79,
       "tag": "Market"
     },
@@ -5317,7 +5289,7 @@
       "url": "https://kalshi.com/markets/KXGDPYEAR",
       "resolution_date": "2027-02-28",
       "volume": 484640.99,
-      "volume_24h": 30.93,
+      "volume_24h": 37.97,
       "relevance": 1.0,
       "tag": "Macro"
     },
@@ -5741,7 +5713,7 @@
       "url": "https://kalshi.com/markets/KXEARNINGSMENTIONNFLX",
       "resolution_date": "2027-02-02",
       "volume": 879.23,
-      "volume_24h": 8.59,
+      "volume_24h": 8.97,
       "relevance": 0.57,
       "tag": "Market"
     },
@@ -5813,7 +5785,7 @@
       "url": "https://kalshi.com/markets/RSENATESEATS",
       "resolution_date": "2027-02-01",
       "volume": 16918463.89,
-      "volume_24h": 201220.75,
+      "volume_24h": 198415.2,
       "relevance": 0.62,
       "tag": "Govt"
     },
@@ -6213,7 +6185,7 @@
       "url": "https://kalshi.com/markets/KXBLUEWAVECOMBO",
       "resolution_date": "2027-02-01",
       "volume": 16123262.87,
-      "volume_24h": 136034.93,
+      "volume_24h": 88314.04,
       "relevance": 0.95,
       "tag": "Govt"
     },
@@ -7291,15 +7263,15 @@
         },
         {
           "prompt": "Exactly 2.25%",
-          "probability": 0.01
+          "probability": 0.02
         },
         {
           "prompt": "Exactly 2.50%",
-          "probability": 0.15
+          "probability": 0.16
         },
         {
           "prompt": "Exactly 2.75%",
-          "probability": 0.78
+          "probability": 0.79
         },
         {
           "prompt": "Exactly 3.00%",
@@ -7312,8 +7284,8 @@
       ],
       "url": "https://kalshi.com/markets/KXCANOREOY",
       "resolution_date": "2027-01-07",
-      "volume": 53356.83,
-      "volume_24h": 5816.32,
+      "volume": 53357.4,
+      "volume_24h": 5816.889999999999,
       "relevance": 0.76,
       "tag": "Macro"
     },
@@ -7681,7 +7653,7 @@
       "url": "https://kalshi.com/markets/KXRATEHIKE",
       "resolution_date": "2027-01-03",
       "volume": 603859.8400000001,
-      "volume_24h": 19023.79,
+      "volume_24h": 18962.800000000003,
       "relevance": 0.73,
       "tag": "Macro"
     },
@@ -7709,7 +7681,7 @@
       "url": "https://kalshi.com/markets/KXPERMITBILL",
       "resolution_date": "2027-01-03",
       "volume": 3445.49,
-      "volume_24h": 2192.27,
+      "volume_24h": 1950.09,
       "relevance": 0.75,
       "tag": "Govt"
     },
@@ -7937,7 +7909,7 @@
       "url": "https://kalshi.com/markets/KXWTIMAX",
       "resolution_date": "2027-01-01",
       "volume": 10967946.94,
-      "volume_24h": 43439.19,
+      "volume_24h": 43323.55,
       "relevance": 0.99,
       "tag": "Commodities"
     },
@@ -8203,7 +8175,7 @@
       "bets": [
         {
           "prompt": "Before 2027",
-          "probability": 0.017
+          "probability": 0.02
         },
         {
           "prompt": "Before 2028",
@@ -8216,8 +8188,8 @@
       ],
       "url": "https://kalshi.com/markets/KXTRUMPOUT27",
       "resolution_date": "2027-01-01",
-      "volume": 8698991.04,
-      "volume_24h": 66868.68,
+      "volume": 8708499.77,
+      "volume_24h": 76377.41,
       "relevance": 0.9400000000000001,
       "tag": "Govt"
     },
@@ -8257,7 +8229,7 @@
       "url": "https://kalshi.com/markets/KXTESLASEMI",
       "resolution_date": "2027-01-01",
       "volume": 188649.25,
-      "volume_24h": 915.53,
+      "volume_24h": 762.97,
       "relevance": 0.87,
       "tag": "Market"
     },
@@ -8549,7 +8521,7 @@
       "url": "https://kalshi.com/markets/KXNATLEMERGENCY",
       "resolution_date": "2027-01-01",
       "volume": 43014.38,
-      "volume_24h": 10072.77,
+      "volume_24h": 9633.56,
       "relevance": 0.5700000000000001,
       "tag": "Govt"
     },
@@ -8997,7 +8969,7 @@
       "url": "https://kalshi.com/markets/KXGTEMP",
       "resolution_date": "2027-01-01",
       "volume": 677748.34,
-      "volume_24h": 9516.63,
+      "volume_24h": 8530.43,
       "relevance": 0.52,
       "tag": "Calamities"
     },
@@ -9131,12 +9103,12 @@
       "bets": [
         {
           "prompt": "Any psychedelic substance for medical use",
-          "probability": 0.17
+          "probability": 0.16
         }
       ],
       "url": "https://kalshi.com/markets/KXFDAAPPROVALPSYCHEDELIC",
       "resolution_date": "2027-01-01",
-      "volume": 456151.57,
+      "volume": 456186.57,
       "volume_24h": 2088.42,
       "relevance": 0.53,
       "tag": "Govt"
@@ -9401,7 +9373,7 @@
       "url": "https://kalshi.com/markets/KXBTCVSGOLD",
       "resolution_date": "2027-01-01",
       "volume": 367474.68,
-      "volume_24h": 2661.4,
+      "volume_24h": 2595.07,
       "relevance": 0.73,
       "tag": "Crypto"
     },
@@ -9917,7 +9889,7 @@
       "url": "https://kalshi.com/markets/KXAAAGASMIN",
       "resolution_date": "2027-01-01",
       "volume": 119869.61,
-      "volume_24h": 2089.3,
+      "volume_24h": 1896.14,
       "relevance": 0.8400000000000001,
       "tag": "Commodities"
     },
@@ -10051,13 +10023,13 @@
         },
         {
           "prompt": "$1,000 or above",
-          "probability": 0.23
+          "probability": 0.28
         }
       ],
       "url": "https://kalshi.com/markets/KXZECY",
       "resolution_date": "2027-01-01",
-      "volume": 5186.53,
-      "volume_24h": 102.84,
+      "volume": 5191.19,
+      "volume_24h": 107.5,
       "relevance": 0.74,
       "tag": "Crypto"
     },
@@ -10437,7 +10409,7 @@
       "url": "https://kalshi.com/markets/KXBTCY",
       "resolution_date": "2027-01-01",
       "volume": 51749921.72,
-      "volume_24h": 369304.44,
+      "volume_24h": 365264.53,
       "relevance": 0.7400000000000001,
       "tag": "Crypto"
     },
@@ -10513,7 +10485,7 @@
       "url": "https://kalshi.com/markets/KXINXMINY",
       "resolution_date": "2027-01-01",
       "volume": 1311733.28,
-      "volume_24h": 8022.08,
+      "volume_24h": 8029.71,
       "relevance": 0.99,
       "tag": "Market"
     },
@@ -10523,7 +10495,7 @@
       "bets": [
         {
           "prompt": "8,000 or above",
-          "probability": 0.051
+          "probability": 0.069
         },
         {
           "prompt": "8,200 or above",
@@ -10548,8 +10520,8 @@
       ],
       "url": "https://kalshi.com/markets/KXINXMAXY",
       "resolution_date": "2027-01-01",
-      "volume": 1251021.6099999999,
-      "volume_24h": 5990.16,
+      "volume": 1251022.6099999999,
+      "volume_24h": 5991.16,
       "relevance": 0.98,
       "tag": "Market"
     },
@@ -10689,7 +10661,7 @@
       "url": "https://kalshi.com/markets/KXBTCMINY",
       "resolution_date": "2027-01-01",
       "volume": 8172793.92,
-      "volume_24h": 231965.56,
+      "volume_24h": 231994.03,
       "relevance": 0.89,
       "tag": "Crypto"
     },
@@ -10781,7 +10753,7 @@
       "url": "https://kalshi.com/markets/KXBTC2026250",
       "resolution_date": "2027-01-01",
       "volume": 1722048.79,
-      "volume_24h": 4697.91,
+      "volume_24h": 4686.22,
       "relevance": 0.86,
       "tag": "Crypto"
     },
@@ -10797,7 +10769,7 @@
       "url": "https://kalshi.com/markets/KXBTC2026200",
       "resolution_date": "2027-01-01",
       "volume": 14906505.93,
-      "volume_24h": 6867.67,
+      "volume_24h": 6845.23,
       "relevance": 0.91,
       "tag": "Crypto"
     },
@@ -11189,7 +11161,7 @@
       "url": "https://kalshi.com/markets/KXB200MAX",
       "resolution_date": "2026-12-31",
       "volume": 21981.32,
-      "volume_24h": 280.59000000000003,
+      "volume_24h": 254.59,
       "relevance": 0.65,
       "tag": "Market"
     },
@@ -11231,26 +11203,6 @@
       "volume": 36327.44,
       "volume_24h": 52.44,
       "relevance": 0.63,
-      "tag": "Market"
-    },
-    {
-      "id": "k-KXINXVSBTC-26DEC31",
-      "title": "Annual Return: S&P 500 Total Return Vs. BTC?",
-      "bets": [
-        {
-          "prompt": "S&P 500 Total Return Index",
-          "probability": 0.91
-        },
-        {
-          "prompt": "BTC",
-          "probability": 0.01
-        }
-      ],
-      "url": "https://kalshi.com/markets/KXINXVSBTC",
-      "resolution_date": "2026-12-31",
-      "volume": 30755.58,
-      "volume_24h": 10.09,
-      "relevance": 0.86,
       "tag": "Market"
     },
     {
@@ -11309,7 +11261,7 @@
       "url": "https://kalshi.com/markets/KXBTCMAXY",
       "resolution_date": "2026-12-31",
       "volume": 5843598.0,
-      "volume_24h": 8717.08,
+      "volume_24h": 8683.69,
       "relevance": 0.86,
       "tag": "Crypto"
     },
@@ -11335,13 +11287,13 @@
       "bets": [
         {
           "prompt": "Positive Growth",
-          "probability": 0.77
+          "probability": 0.78
         }
       ],
       "url": "https://kalshi.com/markets/KXINXPOS",
       "resolution_date": "2026-12-31",
-      "volume": 2157697.24,
-      "volume_24h": 17444.89,
+      "volume": 2157698.5,
+      "volume_24h": 17415.61,
       "relevance": 0.92,
       "tag": "Market"
     },
@@ -11367,7 +11319,7 @@
         },
         {
           "prompt": "3,600 or above",
-          "probability": 0.53
+          "probability": 0.51
         },
         {
           "prompt": "3,700 or above",
@@ -11448,8 +11400,8 @@
       ],
       "url": "https://kalshi.com/markets/KXGOLDDIRY",
       "resolution_date": "2026-12-31",
-      "volume": 581775.38,
-      "volume_24h": 10950.300000000001,
+      "volume": 581788.16,
+      "volume_24h": 10965.84,
       "relevance": 0.96,
       "tag": "Commodities"
     },
@@ -11875,7 +11827,7 @@
         },
         {
           "prompt": "7,400 to 7,599.99",
-          "probability": 0.21
+          "probability": 0.22
         },
         {
           "prompt": "7,600 to 7,799.99",
@@ -11912,8 +11864,8 @@
       ],
       "url": "https://kalshi.com/markets/KXINXY",
       "resolution_date": "2026-12-31",
-      "volume": 10119645.22,
-      "volume_24h": 116428.24,
+      "volume": 10119802.3,
+      "volume_24h": 116372.44,
       "relevance": 0.97,
       "tag": "Market"
     },
@@ -11923,7 +11875,7 @@
       "bets": [
         {
           "prompt": "6,900 or above",
-          "probability": 0.74
+          "probability": 0.75
         },
         {
           "prompt": "7,000 or above",
@@ -11959,15 +11911,15 @@
         },
         {
           "prompt": "7,800 or above",
-          "probability": 0.08
+          "probability": 0.11
         },
         {
           "prompt": "7,900 or above",
-          "probability": 0.06
+          "probability": 0.08
         },
         {
           "prompt": "8,000 or above",
-          "probability": 0.07
+          "probability": 0.04
         },
         {
           "prompt": "8,100 or above",
@@ -11992,8 +11944,8 @@
       ],
       "url": "https://kalshi.com/markets/KXINXDIRY",
       "resolution_date": "2026-12-31",
-      "volume": 116832.64,
-      "volume_24h": 3364.92,
+      "volume": 116836.64,
+      "volume_24h": 3296.2799999999997,
       "relevance": 0.88,
       "tag": "Market"
     },
@@ -12108,8 +12060,8 @@
       ],
       "url": "https://kalshi.com/markets/KXTESLAOPTIMUS",
       "resolution_date": "2026-12-31",
-      "volume": 508364.41,
-      "volume_24h": 1579.04,
+      "volume": 509088.64,
+      "volume_24h": 2303.27,
       "relevance": 0.52,
       "tag": "Market"
     },
@@ -12209,7 +12161,7 @@
       "url": "https://kalshi.com/markets/KXVENEZUELALEADER",
       "resolution_date": "2026-12-31",
       "volume": 6850910.18,
-      "volume_24h": 16984.79,
+      "volume_24h": 16620.09,
       "relevance": 0.95,
       "tag": "International"
     },
@@ -12364,8 +12316,8 @@
       ],
       "url": "https://kalshi.com/markets/KXJENSENOUT",
       "resolution_date": "2026-12-31",
-      "volume": 149047.71,
-      "volume_24h": 111629.61,
+      "volume": 149053.06,
+      "volume_24h": 111663.03,
       "relevance": 0.99,
       "tag": "Market"
     },
@@ -12535,7 +12487,7 @@
         },
         {
           "prompt": "Stellar Lumens (XLM)",
-          "probability": 0.05
+          "probability": 0.11
         },
         {
           "prompt": "Solana (SOL)",
@@ -12544,8 +12496,8 @@
       ],
       "url": "https://kalshi.com/markets/KXCRYPTORETURNY",
       "resolution_date": "2026-12-31",
-      "volume": 918634.82,
-      "volume_24h": 5711.91,
+      "volume": 919621.6,
+      "volume_24h": 7987.69,
       "relevance": 0.81,
       "tag": "Crypto"
     },
@@ -13627,13 +13579,13 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.3
+          "probability": 0.29
         }
       ],
       "url": "https://kalshi.com/markets/KXGOVTSHUTDOWN",
       "resolution_date": "2026-12-13",
-      "volume": 562974.97,
-      "volume_24h": 25316.16,
+      "volume": 563163.75,
+      "volume_24h": 25345.6,
       "relevance": 0.97,
       "tag": "Govt"
     },
@@ -13960,8 +13912,8 @@
       ],
       "url": "https://kalshi.com/markets/KXCPIYOY",
       "resolution_date": "2026-12-10",
-      "volume": 1796061.94,
-      "volume_24h": 51351.03,
+      "volume": 1796062.76,
+      "volume_24h": 51351.85,
       "relevance": 0.99,
       "tag": "Macro"
     },
@@ -14036,8 +13988,8 @@
       ],
       "url": "https://kalshi.com/markets/KXCPICOREYOY",
       "resolution_date": "2026-12-10",
-      "volume": 557645.13,
-      "volume_24h": 3270.92,
+      "volume": 557645.35,
+      "volume_24h": 3271.03,
       "relevance": 0.99,
       "tag": "Macro"
     },
@@ -14063,7 +14015,7 @@
         },
         {
           "prompt": "Above 0.4%",
-          "probability": 0.01
+          "probability": 0.02
         },
         {
           "prompt": "Above 0.5%",
@@ -14092,7 +14044,7 @@
       ],
       "url": "https://kalshi.com/markets/KXCPICORE",
       "resolution_date": "2026-12-10",
-      "volume": 337560.52,
+      "volume": 337561.17,
       "volume_24h": 7151.290000000001,
       "relevance": 1.0,
       "tag": "Macro"
@@ -14227,13 +14179,13 @@
         },
         {
           "prompt": "Hike >25bps",
-          "probability": 0.04
+          "probability": 0.03
         }
       ],
       "url": "https://kalshi.com/markets/KXFEDDECISION",
       "resolution_date": "2026-12-09",
-      "volume": 24336115.919999998,
-      "volume_24h": 999800.16,
+      "volume": 24336519.669999998,
+      "volume_24h": 947664.71,
       "relevance": 1.0,
       "tag": "Macro"
     },
@@ -14289,7 +14241,7 @@
       "url": "https://kalshi.com/markets/KXFED",
       "resolution_date": "2026-12-09",
       "volume": 1735903.72,
-      "volume_24h": 26263.85,
+      "volume_24h": 26202.86,
       "relevance": 1.0,
       "tag": "Macro"
     },
@@ -14451,7 +14403,7 @@
         },
         {
           "prompt": "AI / Artificial Intelligence",
-          "probability": 0.73
+          "probability": 0.71
         },
         {
           "prompt": "Manufacturing",
@@ -14483,13 +14435,13 @@
         },
         {
           "prompt": "Excavator",
-          "probability": 0.61
+          "probability": 0.65
         }
       ],
       "url": "https://kalshi.com/markets/KXEARNINGSMENTIONDE",
       "resolution_date": "2026-12-09",
-      "volume": 11978.03,
-      "volume_24h": 5069.13,
+      "volume": 12072.03,
+      "volume_24h": 5073.91,
       "relevance": 0.6,
       "tag": "Market"
     },
@@ -14520,7 +14472,7 @@
       ],
       "url": "https://kalshi.com/markets/KXCBDECISIONCANADA",
       "resolution_date": "2026-12-09",
-      "volume": 267130.04,
+      "volume": 267231.04,
       "volume_24h": 36237.740000000005,
       "relevance": 0.89,
       "tag": "Macro"
@@ -14536,8 +14488,8 @@
       ],
       "url": "https://kalshi.com/markets/KXHMONTH",
       "resolution_date": "2026-12-08",
-      "volume": 299249.96,
-      "volume_24h": 44232.77,
+      "volume": 299484.52,
+      "volume_24h": 44418.4,
       "relevance": 0.54,
       "tag": "Calamities"
     },
@@ -14559,7 +14511,7 @@
         },
         {
           "prompt": "Above $5.60",
-          "probability": 0.65
+          "probability": 0.66
         },
         {
           "prompt": "Above $5.70",
@@ -14632,8 +14584,8 @@
       ],
       "url": "https://kalshi.com/markets/KXDIESELMON",
       "resolution_date": "2026-12-07",
-      "volume": 313642.02,
-      "volume_24h": 21424.43,
+      "volume": 313677.02,
+      "volume_24h": 21557.21,
       "relevance": 0.89,
       "tag": "Commodities"
     },
@@ -14700,8 +14652,8 @@
       ],
       "url": "https://kalshi.com/markets/KXU3",
       "resolution_date": "2026-12-04",
-      "volume": 159491.81,
-      "volume_24h": 24290.92,
+      "volume": 159691.81,
+      "volume_24h": 24490.92,
       "relevance": 0.99,
       "tag": "Macro"
     },
@@ -15141,7 +15093,7 @@
       "url": "https://kalshi.com/markets/KXNHSALES",
       "resolution_date": "2026-12-02",
       "volume": 13808.64,
-      "volume_24h": 151.05,
+      "volume_24h": 171.05,
       "relevance": 1.0,
       "tag": "Macro"
     },
@@ -15633,7 +15585,7 @@
       "url": "https://kalshi.com/markets/KXHORMUZWEEKLY",
       "resolution_date": "2026-12-01",
       "volume": 208347.38,
-      "volume_24h": 135799.49,
+      "volume_24h": 135813.02,
       "relevance": 0.7899999999999999,
       "tag": "Commodities"
     },
@@ -15696,8 +15648,8 @@
       ],
       "url": "https://kalshi.com/markets/KXNEWTARIFFS",
       "resolution_date": "2026-12-01",
-      "volume": 20428.65,
-      "volume_24h": 9737.92,
+      "volume": 20556.65,
+      "volume_24h": 9865.92,
       "relevance": 0.94,
       "tag": "Govt"
     },
@@ -15865,7 +15817,7 @@
       "url": "https://kalshi.com/markets/KXAAAGASMINM",
       "resolution_date": "2026-12-01",
       "volume": 311211.17,
-      "volume_24h": 21548.57,
+      "volume_24h": 22170.57,
       "relevance": 0.66,
       "tag": "Commodities"
     },
@@ -15947,7 +15899,7 @@
         },
         {
           "prompt": "Below $1,250.00",
-          "probability": 0.05
+          "probability": 0.02
         },
         {
           "prompt": "Below $1,000.00",
@@ -15968,8 +15920,8 @@
       ],
       "url": "https://kalshi.com/markets/KXETHMINMON",
       "resolution_date": "2026-11-30",
-      "volume": 120149.31,
-      "volume_24h": 5084.74,
+      "volume": 120391.87,
+      "volume_24h": 5604.86,
       "relevance": 0.59,
       "tag": "Crypto"
     },
@@ -16011,7 +15963,7 @@
         },
         {
           "prompt": "Above 7,300.00",
-          "probability": 0.6
+          "probability": 0.57
         },
         {
           "prompt": "Above 7,320.00",
@@ -16140,8 +16092,8 @@
       ],
       "url": "https://kalshi.com/markets/KXINXMAXMON",
       "resolution_date": "2026-11-30",
-      "volume": 15370.720000000001,
-      "volume_24h": 3286.96,
+      "volume": 15383.720000000001,
+      "volume_24h": 3299.96,
       "relevance": 0.56,
       "tag": "Market"
     },
@@ -16675,7 +16627,7 @@
         },
         {
           "prompt": "5.19% or below",
-          "probability": 0.09
+          "probability": 0.06
         },
         {
           "prompt": "5.18% or below",
@@ -16728,7 +16680,7 @@
       ],
       "url": "https://kalshi.com/markets/KX30YRDIRLM",
       "resolution_date": "2026-11-30",
-      "volume": 14113.689999999999,
+      "volume": 14245.689999999999,
       "volume_24h": 1828.33,
       "relevance": 0.75,
       "tag": "Macro"
@@ -17303,7 +17255,7 @@
         },
         {
           "prompt": "4.82% or below",
-          "probability": 0.31
+          "probability": 0.2
         },
         {
           "prompt": "4.81% or below",
@@ -17319,7 +17271,7 @@
         },
         {
           "prompt": "4.78% or below",
-          "probability": 0.07
+          "probability": 0.06
         },
         {
           "prompt": "4.77% or below",
@@ -17376,8 +17328,8 @@
       ],
       "url": "https://kalshi.com/markets/KX10YRDIRLM",
       "resolution_date": "2026-11-30",
-      "volume": 23344.31,
-      "volume_24h": 2014.9099999999999,
+      "volume": 23475.73,
+      "volume_24h": 2144.91,
       "relevance": 0.8,
       "tag": "Macro"
     },
@@ -17636,8 +17588,8 @@
       ],
       "url": "https://kalshi.com/markets/KXAAAGASM",
       "resolution_date": "2026-11-30",
-      "volume": 2297675.97,
-      "volume_24h": 114512.42,
+      "volume": 2297689.2399999998,
+      "volume_24h": 108291.45999999999,
       "relevance": 0.8300000000000001,
       "tag": "Commodities"
     },
@@ -17799,11 +17751,11 @@
       "bets": [
         {
           "prompt": "4.94% or above",
-          "probability": 0.76
+          "probability": 0.67
         },
         {
           "prompt": "4.95% or above",
-          "probability": 0.55
+          "probability": 0.64
         },
         {
           "prompt": "4.96% or above",
@@ -17880,7 +17832,7 @@
       ],
       "url": "https://kalshi.com/markets/KX10YRDIRHW",
       "resolution_date": "2026-11-27",
-      "volume": 2288.82,
+      "volume": 2605.82,
       "volume_24h": 908.82,
       "relevance": 0.86,
       "tag": "Macro"
@@ -18015,13 +17967,13 @@
         },
         {
           "prompt": "Before Jan 1, 2027",
-          "probability": 0.05
+          "probability": 0.04
         }
       ],
       "url": "https://kalshi.com/markets/KXELECTIONEMERGENCY",
       "resolution_date": "2027-01-08",
-      "volume": 1274883.54,
-      "volume_24h": 16674.13,
+      "volume": 1274888.73,
+      "volume_24h": 16679.32,
       "relevance": 0.86,
       "tag": "Govt"
     },
@@ -18148,8 +18100,8 @@
       ],
       "url": "https://kalshi.com/markets/KXHORMUZNORM",
       "resolution_date": "2027-01-01",
-      "volume": 15861824.270000001,
-      "volume_24h": 70333.26,
+      "volume": 15861882.14,
+      "volume_24h": 69642.24,
       "relevance": 0.9299999999999999,
       "tag": "Geopolitical"
     },
@@ -18203,7 +18155,7 @@
         },
         {
           "prompt": "Before Apr 1, 2027",
-          "probability": 0.45
+          "probability": 0.46
         },
         {
           "prompt": "Before Jul 1, 2027",
@@ -18228,8 +18180,8 @@
       ],
       "url": "https://kalshi.com/markets/KXHEGSETHOUT",
       "resolution_date": "2029-01-08",
-      "volume": 3929872.31,
-      "volume_24h": 27295.7,
+      "volume": 3929924.65,
+      "volume_24h": 27151.940000000002,
       "relevance": 0.63,
       "tag": "Govt"
     },
@@ -18273,7 +18225,7 @@
       "url": "https://kalshi.com/markets/KXTARIFFCHECKS",
       "resolution_date": "2027-01-01",
       "volume": 1666722.62,
-      "volume_24h": 1611.43,
+      "volume_24h": 1594.43,
       "relevance": 0.9500000000000001,
       "tag": "Govt"
     },
@@ -18395,7 +18347,7 @@
         },
         {
           "prompt": "Before Jul 1, 2027",
-          "probability": 0.36
+          "probability": 0.37
         },
         {
           "prompt": "Before Aug 1, 2027",
@@ -18403,7 +18355,7 @@
         },
         {
           "prompt": "Before Oct 1, 2027",
-          "probability": 0.52
+          "probability": 0.53
         },
         {
           "prompt": "Before Jan 1, 2028",
@@ -18412,8 +18364,8 @@
       ],
       "url": "https://kalshi.com/markets/KXIMPEACH",
       "resolution_date": "2028-01-01",
-      "volume": 5781126.83,
-      "volume_24h": 75894.86,
+      "volume": 5781158.32,
+      "volume_24h": 75846.56,
       "relevance": 0.53,
       "tag": "Govt"
     },
@@ -18559,11 +18511,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.038
+          "probability": 0.0375
         },
         {
           "prompt": "No",
-          "probability": 0.962
+          "probability": 0.9625
         }
       ],
       "url": "https://polymarket.com/event/will-there-be-no-change-in-fed-interest-rates-after-the-december-2026-meeting-20260729232808635",
@@ -18619,11 +18571,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.997
+          "probability": 0.9965
         },
         {
           "prompt": "No",
-          "probability": 0.003
+          "probability": 0.0035
         }
       ],
       "url": "https://polymarket.com/event/israel-x-iran-ceasefire-continues-through-november-22",
@@ -18799,11 +18751,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.152
+          "probability": 0.1505
         },
         {
           "prompt": "No",
-          "probability": 0.848
+          "probability": 0.8495
         }
       ],
       "url": "https://polymarket.com/event/will-bitcoin-dip-to-45000-by-december-31-2026-674-923-755-971-998-525-926-245-316-517-544-589-965-923-986-841-815-224-586-231-289-533-573",
@@ -18819,11 +18771,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.925
+          "probability": 0.92
         },
         {
           "prompt": "No",
-          "probability": 0.075
+          "probability": 0.08
         }
       ],
       "url": "https://polymarket.com/event/israel-x-iran-ceasefire-continues-through-november-30",
@@ -18839,11 +18791,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1225
+          "probability": 0.1215
         },
         {
           "prompt": "No",
-          "probability": 0.8775
+          "probability": 0.8785
         }
       ],
       "url": "https://polymarket.com/event/will-nvidia-be-the-largest-company-in-the-world-by-market-cap-on-december-31-244",
@@ -18999,11 +18951,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.649
+          "probability": 0.6485
         },
         {
           "prompt": "No",
-          "probability": 0.351
+          "probability": 0.3515
         }
       ],
       "url": "https://polymarket.com/event/will-gadi-eizenkot-be-the-next-prime-minister-of-israel",
@@ -19179,11 +19131,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.9555
+          "probability": 0.9545
         },
         {
           "prompt": "No",
-          "probability": 0.0445
+          "probability": 0.0455
         }
       ],
       "url": "https://polymarket.com/event/another-fed-rate-hike-in-2026",
@@ -19719,11 +19671,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.515
+          "probability": 0.51
         },
         {
           "prompt": "No",
-          "probability": 0.485
+          "probability": 0.49
         }
       ],
       "url": "https://polymarket.com/event/us-x-iran-effective-ceasefire-by-november-22-20261108",
@@ -19739,11 +19691,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.14
+          "probability": 0.135
         },
         {
           "prompt": "No",
-          "probability": 0.86
+          "probability": 0.865
         }
       ],
       "url": "https://polymarket.com/event/iran-full-airspace-closure-by-december-31-20260727170429885",
@@ -19939,11 +19891,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0025
+          "probability": 0.0015
         },
         {
           "prompt": "No",
-          "probability": 0.9975
+          "probability": 0.9985
         }
       ],
       "url": "https://polymarket.com/event/will-ric-zemmour-win-the-2027-french-presidential-election",
@@ -20219,11 +20171,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.6235
+          "probability": 0.6225
         },
         {
           "prompt": "No",
-          "probability": 0.3765
+          "probability": 0.3775
         }
       ],
       "url": "https://polymarket.com/event/will-nvidias-market-capitalization-be-less-than-3pt50t-at-the-end-of-2026-1785882876109",
@@ -20259,11 +20211,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.027
+          "probability": 0.0265
         },
         {
           "prompt": "No",
-          "probability": 0.973
+          "probability": 0.9735
         }
       ],
       "url": "https://polymarket.com/event/next-us-iran-senior-diplomatic-meeting-by-november-30-2026",
@@ -20339,11 +20291,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.37
+          "probability": 0.36
         },
         {
           "prompt": "No",
-          "probability": 0.63
+          "probability": 0.64
         }
       ],
       "url": "https://polymarket.com/event/nvda-above-160-on-november-30-2026",
@@ -20459,11 +20411,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.021
+          "probability": 0.0195
         },
         {
           "prompt": "No",
-          "probability": 0.979
+          "probability": 0.9805
         }
       ],
       "url": "https://polymarket.com/event/will-avigdor-lieberman-be-the-next-prime-minister-of-israel",
@@ -20519,11 +20471,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.666
+          "probability": 0.654
         },
         {
           "prompt": "No",
-          "probability": 0.334
+          "probability": 0.346
         }
       ],
       "url": "https://polymarket.com/event/will-xauusd-dip-to-3500-in-november-2026",
@@ -20539,11 +20491,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.125
+          "probability": 0.14
         },
         {
           "prompt": "No",
-          "probability": 0.875
+          "probability": 0.86
         }
       ],
       "url": "https://polymarket.com/event/will-wti-dip-to-75-in-november-2026",
@@ -20739,11 +20691,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.956
+          "probability": 0.9555
         },
         {
           "prompt": "No",
-          "probability": 0.044
+          "probability": 0.0445
         }
       ],
       "url": "https://polymarket.com/event/will-the-fed-hikepausehike-in-the-next-three-decisions-sepoctdec",
@@ -20759,11 +20711,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.529
+          "probability": 0.5285
         },
         {
           "prompt": "No",
-          "probability": 0.471
+          "probability": 0.4715
         }
       ],
       "url": "https://polymarket.com/event/will-the-fed-pausehikehike-in-the-next-three-decisions-octdecjan",
@@ -20779,11 +20731,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.33
+          "probability": 0.325
         },
         {
           "prompt": "No",
-          "probability": 0.67
+          "probability": 0.675
         }
       ],
       "url": "https://polymarket.com/event/strait-of-hormuz-traffic-returns-to-normal-by-december-31-2027",
@@ -21079,11 +21031,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.042
+          "probability": 0.043
         },
         {
           "prompt": "No",
-          "probability": 0.958
+          "probability": 0.957
         }
       ],
       "url": "https://polymarket.com/event/russia-x-ukraine-ceasefire-by-december-31-2026",
@@ -21179,11 +21131,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.017
+          "probability": 0.018
         },
         {
           "prompt": "No",
-          "probability": 0.983
+          "probability": 0.982
         }
       ],
       "url": "https://polymarket.com/event/will-bitcoin-dip-to-20000-by-december-31-2026-121-885-178-397-354-236-731-159-857",
@@ -21319,11 +21271,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0085
+          "probability": 0.008
         },
         {
           "prompt": "No",
-          "probability": 0.9915
+          "probability": 0.992
         }
       ],
       "url": "https://polymarket.com/event/russia-x-ukraine-ceasefire-agreement-by-november-30-2026",
@@ -21439,11 +21391,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.27
+          "probability": 0.255
         },
         {
           "prompt": "No",
-          "probability": 0.73
+          "probability": 0.745
         }
       ],
       "url": "https://polymarket.com/event/government-shutdown-by-december-12",
@@ -21579,11 +21531,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.2895
+          "probability": 0.2645
         },
         {
           "prompt": "No",
-          "probability": 0.7105
+          "probability": 0.7355
         }
       ],
       "url": "https://polymarket.com/event/will-solana-dip-to-50-by-december-31-2026-from-june-8",
@@ -21639,11 +21591,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1085
+          "probability": 0.103
         },
         {
           "prompt": "No",
-          "probability": 0.8915
+          "probability": 0.897
         }
       ],
       "url": "https://polymarket.com/event/will-nvidias-market-capitalization-be-between-4pt00t-and-4pt50t-at-the-end-of-2026-1785882876111",
@@ -21939,11 +21891,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.165
+          "probability": 0.177
         },
         {
           "prompt": "No",
-          "probability": 0.835
+          "probability": 0.823
         }
       ],
       "url": "https://polymarket.com/event/will-the-swiss-national-bank-increase-the-snb-policy-rate-by-25-bps-at-the-december-meeting",
@@ -22099,11 +22051,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.5515
+          "probability": 0.5375
         },
         {
           "prompt": "No",
-          "probability": 0.4485
+          "probability": 0.4625
         }
       ],
       "url": "https://polymarket.com/event/will-nvidia-be-the-second-largest-company-in-the-world-by-market-cap-on-november-30-2026",
@@ -22119,11 +22071,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0185
+          "probability": 0.018
         },
         {
           "prompt": "No",
-          "probability": 0.9815
+          "probability": 0.982
         }
       ],
       "url": "https://polymarket.com/event/new-pandemic-in-2026",
@@ -22139,11 +22091,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.5245
+          "probability": 0.52
         },
         {
           "prompt": "No",
-          "probability": 0.4755
+          "probability": 0.48
         }
       ],
       "url": "https://polymarket.com/event/will-solana-dip-to-60-by-december-31-2026-249-524",
@@ -22269,7 +22221,7 @@
       "url": "https://polymarket.com/event/deepseek-added-to-the-entity-list-by-december-31-2026",
       "resolution_date": "2026-12-31",
       "volume": 5485.388208,
-      "volume_24h": 137.435,
+      "volume_24h": 108.09,
       "relevance": 0.88,
       "tag": "Govt"
     },
@@ -22639,11 +22591,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.185
+          "probability": 0.18
         },
         {
           "prompt": "No",
-          "probability": 0.815
+          "probability": 0.82
         }
       ],
       "url": "https://polymarket.com/event/nvda-above-170-on-november-30-2026",
@@ -22659,11 +22611,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.009
+          "probability": 0.0085
         },
         {
           "prompt": "No",
-          "probability": 0.991
+          "probability": 0.9915
         }
       ],
       "url": "https://polymarket.com/event/will-us-withdraw-from-nato-before-2027-348-975-598-224-737",
@@ -22679,11 +22631,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.669
+          "probability": 0.6675
         },
         {
           "prompt": "No",
-          "probability": 0.331
+          "probability": 0.3325
         }
       ],
       "url": "https://polymarket.com/event/nvda-above-150-on-november-30-2026",
@@ -22699,11 +22651,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.919
+          "probability": 0.922
         },
         {
           "prompt": "No",
-          "probability": 0.081
+          "probability": 0.078
         }
       ],
       "url": "https://polymarket.com/event/will-the-upper-bound-of-the-target-federal-funds-rate-be-4pt25-at-the-end-of-2026-984",
@@ -22719,11 +22671,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.24
+          "probability": 0.235
         },
         {
           "prompt": "No",
-          "probability": 0.76
+          "probability": 0.765
         }
       ],
       "url": "https://polymarket.com/event/will-xauusd-reach-3700-in-november-2026",
@@ -22819,11 +22771,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.064
+          "probability": 0.0635
         },
         {
           "prompt": "No",
-          "probability": 0.936
+          "probability": 0.9365
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-hit-5pt5-before-2027-997-245",
@@ -22839,11 +22791,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0295
+          "probability": 0.0285
         },
         {
           "prompt": "No",
-          "probability": 0.9705
+          "probability": 0.9715
         }
       ],
       "url": "https://polymarket.com/event/will-wti-reach-100-in-november-2026-from-november-2",
@@ -22859,11 +22811,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.835
+          "probability": 0.815
         },
         {
           "prompt": "No",
-          "probability": 0.165
+          "probability": 0.185
         }
       ],
       "url": "https://polymarket.com/event/will-marine-le-pen-win-the-most-votes-in-the-first-round-of-the-2027-french-presidential-election",
@@ -22879,11 +22831,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0275
+          "probability": 0.032
         },
         {
           "prompt": "No",
-          "probability": 0.9725
+          "probability": 0.968
         }
       ],
       "url": "https://polymarket.com/event/will-wti-reach-95-in-november-2026",
@@ -22899,11 +22851,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.275
+          "probability": 0.28
         },
         {
           "prompt": "No",
-          "probability": 0.725
+          "probability": 0.72
         }
       ],
       "url": "https://polymarket.com/event/will-russia-capture-all-of-kostyantynivka-by-march-31-2027",
@@ -23019,11 +22971,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0035
+          "probability": 0.003
         },
         {
           "prompt": "No",
-          "probability": 0.9965
+          "probability": 0.997
         }
       ],
       "url": "https://polymarket.com/event/will-vladimir-putin-be-the-next-leader-out-before-2027-20260630194627374",
@@ -23059,11 +23011,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1065
+          "probability": 0.107
         },
         {
           "prompt": "No",
-          "probability": 0.8935
+          "probability": 0.893
         }
       ],
       "url": "https://polymarket.com/event/nvda-above-180-on-november-30-2026",
@@ -23079,11 +23031,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.2125
+          "probability": 0.212
         },
         {
           "prompt": "No",
-          "probability": 0.7875
+          "probability": 0.788
         }
       ],
       "url": "https://polymarket.com/event/will-openais-market-cap-be-1pt5t-or-greater-at-market-close-on-ipo-day-by-december-31-2027-911",
@@ -23119,11 +23071,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.027
+          "probability": 0.028
         },
         {
           "prompt": "No",
-          "probability": 0.973
+          "probability": 0.972
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-hit-5pt7-before-2027-988-682",
@@ -23219,11 +23171,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.125
+          "probability": 0.1285
         },
         {
           "prompt": "No",
-          "probability": 0.875
+          "probability": 0.8715
         }
       ],
       "url": "https://polymarket.com/event/will-the-2-year-treasury-yield-hit-5pt20-before-2027",
@@ -23339,11 +23291,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.2
+          "probability": 0.205
         },
         {
           "prompt": "No",
-          "probability": 0.8
+          "probability": 0.795
         }
       ],
       "url": "https://polymarket.com/event/will-bitcoin-hit-100k-by-june-30-2027",
@@ -23519,11 +23471,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0525
+          "probability": 0.052
         },
         {
           "prompt": "No",
-          "probability": 0.9475
+          "probability": 0.948
         }
       ],
       "url": "https://polymarket.com/event/weed-rescheduled-by-december-31",
@@ -23539,11 +23491,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0505
+          "probability": 0.053
         },
         {
           "prompt": "No",
-          "probability": 0.9495
+          "probability": 0.947
         }
       ],
       "url": "https://polymarket.com/event/will-the-us-federal-government-take-a-stake-in-nvidia-corporation",
@@ -23659,11 +23611,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.017
+          "probability": 0.018
         },
         {
           "prompt": "No",
-          "probability": 0.983
+          "probability": 0.982
         }
       ],
       "url": "https://polymarket.com/event/will-ethereum-reach-3500-by-december-31-2026",
@@ -23699,11 +23651,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.325
+          "probability": 0.31
         },
         {
           "prompt": "No",
-          "probability": 0.675
+          "probability": 0.69
         }
       ],
       "url": "https://polymarket.com/event/will-gas-hit-3pt50-low-by-november-30-2026",
@@ -23859,11 +23811,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.135
+          "probability": 0.14
         },
         {
           "prompt": "No",
-          "probability": 0.865
+          "probability": 0.86
         }
       ],
       "url": "https://polymarket.com/event/will-mu-reach-780-in-november-2026-from-november-14",
@@ -23919,11 +23871,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.725
+          "probability": 0.7405
         },
         {
           "prompt": "No",
-          "probability": 0.275
+          "probability": 0.2595
         }
       ],
       "url": "https://polymarket.com/event/will-xagusd-dip-to-40-in-november-2026",
@@ -24019,11 +23971,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.058
+          "probability": 0.0565
         },
         {
           "prompt": "No",
-          "probability": 0.942
+          "probability": 0.9435
         }
       ],
       "url": "https://polymarket.com/event/spx-hit-8200-high-dec-2026",
@@ -24259,11 +24211,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.485
+          "probability": 0.48
         },
         {
           "prompt": "No",
-          "probability": 0.515
+          "probability": 0.52
         }
       ],
       "url": "https://polymarket.com/event/will-nvidia-be-the-second-largest-company-in-the-world-by-market-cap-on-december-31-20260806175739817",
@@ -24279,11 +24231,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.118
+          "probability": 0.1165
         },
         {
           "prompt": "No",
-          "probability": 0.882
+          "probability": 0.8835
         }
       ],
       "url": "https://polymarket.com/event/will-the-reserve-bank-of-australia-decrease-the-cash-rate-target-by-25-bps-at-the-february-2027-meeting",
@@ -24359,11 +24311,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.105
+          "probability": 0.11
         },
         {
           "prompt": "No",
-          "probability": 0.895
+          "probability": 0.89
         }
       ],
       "url": "https://polymarket.com/event/will-the-30-year-treasury-yield-dip-below-4pt95-before-2027",
@@ -24399,11 +24351,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0585
+          "probability": 0.059
         },
         {
           "prompt": "No",
-          "probability": 0.9415
+          "probability": 0.941
         }
       ],
       "url": "https://polymarket.com/event/will-openais-market-cap-be-between-750b-and-1t-at-market-close-on-ipo-day-by-december-31-2027-383",
@@ -24459,11 +24411,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.078
+          "probability": 0.0745
         },
         {
           "prompt": "No",
-          "probability": 0.922
+          "probability": 0.9255
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-dip-below-4pt59-in-november",
@@ -24499,11 +24451,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1505
+          "probability": 0.1555
         },
         {
           "prompt": "No",
-          "probability": 0.8495
+          "probability": 0.8445
         }
       ],
       "url": "https://polymarket.com/event/spx-hit-6200-low-dec-2026",
@@ -24559,11 +24511,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1175
+          "probability": 0.125
         },
         {
           "prompt": "No",
-          "probability": 0.8825
+          "probability": 0.875
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-dip-below-4pt82-in-november",
@@ -24719,11 +24671,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.022
+          "probability": 0.0225
         },
         {
           "prompt": "No",
-          "probability": 0.978
+          "probability": 0.9775
         }
       ],
       "url": "https://polymarket.com/event/will-the-ecb-announce-no-change-at-the-december-2026-meeting",
@@ -24779,11 +24731,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1705
+          "probability": 0.159
         },
         {
           "prompt": "No",
-          "probability": 0.8295
+          "probability": 0.841
         }
       ],
       "url": "https://polymarket.com/event/will-metas-market-capitalization-be-less-than-1pt25t-at-the-end-of-december-2026",
@@ -25259,11 +25211,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.027
+          "probability": 0.0275
         },
         {
           "prompt": "No",
-          "probability": 0.973
+          "probability": 0.9725
         }
       ],
       "url": "https://polymarket.com/event/china-x-taiwan-military-clash-before-2027",
@@ -25299,11 +25251,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.2035
+          "probability": 0.1945
         },
         {
           "prompt": "No",
-          "probability": 0.7965
+          "probability": 0.8055
         }
       ],
       "url": "https://polymarket.com/event/will-the-reserve-bank-of-india-make-no-change-to-the-policy-repo-rate-at-the-february-2027-meeting",
@@ -25339,11 +25291,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.086
+          "probability": 0.0855
         },
         {
           "prompt": "No",
-          "probability": 0.914
+          "probability": 0.9145
         }
       ],
       "url": "https://polymarket.com/event/will-eu-emergency-diesel-stocks-be-at-least-37m-tonnes-at-end-of-december-2026",
@@ -25499,11 +25451,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.46
+          "probability": 0.44
         },
         {
           "prompt": "No",
-          "probability": 0.54
+          "probability": 0.56
         }
       ],
       "url": "https://polymarket.com/event/will-france-pass-a-national-budget-by-december-31",
@@ -25639,11 +25591,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.9735
+          "probability": 0.974
         },
         {
           "prompt": "No",
-          "probability": 0.0265
+          "probability": 0.026
         }
       ],
       "url": "https://polymarket.com/event/will-chinas-2026-annual-gdp-growth-yy-be-between-4pt0-and-5pt0",
@@ -25739,11 +25691,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1535
+          "probability": 0.166
         },
         {
           "prompt": "No",
-          "probability": 0.8465
+          "probability": 0.834
         }
       ],
       "url": "https://polymarket.com/event/will-nvidia-be-the-third-largest-company-in-the-world-by-market-cap-on-december-31-20260806175740602",
@@ -25859,11 +25811,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.6
+          "probability": 0.61
         },
         {
           "prompt": "No",
-          "probability": 0.4
+          "probability": 0.39
         }
       ],
       "url": "https://polymarket.com/event/will-ai-chip-export-licensing-become-law-this-year",
@@ -25879,11 +25831,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0045
+          "probability": 0.004
         },
         {
           "prompt": "No",
-          "probability": 0.9955
+          "probability": 0.996
         }
       ],
       "url": "https://polymarket.com/event/will-microstrategy-announce-holding-1m-btc-by-december-31-2026-bv81",
@@ -25919,11 +25871,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.065
+          "probability": 0.08
         },
         {
           "prompt": "No",
-          "probability": 0.935
+          "probability": 0.92
         }
       ],
       "url": "https://polymarket.com/event/spx-hit-8000-high-dec-2026",
@@ -25934,16 +25886,36 @@
       "tag": "Market"
     },
     {
+      "id": "pm-3358961",
+      "title": "Will Amazon\u2019s market capitalization be between $3.00T and $3.50T at the end of 2026?",
+      "bets": [
+        {
+          "prompt": "Yes",
+          "probability": 0.2015
+        },
+        {
+          "prompt": "No",
+          "probability": 0.7985
+        }
+      ],
+      "url": "https://polymarket.com/event/will-amazons-market-capitalization-be-between-2pt50t-and-3pt00t-at-the-end-of-2026-1785882876098",
+      "resolution_date": "2026-12-31",
+      "volume": 16767.659505000003,
+      "volume_24h": 9.51,
+      "relevance": 0.94,
+      "tag": "Market"
+    },
+    {
       "id": "pm-6765341",
       "title": "Will Benjamin Netanyahu receive the second mandate to form a government after the 2026 Israeli election?",
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.49
+          "probability": 0.495
         },
         {
           "prompt": "No",
-          "probability": 0.51
+          "probability": 0.505
         }
       ],
       "url": "https://polymarket.com/event/will-benjamin-netanyahu-receive-the-second-mandate-to-form-a-government-after-the-2026-israeli-election-20261105190000000",
@@ -25999,11 +25971,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.09
+          "probability": 0.1
         },
         {
           "prompt": "No",
-          "probability": 0.91
+          "probability": 0.9
         }
       ],
       "url": "https://polymarket.com/event/saudi-houthi-ceasefire-agreement-announced-by-december-31",
@@ -26019,11 +25991,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.057
+          "probability": 0.0605
         },
         {
           "prompt": "No",
-          "probability": 0.943
+          "probability": 0.9395
         }
       ],
       "url": "https://polymarket.com/event/will-david-lisnard-win-the-most-votes-in-the-first-round-of-the-2027-french-presidential-election",
@@ -26159,11 +26131,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.5775
+          "probability": 0.578
         },
         {
           "prompt": "No",
-          "probability": 0.4225
+          "probability": 0.422
         }
       ],
       "url": "https://polymarket.com/event/will-the-us-economy-be-in-a-soft-landing-at-the-end-of-2026",
@@ -26199,11 +26171,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.79
+          "probability": 0.815
         },
         {
           "prompt": "No",
-          "probability": 0.21
+          "probability": 0.185
         }
       ],
       "url": "https://polymarket.com/event/will-eu-emergency-diesel-stocks-be-at-least-30m-tonnes-at-end-of-december-2026",
@@ -26219,11 +26191,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.118
+          "probability": 0.1175
         },
         {
           "prompt": "No",
-          "probability": 0.882
+          "probability": 0.8825
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-dip-below-4pt5-before-2027",
@@ -26479,11 +26451,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.531
+          "probability": 0.537
         },
         {
           "prompt": "No",
-          "probability": 0.469
+          "probability": 0.463
         }
       ],
       "url": "https://polymarket.com/event/jensen-huang-named-nvidia-ceo-and-nvidia-4t-end-of-2026-named-under",
@@ -26499,11 +26471,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.2275
+          "probability": 0.2285
         },
         {
           "prompt": "No",
-          "probability": 0.7725
+          "probability": 0.7715
         }
       ],
       "url": "https://polymarket.com/event/will-openais-ipo-valuation-be-between-1pt0t-and-1pt25t",
@@ -26599,11 +26571,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0405
+          "probability": 0.0385
         },
         {
           "prompt": "No",
-          "probability": 0.9595
+          "probability": 0.9615
         }
       ],
       "url": "https://polymarket.com/event/will-core-pce-mom-be-0pt4pct-in-october-2026",
@@ -26659,11 +26631,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1515
+          "probability": 0.1525
         },
         {
           "prompt": "No",
-          "probability": 0.8485
+          "probability": 0.8475
         }
       ],
       "url": "https://polymarket.com/event/trump-impeached-and-removed-before-2028",
@@ -26719,11 +26691,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.385
+          "probability": 0.39
         },
         {
           "prompt": "No",
-          "probability": 0.615
+          "probability": 0.61
         }
       ],
       "url": "https://polymarket.com/event/will-core-pce-yoy-be-3pt3pct-in-october-2026",
@@ -26799,11 +26771,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.014
+          "probability": 0.0135
         },
         {
           "prompt": "No",
-          "probability": 0.986
+          "probability": 0.9865
         }
       ],
       "url": "https://polymarket.com/event/openai-ipo-before-2027",
@@ -26819,11 +26791,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0825
+          "probability": 0.083
         },
         {
           "prompt": "No",
-          "probability": 0.9175
+          "probability": 0.917
         }
       ],
       "url": "https://polymarket.com/event/reserve-bank-of-australia-increases-interest-rates-by-25-bps-at-the-december-2026-meeting",
@@ -27059,11 +27031,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0845
+          "probability": 0.0685
         },
         {
           "prompt": "No",
-          "probability": 0.9155
+          "probability": 0.9315
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-dip-below-4pt79-in-november",
@@ -27099,11 +27071,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.578
+          "probability": 0.5775
         },
         {
           "prompt": "No",
-          "probability": 0.422
+          "probability": 0.4225
         }
       ],
       "url": "https://polymarket.com/event/will-alphabets-market-capitalization-be-less-than-3pt00t-at-the-end-of-2026-1785882876116",
@@ -27259,11 +27231,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.196
+          "probability": 0.177
         },
         {
           "prompt": "No",
-          "probability": 0.804
+          "probability": 0.823
         }
       ],
       "url": "https://polymarket.com/event/will-core-pce-mom-be-0pt2pct-in-october-2026",
@@ -27279,11 +27251,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.9905
+          "probability": 0.9875
         },
         {
           "prompt": "No",
-          "probability": 0.0095
+          "probability": 0.0125
         }
       ],
       "url": "https://polymarket.com/event/will-the-bank-of-korea-hike-by-25-bps-at-the-november-2026-meeting",
@@ -27299,11 +27271,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.635
+          "probability": 0.65
         },
         {
           "prompt": "No",
-          "probability": 0.365
+          "probability": 0.35
         }
       ],
       "url": "https://polymarket.com/event/will-export-control-chip-security-become-law-this-year",
@@ -27339,11 +27311,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0625
+          "probability": 0.079
         },
         {
           "prompt": "No",
-          "probability": 0.9375
+          "probability": 0.921
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-dip-below-4pt56-in-november",
@@ -27379,11 +27351,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.53
+          "probability": 0.535
         },
         {
           "prompt": "No",
-          "probability": 0.47
+          "probability": 0.465
         }
       ],
       "url": "https://polymarket.com/event/mrvl-quarterly-earnings-nongaap-eps-12-01-2026-1pt11",
@@ -27499,11 +27471,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.093
+          "probability": 0.0925
         },
         {
           "prompt": "No",
-          "probability": 0.907
+          "probability": 0.9075
         }
       ],
       "url": "https://polymarket.com/event/will-iran-target-oman-by-november-30-2026-20261119",
@@ -27539,11 +27511,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.34
+          "probability": 0.35
         },
         {
           "prompt": "No",
-          "probability": 0.66
+          "probability": 0.65
         }
       ],
       "url": "https://polymarket.com/event/will-alphabet-be-the-third-largest-company-in-the-world-by-market-cap-on-december-31-20260806175740605",
@@ -27799,11 +27771,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0045
+          "probability": 0.004
         },
         {
           "prompt": "No",
-          "probability": 0.9955
+          "probability": 0.996
         }
       ],
       "url": "https://polymarket.com/event/will-core-pce-yoy-be-2pt9pct-in-october-2026",
@@ -27819,11 +27791,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0045
+          "probability": 0.004
         },
         {
           "prompt": "No",
-          "probability": 0.9955
+          "probability": 0.996
         }
       ],
       "url": "https://polymarket.com/event/will-core-pce-yoy-be-2pt8pct-or-less-in-october-2026",
@@ -27859,11 +27831,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.96
+          "probability": 0.961
         },
         {
           "prompt": "No",
-          "probability": 0.04
+          "probability": 0.039
         }
       ],
       "url": "https://polymarket.com/event/will-the-feds-upper-bound-reach-4pt25-or-higher-before-2027",
@@ -27879,11 +27851,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.021
+          "probability": 0.0195
         },
         {
           "prompt": "No",
-          "probability": 0.979
+          "probability": 0.9805
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-hit-4pt99-in-november",
@@ -27919,11 +27891,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.4
+          "probability": 0.44
         },
         {
           "prompt": "No",
-          "probability": 0.6
+          "probability": 0.56
         }
       ],
       "url": "https://polymarket.com/event/will-the-2-year-treasury-yield-hit-4pt90-before-2027",
@@ -27959,11 +27931,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0625
+          "probability": 0.053
         },
         {
           "prompt": "No",
-          "probability": 0.9375
+          "probability": 0.947
         }
       ],
       "url": "https://polymarket.com/event/will-the-30-year-treasury-yield-dip-below-5pt17-in-november",
@@ -27979,11 +27951,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.455
+          "probability": 0.445
         },
         {
           "prompt": "No",
-          "probability": 0.545
+          "probability": 0.555
         }
       ],
       "url": "https://polymarket.com/event/will-iran-target-kuwait-by-november-30-2026-20261119",
@@ -28079,11 +28051,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.159
+          "probability": 0.1585
         },
         {
           "prompt": "No",
-          "probability": 0.841
+          "probability": 0.8415
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-dip-below-4pt30-before-2027",
@@ -28099,11 +28071,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.23
+          "probability": 0.245
         },
         {
           "prompt": "No",
-          "probability": 0.77
+          "probability": 0.755
         }
       ],
       "url": "https://polymarket.com/event/will-the-2-year-treasury-yield-hit-5pt00-before-2027",
@@ -28179,11 +28151,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0495
+          "probability": 0.051
         },
         {
           "prompt": "No",
-          "probability": 0.9505
+          "probability": 0.949
         }
       ],
       "url": "https://polymarket.com/event/will-russia-capture-orikhiv-by-december-31-2026",
@@ -28299,11 +28271,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0075
+          "probability": 0.009
         },
         {
           "prompt": "No",
-          "probability": 0.9925
+          "probability": 0.991
         }
       ],
       "url": "https://polymarket.com/event/will-the-bank-of-japan-decrease-the-uncollateralized-overnight-call-rate-by-50-bps-at-the-january-2027-meeting",
@@ -28399,11 +28371,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.755
+          "probability": 0.77
         },
         {
           "prompt": "No",
-          "probability": 0.245
+          "probability": 0.23
         }
       ],
       "url": "https://polymarket.com/event/will-core-pce-mom-be-0pt3pct-in-october-2026",
@@ -28479,11 +28451,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.13
+          "probability": 0.12
         },
         {
           "prompt": "No",
-          "probability": 0.87
+          "probability": 0.88
         }
       ],
       "url": "https://polymarket.com/event/will-us-gdp-growth-in-q4-2026-be-less-than-1pt5pct",
@@ -28519,11 +28491,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.906
+          "probability": 0.9055
         },
         {
           "prompt": "No",
-          "probability": 0.094
+          "probability": 0.0945
         }
       ],
       "url": "https://polymarket.com/event/no-change-in-reserve-bank-of-australias-interest-rates-at-the-december-2026-meeting",
@@ -28659,11 +28631,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0675
+          "probability": 0.1005
         },
         {
           "prompt": "No",
-          "probability": 0.9325
+          "probability": 0.8995
         }
       ],
       "url": "https://polymarket.com/event/will-the-reserve-bank-of-india-decrease-the-policy-repo-rate-by-50-bps-at-the-february-2027-meeting",
@@ -28759,11 +28731,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.03
+          "probability": 0.0295
         },
         {
           "prompt": "No",
-          "probability": 0.97
+          "probability": 0.9705
         }
       ],
       "url": "https://polymarket.com/event/israel-x-turkey-military-clash-before-2027",
@@ -28799,11 +28771,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.195
+          "probability": 0.19
         },
         {
           "prompt": "No",
-          "probability": 0.805
+          "probability": 0.81
         }
       ],
       "url": "https://polymarket.com/event/houthis-enter-aden-by-december-31-2026",
@@ -28819,11 +28791,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.075
+          "probability": 0.06
         },
         {
           "prompt": "No",
-          "probability": 0.925
+          "probability": 0.94
         }
       ],
       "url": "https://polymarket.com/event/will-strait-of-hormuz-traffic-return-to-normal-in-august-2027",
@@ -28859,11 +28831,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.14
+          "probability": 0.145
         },
         {
           "prompt": "No",
-          "probability": 0.86
+          "probability": 0.855
         }
       ],
       "url": "https://polymarket.com/event/will-the-30-year-treasury-yield-hit-5pt60-before-2027-readd",
@@ -28879,11 +28851,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.115
+          "probability": 0.14
         },
         {
           "prompt": "No",
-          "probability": 0.885
+          "probability": 0.86
         }
       ],
       "url": "https://polymarket.com/event/will-msft-reach-525-in-november-2026-from-november-19",
@@ -28919,11 +28891,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.2535
+          "probability": 0.254
         },
         {
           "prompt": "No",
-          "probability": 0.7465
+          "probability": 0.746
         }
       ],
       "url": "https://polymarket.com/event/will-eurozone-annual-gdp-growth-in-2026-be-between-0-and-1pt0",
@@ -28939,11 +28911,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0325
+          "probability": 0.0305
         },
         {
           "prompt": "No",
-          "probability": 0.9675
+          "probability": 0.9695
         }
       ],
       "url": "https://polymarket.com/event/israel-x-hamas-ceasefire-phase-ii-by-december-31-632",
@@ -28959,11 +28931,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.022
+          "probability": 0.025
         },
         {
           "prompt": "No",
-          "probability": 0.978
+          "probability": 0.975
         }
       ],
       "url": "https://polymarket.com/event/will-the-30-year-treasury-yield-hit-5pt49-in-november",
@@ -29019,11 +28991,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.665
+          "probability": 0.67
         },
         {
           "prompt": "No",
-          "probability": 0.335
+          "probability": 0.33
         }
       ],
       "url": "https://polymarket.com/event/will-strait-of-hormuz-traffic-not-return-to-normal-in-2027",
@@ -29091,6 +29063,26 @@
       "volume": 5683081.844237999,
       "volume_24h": 320.79999999999995,
       "relevance": 0.89,
+      "tag": "Crypto"
+    },
+    {
+      "id": "pm-701571",
+      "title": "Will Solana reach $200 by December 31, 2026?",
+      "bets": [
+        {
+          "prompt": "Yes",
+          "probability": 0.0065
+        },
+        {
+          "prompt": "No",
+          "probability": 0.9935
+        }
+      ],
+      "url": "https://polymarket.com/event/will-solana-reach-200-by-december-31-2026",
+      "resolution_date": "2027-01-01",
+      "volume": 100756.648251,
+      "volume_24h": 5.0,
+      "relevance": 0.77,
       "tag": "Crypto"
     },
     {
@@ -29179,11 +29171,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.875
+          "probability": 0.835
         },
         {
           "prompt": "No",
-          "probability": 0.125
+          "probability": 0.165
         }
       ],
       "url": "https://polymarket.com/event/israel-military-action-against-lebanon-on-november-25",
@@ -29239,11 +29231,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.19
+          "probability": 0.18
         },
         {
           "prompt": "No",
-          "probability": 0.81
+          "probability": 0.82
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-dip-below-4pt35-before-2027",
@@ -29259,11 +29251,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0845
+          "probability": 0.09
         },
         {
           "prompt": "No",
-          "probability": 0.9155
+          "probability": 0.91
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-dip-below-4pt4-before-2027",
@@ -29319,11 +29311,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0385
+          "probability": 0.036
         },
         {
           "prompt": "No",
-          "probability": 0.9615
+          "probability": 0.964
         }
       ],
       "url": "https://polymarket.com/event/will-gas-hit-3pt65-high-by-november-30-2026",
@@ -29419,11 +29411,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1625
+          "probability": 0.1665
         },
         {
           "prompt": "No",
-          "probability": 0.8375
+          "probability": 0.8335
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-hit-5pt10-before-2027",
@@ -29479,11 +29471,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.047
+          "probability": 0.044
         },
         {
           "prompt": "No",
-          "probability": 0.953
+          "probability": 0.956
         }
       ],
       "url": "https://polymarket.com/event/doj-criminally-charges-amd-by-december-31-2026",
@@ -29619,11 +29611,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.52
+          "probability": 0.515
         },
         {
           "prompt": "No",
-          "probability": 0.48
+          "probability": 0.485
         }
       ],
       "url": "https://polymarket.com/event/will-the-sp-500-close-in-a-bear-market-by-june-30-2027",
@@ -29779,11 +29771,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.269
+          "probability": 0.2395
         },
         {
           "prompt": "No",
-          "probability": 0.731
+          "probability": 0.7605
         }
       ],
       "url": "https://polymarket.com/event/will-microsoft-be-the-second-largest-company-in-the-world-by-market-cap-on-december-31-20260806175739818",
@@ -29879,11 +29871,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.04
+          "probability": 0.0395
         },
         {
           "prompt": "No",
-          "probability": 0.96
+          "probability": 0.9605
         }
       ],
       "url": "https://polymarket.com/event/will-mu-reach-780-by-november-23-2026",
@@ -29899,11 +29891,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.19
+          "probability": 0.175
         },
         {
           "prompt": "No",
-          "probability": 0.81
+          "probability": 0.825
         }
       ],
       "url": "https://polymarket.com/event/will-iran-target-saudi-arabia-by-december-31-2026",
@@ -29939,11 +29931,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.033
+          "probability": 0.0325
         },
         {
           "prompt": "No",
-          "probability": 0.967
+          "probability": 0.9675
         }
       ],
       "url": "https://polymarket.com/event/will-the-2-year-treasury-yield-dip-below-4pt44-in-november",
@@ -30019,11 +30011,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.015
+          "probability": 0.0155
         },
         {
           "prompt": "No",
-          "probability": 0.985
+          "probability": 0.9845
         }
       ],
       "url": "https://polymarket.com/event/will-openai-ipo-by-december-31-2026",
@@ -30079,11 +30071,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.9725
+          "probability": 0.972
         },
         {
           "prompt": "No",
-          "probability": 0.0275
+          "probability": 0.028
         }
       ],
       "url": "https://polymarket.com/event/will-the-ecb-announce-a-25-bps-increase-at-the-december-2026-meeting",
@@ -30139,11 +30131,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.28
+          "probability": 0.29
         },
         {
           "prompt": "No",
-          "probability": 0.72
+          "probability": 0.71
         }
       ],
       "url": "https://polymarket.com/event/will-us-crude-oil-reserves-fall-to-250m-by-december-25-2026",
@@ -30299,11 +30291,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0585
+          "probability": 0.057
         },
         {
           "prompt": "No",
-          "probability": 0.9415
+          "probability": 0.943
         }
       ],
       "url": "https://polymarket.com/event/how-many-gta-vi-units-sold-reported-before-2027-33m-to-36m",
@@ -30339,11 +30331,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1055
+          "probability": 0.093
         },
         {
           "prompt": "No",
-          "probability": 0.8945
+          "probability": 0.907
         }
       ],
       "url": "https://polymarket.com/event/will-no-russia-ukraine-senior-diplomatic-meeting-take-place-by-december-31-2027",
@@ -30379,11 +30371,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0795
+          "probability": 0.08
         },
         {
           "prompt": "No",
-          "probability": 0.9205
+          "probability": 0.92
         }
       ],
       "url": "https://polymarket.com/event/will-alphabets-market-capitalization-be-between-3pt50t-and-4pt00t-at-the-end-of-2026-1785882876118",
@@ -30479,11 +30471,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.165
+          "probability": 0.152
         },
         {
           "prompt": "No",
-          "probability": 0.835
+          "probability": 0.848
         }
       ],
       "url": "https://polymarket.com/event/will-canadas-november-2026-unemployment-rate-be-6pt4",
@@ -30519,11 +30511,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.061
+          "probability": 0.0615
         },
         {
           "prompt": "No",
-          "probability": 0.939
+          "probability": 0.9385
         }
       ],
       "url": "https://polymarket.com/event/will-israel-strike-5-countries-in-november-2025",
@@ -30779,11 +30771,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.745
+          "probability": 0.755
         },
         {
           "prompt": "No",
-          "probability": 0.255
+          "probability": 0.245
         }
       ],
       "url": "https://polymarket.com/event/tsla-above-370-on-november-30-2026",
@@ -30819,11 +30811,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.937
+          "probability": 0.938
         },
         {
           "prompt": "No",
-          "probability": 0.063
+          "probability": 0.062
         }
       ],
       "url": "https://polymarket.com/event/gas-hits-4pt50-dollars-by-end-of-2026-dem-sweep-no",
@@ -30839,11 +30831,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0185
+          "probability": 0.0235
         },
         {
           "prompt": "No",
-          "probability": 0.9815
+          "probability": 0.9765
         }
       ],
       "url": "https://polymarket.com/event/will-gas-hit-4pt10-high-by-november-30-2026",
@@ -30879,11 +30871,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.168
+          "probability": 0.169
         },
         {
           "prompt": "No",
-          "probability": 0.832
+          "probability": 0.831
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-hit-5pt15-before-2027",
@@ -30979,11 +30971,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.037
+          "probability": 0.0365
         },
         {
           "prompt": "No",
-          "probability": 0.963
+          "probability": 0.9635
         }
       ],
       "url": "https://polymarket.com/event/will-tesla-release-optimus-by-december-31-2026",
@@ -31239,11 +31231,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.08
+          "probability": 0.085
         },
         {
           "prompt": "No",
-          "probability": 0.92
+          "probability": 0.915
         }
       ],
       "url": "https://polymarket.com/event/jerome-powell-out-from-fed-board-by-december-31",
@@ -31259,11 +31251,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.04
+          "probability": 0.039
         },
         {
           "prompt": "No",
-          "probability": 0.96
+          "probability": 0.961
         }
       ],
       "url": "https://polymarket.com/event/will-russia-enter-kramatorsk-by-december-31-2026",
@@ -31319,11 +31311,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0465
+          "probability": 0.047
         },
         {
           "prompt": "No",
-          "probability": 0.9535
+          "probability": 0.953
         }
       ],
       "url": "https://polymarket.com/event/will-amazon-be-the-third-largest-company-in-the-world-by-market-cap-on-december-31-20260806175740608",
@@ -31359,11 +31351,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0125
+          "probability": 0.0135
         },
         {
           "prompt": "No",
-          "probability": 0.9875
+          "probability": 0.9865
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-hit-5pt21-in-november",
@@ -31479,11 +31471,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.275
+          "probability": 0.255
         },
         {
           "prompt": "No",
-          "probability": 0.725
+          "probability": 0.745
         }
       ],
       "url": "https://polymarket.com/event/will-okta-q3-crpo-growth-be-between-14pt5-and-15pt5",
@@ -31519,11 +31511,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0145
+          "probability": 0.0165
         },
         {
           "prompt": "No",
-          "probability": 0.9855
+          "probability": 0.9835
         }
       ],
       "url": "https://polymarket.com/event/will-at-least-20-ships-transit-the-strait-of-hormuz-on-any-day-by-november-30-2026",
@@ -31559,11 +31551,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.415
+          "probability": 0.42
         },
         {
           "prompt": "No",
-          "probability": 0.585
+          "probability": 0.58
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-dip-below-4pt50-before-2027",
@@ -31679,11 +31671,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.315
+          "probability": 0.325
         },
         {
           "prompt": "No",
-          "probability": 0.685
+          "probability": 0.675
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-hit-5pt00-before-2027-readd",
@@ -31859,11 +31851,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0265
+          "probability": 0.0245
         },
         {
           "prompt": "No",
-          "probability": 0.9735
+          "probability": 0.9755
         }
       ],
       "url": "https://polymarket.com/event/us-treasury-announces-bitcoin-purchase-by-december-31-2026",
@@ -32079,11 +32071,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.335
+          "probability": 0.325
         },
         {
           "prompt": "No",
-          "probability": 0.665
+          "probability": 0.675
         }
       ],
       "url": "https://polymarket.com/event/will-robinhood-be-first-to-list-tokenized-stocks-in-the-us",
@@ -32099,11 +32091,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.106
+          "probability": 0.0835
         },
         {
           "prompt": "No",
-          "probability": 0.894
+          "probability": 0.9165
         }
       ],
       "url": "https://polymarket.com/event/will-the-30-year-treasury-yield-dip-below-5pt20-in-november",
@@ -32132,26 +32124,6 @@
       "volume_24h": 1293.341253,
       "relevance": 0.5499999999999999,
       "tag": "Commodities"
-    },
-    {
-      "id": "pm-7048650",
-      "title": "Will the 7-day average ship traffic through the Strait of Hormuz reach 50+ by December 31?",
-      "bets": [
-        {
-          "prompt": "Yes",
-          "probability": 0.0345
-        },
-        {
-          "prompt": "No",
-          "probability": 0.9655
-        }
-      ],
-      "url": "https://polymarket.com/event/will-the-7-day-average-ship-traffic-through-the-strait-of-hormuz-reach-50-by-december-31",
-      "resolution_date": "2026-12-31",
-      "volume": 2780.585559,
-      "volume_24h": 43.73,
-      "relevance": 0.61,
-      "tag": "Geopolitical"
     },
     {
       "id": "pm-561284",
@@ -32214,26 +32186,6 @@
       "tag": "Geopolitical"
     },
     {
-      "id": "pm-6763844",
-      "title": "Will Scott Bessent be the next to leave the Trump Cabinet before 2029?",
-      "bets": [
-        {
-          "prompt": "Yes",
-          "probability": 0.026
-        },
-        {
-          "prompt": "No",
-          "probability": 0.974
-        }
-      ],
-      "url": "https://polymarket.com/event/will-scott-bessent-be-the-next-to-leave-the-trump-cabinet-before-2029",
-      "resolution_date": "2028-12-31",
-      "volume": 737.15452,
-      "volume_24h": 40.0,
-      "relevance": 0.9199999999999999,
-      "tag": "Govt"
-    },
-    {
       "id": "pm-6171937",
       "title": "Will NVIDIA (NVDA) hit (HIGH) $224 in November?",
       "bets": [
@@ -32279,11 +32231,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.066
+          "probability": 0.0655
         },
         {
           "prompt": "No",
-          "probability": 0.934
+          "probability": 0.9345
         }
       ],
       "url": "https://polymarket.com/event/will-xauusd-dip-to-3300-by-november-23-2026",
@@ -32319,11 +32271,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.039
+          "probability": 0.182
         },
         {
           "prompt": "No",
-          "probability": 0.961
+          "probability": 0.818
         }
       ],
       "url": "https://polymarket.com/event/will-the-bank-of-canada-increase-the-target-for-the-overnight-rate-by-50-bps-at-the-january-2027-interest-rate-announcement",
@@ -32479,11 +32431,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.064
+          "probability": 0.0605
         },
         {
           "prompt": "No",
-          "probability": 0.936
+          "probability": 0.9395
         }
       ],
       "url": "https://polymarket.com/event/will-the-democratic-party-win-the-popular-vote-in-the-2026-us-house-of-representatives-midterm-elections-by-between-12-and-14-485",
@@ -32619,11 +32571,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.028
+          "probability": 0.025
         },
         {
           "prompt": "No",
-          "probability": 0.972
+          "probability": 0.975
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-hit-5pt03-in-november",
@@ -32739,11 +32691,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.415
+          "probability": 0.435
         },
         {
           "prompt": "No",
-          "probability": 0.585
+          "probability": 0.565
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-dip-below-4pt55-before-2027",
@@ -32759,11 +32711,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.13
+          "probability": 0.125
         },
         {
           "prompt": "No",
-          "probability": 0.87
+          "probability": 0.875
         }
       ],
       "url": "https://polymarket.com/event/ukraine-signs-peace-deal-with-russia-by-june-30-2027",
@@ -32799,11 +32751,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.168
+          "probability": 0.1715
         },
         {
           "prompt": "No",
-          "probability": 0.832
+          "probability": 0.8285
         }
       ],
       "url": "https://polymarket.com/event/will-us-gdp-growth-in-q4-2026-be-between-3pt5pct-and-4pt0pct",
@@ -32819,11 +32771,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0335
+          "probability": 0.0345
         },
         {
           "prompt": "No",
-          "probability": 0.9665
+          "probability": 0.9655
         }
       ],
       "url": "https://polymarket.com/event/will-tsla-dip-to-315-in-november-2026",
@@ -32839,11 +32791,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.2055
+          "probability": 0.1565
         },
         {
           "prompt": "No",
-          "probability": 0.7945
+          "probability": 0.8435
         }
       ],
       "url": "https://polymarket.com/event/will-broadcom-avgo-q4-ai-revenue-be-above-20261008120151000-24b",
@@ -32879,11 +32831,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.13
+          "probability": 0.125
         },
         {
           "prompt": "No",
-          "probability": 0.87
+          "probability": 0.875
         }
       ],
       "url": "https://polymarket.com/event/will-australia-send-warships-through-the-strait-of-hormuz-by-december-31-2026",
@@ -33079,11 +33031,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.02
+          "probability": 0.0195
         },
         {
           "prompt": "No",
-          "probability": 0.98
+          "probability": 0.9805
         }
       ],
       "url": "https://polymarket.com/event/will-gas-hit-3pt95-high-by-november-30-2026",
@@ -33159,11 +33111,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.026
+          "probability": 0.029
         },
         {
           "prompt": "No",
-          "probability": 0.974
+          "probability": 0.971
         }
       ],
       "url": "https://polymarket.com/event/will-the-2-year-treasury-yield-dip-below-4pt38-in-november",
@@ -33219,11 +33171,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.035
+          "probability": 0.0195
         },
         {
           "prompt": "No",
-          "probability": 0.965
+          "probability": 0.9805
         }
       ],
       "url": "https://polymarket.com/event/will-gas-hit-3pt90-high-by-november-30-2026",
@@ -33419,11 +33371,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.6145
+          "probability": 0.6135
         },
         {
           "prompt": "No",
-          "probability": 0.3855
+          "probability": 0.3865
         }
       ],
       "url": "https://polymarket.com/event/democrat-wins-2028-presidency-dem-sweep-yes",
@@ -33479,11 +33431,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.025
+          "probability": 0.0235
         },
         {
           "prompt": "No",
-          "probability": 0.975
+          "probability": 0.9765
         }
       ],
       "url": "https://polymarket.com/event/will-msft-reach-615-in-november-2026",
@@ -33639,11 +33591,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.189
+          "probability": 0.181
         },
         {
           "prompt": "No",
-          "probability": 0.811
+          "probability": 0.819
         }
       ],
       "url": "https://polymarket.com/event/will-one-person-dissent-the-december-fed-decision-20260730000304475",
@@ -33659,11 +33611,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0545
+          "probability": 0.053
         },
         {
           "prompt": "No",
-          "probability": 0.9455
+          "probability": 0.947
         }
       ],
       "url": "https://polymarket.com/event/will-tesla-launch-robotaxis-in-california-by-december-31-20260630142749586",
@@ -33712,26 +33664,6 @@
       "volume_24h": 9.6,
       "relevance": 0.76,
       "tag": "Govt"
-    },
-    {
-      "id": "pm-2914145",
-      "title": "Will BYD be removed from Chinese Military Companies list by June 30, 2027?",
-      "bets": [
-        {
-          "prompt": "Yes",
-          "probability": 0.075
-        },
-        {
-          "prompt": "No",
-          "probability": 0.925
-        }
-      ],
-      "url": "https://polymarket.com/event/will-byd-be-removed-from-chinese-military-companies-list-by-june-30-2027-20260706223230559",
-      "resolution_date": "2027-06-30",
-      "volume": 99812.54975800002,
-      "volume_24h": 2.12,
-      "relevance": 0.8300000000000001,
-      "tag": "Market"
     },
     {
       "id": "pm-1323083",
@@ -34667,11 +34599,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.866
+          "probability": 0.8655
         },
         {
           "prompt": "No",
-          "probability": 0.134
+          "probability": 0.1345
         }
       ],
       "url": "https://polymarket.com/event/will-japans-core-cpi-increase-by-less-than-or-equal-to-1pt9-in-2026-20260617224132718",
@@ -34747,11 +34679,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.059
+          "probability": 0.052
         },
         {
           "prompt": "No",
-          "probability": 0.941
+          "probability": 0.948
         }
       ],
       "url": "https://polymarket.com/event/will-three-people-dissent-the-december-fed-decision-20260730000304477",
@@ -34867,11 +34799,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0515
+          "probability": 0.0535
         },
         {
           "prompt": "No",
-          "probability": 0.9485
+          "probability": 0.9465
         }
       ],
       "url": "https://polymarket.com/event/will-the-reserve-bank-of-india-make-no-change-to-the-policy-repo-rate-at-the-december-2026-meeting",
@@ -34907,11 +34839,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.55
+          "probability": 0.525
         },
         {
           "prompt": "No",
-          "probability": 0.45
+          "probability": 0.475
         }
       ],
       "url": "https://polymarket.com/event/will-xagusd-reach-44-in-november-2026-from-november-23",
@@ -34967,11 +34899,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.034
+          "probability": 0.033
         },
         {
           "prompt": "No",
-          "probability": 0.966
+          "probability": 0.967
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-hit-5pt17-in-november",
@@ -34987,11 +34919,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.027
+          "probability": 0.0265
         },
         {
           "prompt": "No",
-          "probability": 0.973
+          "probability": 0.9735
         }
       ],
       "url": "https://polymarket.com/event/us-canada-diplomatic-agreement-to-lower-tariffs-by-november-30",
@@ -35007,11 +34939,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.069
+          "probability": 0.072
         },
         {
           "prompt": "No",
-          "probability": 0.931
+          "probability": 0.928
         }
       ],
       "url": "https://polymarket.com/event/will-two-people-dissent-the-december-fed-decision-20260730000304476",
@@ -35087,11 +35019,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.275
+          "probability": 0.25
         },
         {
           "prompt": "No",
-          "probability": 0.725
+          "probability": 0.75
         }
       ],
       "url": "https://polymarket.com/event/mortgage-delinquency-rate-exceeds-3-by-end-of-q4-2027",
@@ -37219,7 +37151,7 @@
         },
         {
           "prompt": "4.89% or below",
-          "probability": 0.61
+          "probability": 0.51
         },
         {
           "prompt": "4.88% or below",
@@ -37231,11 +37163,11 @@
         },
         {
           "prompt": "4.86% or below",
-          "probability": 0.23
+          "probability": 0.19
         },
         {
           "prompt": "4.85% or below",
-          "probability": 0.17
+          "probability": 0.12
         },
         {
           "prompt": "4.84% or below",
@@ -37296,8 +37228,8 @@
       ],
       "url": "https://kalshi.com/markets/KX10YRDIRLW",
       "resolution_date": "2026-11-27",
-      "volume": 936.85,
-      "volume_24h": 936.85,
+      "volume": 1033.85,
+      "volume_24h": 1033.85,
       "relevance": 0.6599999999999999,
       "tag": "Macro"
     },
@@ -37387,11 +37319,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.055
+          "probability": 0.0555
         },
         {
           "prompt": "No",
-          "probability": 0.945
+          "probability": 0.9445
         }
       ],
       "url": "https://polymarket.com/event/france-defaults-on-debt-by-december-31-2027",
@@ -37427,11 +37359,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.6
+          "probability": 0.62
         },
         {
           "prompt": "No",
-          "probability": 0.4
+          "probability": 0.38
         }
       ],
       "url": "https://polymarket.com/event/will-the-us-tariff-rate-on-china-be-between-5-and-15-on-december-31-2026",
@@ -37467,11 +37399,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.022
+          "probability": 0.0215
         },
         {
           "prompt": "No",
-          "probability": 0.978
+          "probability": 0.9785
         }
       ],
       "url": "https://polymarket.com/event/russia-x-ukraine-peace-parlay",
@@ -37707,11 +37639,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.11
+          "probability": 0.095
         },
         {
           "prompt": "No",
-          "probability": 0.89
+          "probability": 0.905
         }
       ],
       "url": "https://polymarket.com/event/ukraine-peace-referendum-passed-by-june-30-2027",
@@ -37727,11 +37659,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1075
+          "probability": 0.108
         },
         {
           "prompt": "No",
-          "probability": 0.8925
+          "probability": 0.892
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-dip-below-4pt20-before-2027",
@@ -38127,11 +38059,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.007
+          "probability": 0.0055
         },
         {
           "prompt": "No",
-          "probability": 0.993
+          "probability": 0.9945
         }
       ],
       "url": "https://polymarket.com/event/will-bnb-reach-2000-by-december-31-2026",
@@ -38267,11 +38199,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.013
+          "probability": 0.0115
         },
         {
           "prompt": "No",
-          "probability": 0.987
+          "probability": 0.9885
         }
       ],
       "url": "https://polymarket.com/event/ukraine-joins-nato-before-2027",
@@ -38387,11 +38319,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.35
+          "probability": 0.335
         },
         {
           "prompt": "No",
-          "probability": 0.65
+          "probability": 0.665
         }
       ],
       "url": "https://polymarket.com/event/will-spy-dip-to-700-in-november-2026-from-november-23",
@@ -38427,11 +38359,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1185
+          "probability": 0.1165
         },
         {
           "prompt": "No",
-          "probability": 0.8815
+          "probability": 0.8835
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-dip-below-4pt25-before-2027",
@@ -38487,11 +38419,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0485
+          "probability": 0.0435
         },
         {
           "prompt": "No",
-          "probability": 0.9515
+          "probability": 0.9565
         }
       ],
       "url": "https://polymarket.com/event/consensys-ipo-closing-market-cap-above-3b",
@@ -38507,11 +38439,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.024
+          "probability": 0.0235
         },
         {
           "prompt": "No",
-          "probability": 0.976
+          "probability": 0.9765
         }
       ],
       "url": "https://polymarket.com/event/will-the-us-federal-government-take-a-stake-in-anthropic-pbc",
@@ -38687,11 +38619,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0125
+          "probability": 0.011
         },
         {
           "prompt": "No",
-          "probability": 0.9875
+          "probability": 0.989
         }
       ],
       "url": "https://polymarket.com/event/will-the-bank-of-korea-increase-the-base-rate-by-50-bps-at-the-february-2027-meeting",
@@ -38827,11 +38759,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.13
+          "probability": 0.125
         },
         {
           "prompt": "No",
-          "probability": 0.87
+          "probability": 0.875
         }
       ],
       "url": "https://polymarket.com/event/will-the-us-add-between-50k-and-75k-jobs-in-november-2026",
@@ -38847,11 +38779,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0285
+          "probability": 0.034
         },
         {
           "prompt": "No",
-          "probability": 0.9715
+          "probability": 0.966
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-dip-below-4pt1-before-2027",
@@ -38967,11 +38899,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.3655
+          "probability": 0.354
         },
         {
           "prompt": "No",
-          "probability": 0.6345
+          "probability": 0.646
         }
       ],
       "url": "https://polymarket.com/event/will-the-us-tariff-rate-on-china-be-between-15-and-25-on-december-31-2026",
@@ -38987,11 +38919,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0265
+          "probability": 0.0315
         },
         {
           "prompt": "No",
-          "probability": 0.9735
+          "probability": 0.9685
         }
       ],
       "url": "https://polymarket.com/event/will-openais-ipo-valuation-be-at-least-2pt5t",
@@ -39027,11 +38959,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.075
+          "probability": 0.0755
         },
         {
           "prompt": "No",
-          "probability": 0.925
+          "probability": 0.9245
         }
       ],
       "url": "https://polymarket.com/event/2028-balance-of-power-d-president-d-senate-r-house",
@@ -39147,11 +39079,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.013
+          "probability": 0.011
         },
         {
           "prompt": "No",
-          "probability": 0.987
+          "probability": 0.989
         }
       ],
       "url": "https://polymarket.com/event/will-the-us-tariff-rate-on-china-be-between-25-and-35-on-december-31-2026",
@@ -39247,11 +39179,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.425
+          "probability": 0.385
         },
         {
           "prompt": "No",
-          "probability": 0.575
+          "probability": 0.615
         }
       ],
       "url": "https://polymarket.com/event/will-the-2026-trade-deficit-be-between-900b-and-1t",
@@ -39267,11 +39199,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0295
+          "probability": 0.0215
         },
         {
           "prompt": "No",
-          "probability": 0.9705
+          "probability": 0.9785
         }
       ],
       "url": "https://polymarket.com/event/will-the-us-30-year-fixed-rate-mortgage-hit-8pt00-high-by-december-31-2026-from-october-27",
@@ -39307,11 +39239,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.059
+          "probability": 0.0585
         },
         {
           "prompt": "No",
-          "probability": 0.941
+          "probability": 0.9415
         }
       ],
       "url": "https://polymarket.com/event/will-the-5-year-treasury-yield-dip-below-4pt10-before-2027",
@@ -39347,11 +39279,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.295
+          "probability": 0.29
         },
         {
           "prompt": "No",
-          "probability": 0.705
+          "probability": 0.71
         }
       ],
       "url": "https://polymarket.com/event/will-openais-valuation-hit-high-1pt35t-by-december-31",
@@ -39507,11 +39439,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.145
+          "probability": 0.14
         },
         {
           "prompt": "No",
-          "probability": 0.855
+          "probability": 0.86
         }
       ],
       "url": "https://polymarket.com/event/will-googl-reach-300-in-november-2026-from-november-13",
@@ -39667,11 +39599,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.595
+          "probability": 0.605
         },
         {
           "prompt": "No",
-          "probability": 0.405
+          "probability": 0.395
         }
       ],
       "url": "https://polymarket.com/event/will-micron-q1-dram-revenue-be-above-46b",
@@ -39767,11 +39699,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0425
+          "probability": 0.0415
         },
         {
           "prompt": "No",
-          "probability": 0.9575
+          "probability": 0.9585
         }
       ],
       "url": "https://polymarket.com/event/will-russia-capture-prymorske-by-december-31-2026",
@@ -39787,11 +39719,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0245
+          "probability": 0.024
         },
         {
           "prompt": "No",
-          "probability": 0.9755
+          "probability": 0.976
         }
       ],
       "url": "https://polymarket.com/event/will-microstrategy-announce-bankruptcy-before-2027",
@@ -39807,11 +39739,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0125
+          "probability": 0.013
         },
         {
           "prompt": "No",
-          "probability": 0.9875
+          "probability": 0.987
         }
       ],
       "url": "https://polymarket.com/event/will-the-ecb-decrease-the-deposit-facility-rate-by-50-bps-at-the-february-2027-meeting",
@@ -39867,11 +39799,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.042
+          "probability": 0.053
         },
         {
           "prompt": "No",
-          "probability": 0.958
+          "probability": 0.947
         }
       ],
       "url": "https://polymarket.com/event/will-the-us-federal-government-take-a-stake-in-freeport-mcmoran-inc",
@@ -39927,11 +39859,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0415
+          "probability": 0.041
         },
         {
           "prompt": "No",
-          "probability": 0.9585
+          "probability": 0.959
         }
       ],
       "url": "https://polymarket.com/event/gas-hits-4pt50-dollars-by-end-of-2026-dem-sweep-yes",
@@ -39947,11 +39879,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0205
+          "probability": 0.022
         },
         {
           "prompt": "No",
-          "probability": 0.9795
+          "probability": 0.978
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-dip-below-4pt70-in-november",
@@ -40007,11 +39939,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0905
+          "probability": 0.086
         },
         {
           "prompt": "No",
-          "probability": 0.9095
+          "probability": 0.914
         }
       ],
       "url": "https://polymarket.com/event/will-mu-reach-1140-in-november-2026",
@@ -40027,11 +39959,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.9745
+          "probability": 0.975
         },
         {
           "prompt": "No",
-          "probability": 0.0255
+          "probability": 0.025
         }
       ],
       "url": "https://polymarket.com/event/will-micron-q1-dram-revenue-be-above-42b",
@@ -40047,11 +39979,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.43
+          "probability": 0.44
         },
         {
           "prompt": "No",
-          "probability": 0.57
+          "probability": 0.56
         }
       ],
       "url": "https://polymarket.com/event/comprehensive-federal-ai-framework-becomes-us-law-before-2028",
@@ -40127,11 +40059,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0365
+          "probability": 0.023
         },
         {
           "prompt": "No",
-          "probability": 0.9635
+          "probability": 0.977
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-dip-below-4pt61-in-november",
@@ -40267,11 +40199,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.815
+          "probability": 0.79
         },
         {
           "prompt": "No",
-          "probability": 0.185
+          "probability": 0.21
         }
       ],
       "url": "https://polymarket.com/event/will-eu-emergency-diesel-stocks-be-at-least-32m-tonnes-at-end-of-november-2026",
@@ -40347,11 +40279,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0335
+          "probability": 0.0355
         },
         {
           "prompt": "No",
-          "probability": 0.9665
+          "probability": 0.9645
         }
       ],
       "url": "https://polymarket.com/event/will-the-uks-2026-inflation-be-between-4pt0-and-4pt4",
@@ -40427,11 +40359,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.009
+          "probability": 0.0115
         },
         {
           "prompt": "No",
-          "probability": 0.991
+          "probability": 0.9885
         }
       ],
       "url": "https://polymarket.com/event/will-the-uks-2026-inflation-be-between-1pt5-and-1pt9",
@@ -40467,11 +40399,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0085
+          "probability": 0.0105
         },
         {
           "prompt": "No",
-          "probability": 0.9915
+          "probability": 0.9895
         }
       ],
       "url": "https://polymarket.com/event/will-the-uks-2026-inflation-be-less-than-1pt0",
@@ -40587,11 +40519,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.2065
+          "probability": 0.208
         },
         {
           "prompt": "No",
-          "probability": 0.7935
+          "probability": 0.792
         }
       ],
       "url": "https://polymarket.com/event/kroger-q3-identical-sales-without-fuel-growth-less-than-0",
@@ -40871,11 +40803,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.025
+          "probability": 0.024
         },
         {
           "prompt": "No",
-          "probability": 0.975
+          "probability": 0.976
         }
       ],
       "url": "https://polymarket.com/event/will-googl-reach-380-in-november-2026",
@@ -41187,11 +41119,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0555
+          "probability": 0.055
         },
         {
           "prompt": "No",
-          "probability": 0.9445
+          "probability": 0.945
         }
       ],
       "url": "https://polymarket.com/event/us-congress-stock-trading-ban-before-2027",
@@ -41207,11 +41139,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0235
+          "probability": 0.0185
         },
         {
           "prompt": "No",
-          "probability": 0.9765
+          "probability": 0.9815
         }
       ],
       "url": "https://polymarket.com/event/will-tsla-dip-to-255-in-november-2026",
@@ -41247,11 +41179,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.785
+          "probability": 0.71
         },
         {
           "prompt": "No",
-          "probability": 0.215
+          "probability": 0.29
         }
       ],
       "url": "https://polymarket.com/event/will-meta-dip-to-580-in-november-2026-from-november-23",
@@ -41287,11 +41219,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.064
+          "probability": 0.062
         },
         {
           "prompt": "No",
-          "probability": 0.936
+          "probability": 0.938
         }
       ],
       "url": "https://polymarket.com/event/turkey-military-action-against-yemen-by-december-31-2026",
@@ -41307,11 +41239,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.3
+          "probability": 0.275
         },
         {
           "prompt": "No",
-          "probability": 0.7
+          "probability": 0.725
         }
       ],
       "url": "https://polymarket.com/event/will-ukraine-target-moscow-on-november-26-2026-2",
@@ -41395,11 +41327,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.225
+          "probability": 0.135
         },
         {
           "prompt": "No",
-          "probability": 0.775
+          "probability": 0.865
         }
       ],
       "url": "https://polymarket.com/event/will-tsla-dip-to-345-in-november-2026-from-november-21",
@@ -41560,8 +41492,8 @@
       ],
       "url": "https://kalshi.com/markets/KXCOMMISHFDA",
       "resolution_date": "2028-02-08",
-      "volume": 52170.35,
-      "volume_24h": 283.08,
+      "volume": 52171.05,
+      "volume_24h": 293.88,
       "relevance": 0.63,
       "tag": "Govt"
     },
@@ -41675,11 +41607,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.1915
+          "probability": 0.0815
         },
         {
           "prompt": "No",
-          "probability": 0.8085
+          "probability": 0.9185
         }
       ],
       "url": "https://polymarket.com/event/will-russia-capture-all-of-prymorske-by-december-31-2026",
@@ -42765,7 +42697,7 @@
       "url": "https://kalshi.com/markets/KXUST7AD",
       "resolution_date": "2026-11-25",
       "volume": 840.0,
-      "volume_24h": 800.0,
+      "volume_24h": 840.0,
       "relevance": 0.61,
       "tag": "Macro"
     },
@@ -43119,11 +43051,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.037
+          "probability": 0.0365
         },
         {
           "prompt": "No",
-          "probability": 0.963
+          "probability": 0.9635
         }
       ],
       "url": "https://polymarket.com/event/will-kuwait-join-the-abraham-accords-before-2027",
@@ -43239,11 +43171,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0155
+          "probability": 0.015
         },
         {
           "prompt": "No",
-          "probability": 0.9845
+          "probability": 0.985
         }
       ],
       "url": "https://polymarket.com/event/will-xrp-reach-2pt80-by-december-31-2026",
@@ -43259,11 +43191,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0465
+          "probability": 0.0435
         },
         {
           "prompt": "No",
-          "probability": 0.9535
+          "probability": 0.9565
         }
       ],
       "url": "https://polymarket.com/event/will-november-2026-core-cpi-yoy-be-2pt6",
@@ -43319,11 +43251,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.034
+          "probability": 0.0345
         },
         {
           "prompt": "No",
-          "probability": 0.966
+          "probability": 0.9655
         }
       ],
       "url": "https://polymarket.com/event/will-a-european-country-take-military-action-on-iran-by-december-31",
@@ -43359,11 +43291,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.027
+          "probability": 0.029
         },
         {
           "prompt": "No",
-          "probability": 0.973
+          "probability": 0.971
         }
       ],
       "url": "https://polymarket.com/event/will-eurusd-hit-1pt30-high-in-2026",
@@ -43399,11 +43331,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.0485
+          "probability": 0.05
         },
         {
           "prompt": "No",
-          "probability": 0.9515
+          "probability": 0.95
         }
       ],
       "url": "https://polymarket.com/event/will-eurusd-hit-1pt22-high-in-2026",
@@ -43539,11 +43471,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.022
+          "probability": 0.0215
         },
         {
           "prompt": "No",
-          "probability": 0.978
+          "probability": 0.9785
         }
       ],
       "url": "https://polymarket.com/event/will-the-10-year-treasury-yield-dip-below-4pt73-in-november",
@@ -43599,11 +43531,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.135
+          "probability": 0.128
         },
         {
           "prompt": "No",
-          "probability": 0.865
+          "probability": 0.872
         }
       ],
       "url": "https://polymarket.com/event/will-us-gdp-growth-in-q4-2026-be-between-1pt5pct-and-2pt0pct",
@@ -43619,11 +43551,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.14
+          "probability": 0.16
         },
         {
           "prompt": "No",
-          "probability": 0.86
+          "probability": 0.84
         }
       ],
       "url": "https://polymarket.com/event/will-russia-capture-kindrativka-by-december-31",
@@ -43679,11 +43611,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.155
+          "probability": 0.16
         },
         {
           "prompt": "No",
-          "probability": 0.845
+          "probability": 0.84
         }
       ],
       "url": "https://polymarket.com/event/will-russia-capture-kozacha-lopan-by-december-31-2026-20260630005737621",
@@ -43699,11 +43631,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.3265
+          "probability": 0.329
         },
         {
           "prompt": "No",
-          "probability": 0.6735
+          "probability": 0.671
         }
       ],
       "url": "https://polymarket.com/event/us-recession-by-end-of-2027-dem-sweep-yes",
@@ -43851,11 +43783,11 @@
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.996
+          "probability": 0.9955
         },
         {
           "prompt": "No",
-          "probability": 0.004
+          "probability": 0.0045
         }
       ],
       "url": "https://polymarket.com/event/will-dell-q3-infrastructure-solutions-group-revenue-be-above-38pt0b",
@@ -43886,36 +43818,16 @@
       "tag": "Geopolitical"
     },
     {
-      "id": "pm-3358961",
-      "title": "Will Amazon\u2019s market capitalization be between $3.00T and $3.50T at the end of 2026?",
-      "bets": [
-        {
-          "prompt": "Yes",
-          "probability": 0.2015
-        },
-        {
-          "prompt": "No",
-          "probability": 0.7985
-        }
-      ],
-      "url": "https://polymarket.com/event/will-amazons-market-capitalization-be-between-2pt50t-and-3pt00t-at-the-end-of-2026-1785882876098",
-      "resolution_date": "2026-12-31",
-      "volume": 16767.659505000003,
-      "volume_24h": 9.51,
-      "relevance": 0.94,
-      "tag": "Market"
-    },
-    {
       "id": "pm-701762",
       "title": "Will BNB reach $1100 by December 31, 2026?",
       "bets": [
         {
           "prompt": "Yes",
-          "probability": 0.023
+          "probability": 0.0205
         },
         {
           "prompt": "No",
-          "probability": 0.977
+          "probability": 0.9795
         }
       ],
       "url": "https://polymarket.com/event/will-bnb-reach-1100-by-december-31-2026",
@@ -43924,133 +43836,148 @@
       "volume_24h": 7.72,
       "relevance": 0.84,
       "tag": "Crypto"
-    },
-    {
-      "id": "pm-701571",
-      "title": "Will Solana reach $200 by December 31, 2026?",
-      "bets": [
-        {
-          "prompt": "Yes",
-          "probability": 0.0065
-        },
-        {
-          "prompt": "No",
-          "probability": 0.9935
-        }
-      ],
-      "url": "https://polymarket.com/event/will-solana-reach-200-by-december-31-2026",
-      "resolution_date": "2027-01-01",
-      "volume": 100756.648251,
-      "volume_24h": 5.0,
-      "relevance": 0.77,
-      "tag": "Crypto"
     }
   ],
   "upcoming_catalysts": [
     {
-      "title": "US November Nonfarm Payrolls & Unemployment Report",
+      "title": "US November Nonfarm Payrolls & Unemployment Rate",
       "when": "2026-12-04",
       "expected_date": "2026-12-04",
       "tag": "Macro",
-      "url": null
+      "url": "https://www.bls.gov/schedule/news_release/empsit.htm"
     },
     {
-      "title": "US November CPI Inflation Report",
-      "when": "2026-12-10",
+      "title": "OPEC+ Ministerial Meeting on 2027 Production Targets",
+      "when": "Early December 2026",
       "expected_date": "2026-12-10",
-      "tag": "Macro",
-      "url": null
+      "tag": "Commodities",
+      "url": "https://www.opec.org/opec_web/en/press_room/28.htm"
     },
     {
-      "title": "US November PPI Inflation Report",
-      "when": "2026-12-11",
-      "expected_date": "2026-12-11",
-      "tag": "Macro",
-      "url": null
-    },
-    {
-      "title": "FOMC December 2026 Meeting & Dot Plot / Rate Decision",
+      "title": "FOMC December 2026 Meeting & Updated Dot Plot",
       "when": "2026-12-16",
       "expected_date": "2026-12-16",
       "tag": "Macro",
-      "url": null
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    {
+      "title": "US November CPI Inflation Report",
+      "when": "2026-12-15",
+      "expected_date": "2026-12-15",
+      "tag": "Macro",
+      "url": "https://www.bls.gov/schedule/news_release/cpi.htm"
     },
     {
       "title": "US November PCE Inflation Report",
-      "when": "2026-12-23",
+      "when": "Late December 2026",
       "expected_date": "2026-12-23",
       "tag": "Macro",
-      "url": null
+      "url": "https://www.bea.gov/news/schedule"
     },
     {
-      "title": "US Q4 2026 Earnings Season Kickoff (Major US Banks)",
-      "when": "mid-January 2027",
-      "expected_date": "2027-01-17",
+      "title": "ECB December Policy Meeting",
+      "when": "2026-12-10",
+      "expected_date": "2026-12-10",
+      "tag": "International",
+      "url": "https://www.ecb.europa.eu/press/calendars/mgcgc/html/index.en.html"
+    },
+    {
+      "title": "Bank of Japan December Policy Meeting",
+      "when": "Mid-December 2026",
+      "expected_date": "2026-12-19",
+      "tag": "International",
+      "url": "https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm"
+    },
+    {
+      "title": "US Q4 2026 Earnings Season (Mega-cap Tech: Apple, Microsoft, Alphabet, Amazon, Nvidia, Meta)",
+      "when": "Late January\u2013Mid February 2027",
+      "expected_date": "2027-02-15",
       "tag": "Market",
       "url": null
     },
     {
-      "title": "US Q4 2026 GDP \u2013 Advance Estimate",
-      "when": "late January 2027",
-      "expected_date": "2027-01-30",
+      "title": "US Q3 2026 GDP Third Estimate",
+      "when": "2026-12-22",
+      "expected_date": "2026-12-22",
       "tag": "Macro",
-      "url": null
+      "url": "https://www.bea.gov/news/schedule"
     },
     {
-      "title": "US January 2027 Nonfarm Payrolls & Unemployment Report",
-      "when": "2027-02-05",
+      "title": "US Treasury Quarterly Refunding Announcement (Q1 2027 Financing Plans)",
+      "when": "Early February 2027",
       "expected_date": "2027-02-05",
       "tag": "Macro",
-      "url": null
+      "url": "https://home.treasury.gov/policy-issues/financing-the-government/quarterly-refunding"
     },
     {
-      "title": "US January 2027 CPI Inflation Report",
-      "when": "2027-02-11",
-      "expected_date": "2027-02-11",
-      "tag": "Macro",
-      "url": null
-    },
-    {
-      "title": "January 2027 FOMC Meeting",
-      "when": "late January 2027",
-      "expected_date": "2027-01-28",
-      "tag": "Macro",
-      "url": null
-    },
-    {
-      "title": "Potential US Federal Government Funding / Shutdown Deadline",
-      "when": "early 2027 (next continuing resolution expiry)",
-      "expected_date": "2027-02-28",
+      "title": "Potential US Federal Government Funding Deadline / Shutdown Risk (Expiration of Current Continuing Resolution)",
+      "when": "Early 2027 (per current CR schedule)",
+      "expected_date": "2027-01-31",
       "tag": "Govt",
+      "url": "https://www.congress.gov/resources/display/content/Calendars+and+Schedules"
+    },
+    {
+      "title": "US Supreme Court Decisions Window for Key Economic & Regulatory Cases (Labor, Tech Antitrust, Environmental Rules)",
+      "when": "Through June 2027 term end",
+      "expected_date": "2027-06-30",
+      "tag": "Govt",
+      "url": "https://www.supremecourt.gov/opinions/slipopinion/26"
+    },
+    {
+      "title": "China December 2026 Central Economic Work Conference (Growth, Property, FX Signals)",
+      "when": "Mid-December 2026",
+      "expected_date": "2026-12-18",
+      "tag": "International",
       "url": null
     },
     {
-      "title": "ECB Governing Council Policy Meeting (First of 2027)",
-      "when": "early 2027",
-      "expected_date": "2027-02-15",
+      "title": "US ISM Manufacturing & Services PMI Prints (Demand & Recession Signals)",
+      "when": "Monthly, next on 2026-12-02 (manufacturing) & 2026-12-04 (services)",
+      "expected_date": "2026-12-04",
       "tag": "Macro",
-      "url": null
+      "url": "https://www.ismworld.org/supply-management-news-and-reports/reports/pmi"
     },
     {
-      "title": "OPEC+ Ministerial Meeting / Production Policy Review",
-      "when": "early 2027",
-      "expected_date": "2027-03-31",
-      "tag": "Commodities",
-      "url": null
+      "title": "US November JOLTS Job Openings Report",
+      "when": "2026-12-30",
+      "expected_date": "2026-12-30",
+      "tag": "Macro",
+      "url": "https://www.bls.gov/schedule/news_release/jolts.htm"
     },
     {
-      "title": "Major Tech Earnings Cluster (Apple, Microsoft, Alphabet, Amazon, Nvidia) \u2013 Q4 2026",
-      "when": "late January to mid-February 2027",
-      "expected_date": "2027-02-15",
+      "title": "Key 13F Filing Deadline for Q4 2026 Holdings (Hedge Funds & Large Managers)",
+      "when": "2027-02-14",
+      "expected_date": "2027-02-14",
       "tag": "Market",
+      "url": "https://www.sec.gov/filings/ownership"
+    },
+    {
+      "title": "Major US CPI, PPI, and Employment Data Releases in Early 2027 (Guiding Rate Cut Expectations)",
+      "when": "Monthly Jan\u2013Mar 2027",
+      "expected_date": "2027-03-31",
+      "tag": "Macro",
+      "url": "https://www.bls.gov/schedule"
+    },
+    {
+      "title": "Next US FOMC Meetings After December (Policy Path, Potential First Cut Timing)",
+      "when": "Early 2027 meetings (Jan/Feb & March 2027)",
+      "expected_date": "2027-03-19",
+      "tag": "Macro",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    {
+      "title": "Upcoming US High-Level Trade & Tech Talks with China and EU (Tariffs, Export Controls)",
+      "when": "Over next 6\u20139 months tied to G7 / G20 / ministerial meetings",
+      "expected_date": "2027-06-30",
+      "tag": "Geopolitical",
       "url": null
     },
     {
-      "title": "Next Bitcoin Block Reward Halving Progress & ETF Inflows Milestones",
-      "when": "over the next 12 months",
-      "expected_date": "2027-11-24",
+      "title": "Bitcoin & Ethereum Spot ETF Flows and Potential New Crypto Product Approvals",
+      "when": "Ongoing with notable SEC decision windows in early 2027",
+      "expected_date": "2027-03-31",
       "tag": "Crypto",
-      "url": null
+      "url": "https://www.sec.gov/news/pressreleases"
     }
   ],
   "memos": {
