@@ -53,6 +53,8 @@ const YEAR_LABEL_CLEARANCE = 3;   // months around the index's thumb in which a 
 const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is pressed
 const QUESTIONS_PER_PAGE = 24;
 const CARD_COLUMNS = {minWidth: 320, max: 3};
+const DATE_HUE = 'purple';        // Astryx colour names: month headings and card dates ...
+const TITLE_HUE = 'blue';         // ... and card titles
 const MAX_OUTCOMES = 4;           // shown per question; the rest sit behind "N more outcomes"
 const MIN_PROBABILITY = 0.01;
 const NEAR_CERTAIN = 0.98;
@@ -84,6 +86,7 @@ const shortMonth = number => utc({month: 'short', year: 'numeric'}).format(month
 const day = iso => utc({month: 'short', day: 'numeric', year: 'numeric'}).format(new Date(iso));
 const dayOfMonth = iso => utc({month: 'short', day: 'numeric'}).format(new Date(iso));
 const isDate = text => /^\d{4}-\d{2}-\d{2}$/.test(text);
+const byDate = (a, b) => (a.date ?? '9999').localeCompare(b.date ?? '9999'); // undated last
 const plural = (count, noun) => `${count.toLocaleString('en-US')} ${noun}${count === 1 ? '' : 's'}`;
 
 // ── Questions ──
@@ -143,17 +146,22 @@ function Outcome({bet}) {
 }
 
 // The date line of a card; the year is left out under a month heading, which already says it
-function When({iso, hasYear, hue, icon}) {
-  return h(Text, {type: 'supporting', weight: 'semibold', style: textColor(hue)},
-    fa(icon, hue), ' ', !iso ? 'No date' : !isDate(iso) ? iso : hasYear ? day(iso) : dayOfMonth(iso));
+function When({when, hasYear, icon}) {
+  return h(Text, {type: 'supporting', weight: 'semibold', style: textColor(DATE_HUE)},
+    fa(icon, DATE_HUE), ' ', !when ? 'No date' : !isDate(when) ? when : hasYear ? day(when) : dayOfMonth(when));
 }
 
-// A catalyst looks like a question, in its own colour; a vague `when` ("late January 2027") is shown as written
+function Title({title, url}) {
+  const look = {weight: 'semibold', style: textColor(TITLE_HUE)};
+  return url ? h(Link, {href: url, target: '_blank', ...look}, title) : h(Text, look, title);
+}
+
+// A catalyst is a question's card without the outcomes, told apart by its icon; a vague `when`
+// ("late January 2027") is shown as written
 function Catalyst({catalyst, hasYear}) {
-  const title = {weight: 'semibold', style: textColor('purple')};
-  return h(Card, {variant: 'purple'}, h(VStack, {gap: 3},
-    h(When, {iso: isDate(catalyst.when) ? catalyst.expected_date : catalyst.when, hasYear, hue: 'purple', icon: 'bolt'}),
-    catalyst.url ? h(Link, {href: catalyst.url, target: '_blank', ...title}, catalyst.title) : h(Text, title, catalyst.title),
+  return h(Card, null, h(VStack, {gap: 3},
+    h(When, {when: isDate(catalyst.when) ? catalyst.date : catalyst.when, hasYear, icon: 'bolt'}),
+    h(Title, catalyst),
   ));
 }
 
@@ -161,8 +169,8 @@ function Question({question, hasYear}) {
   const bets = question.outcomes;
   const rest = bets.slice(MAX_OUTCOMES);
   return h(Card, null, h(VStack, {gap: 3},
-    h(When, {iso: question.resolution_date, hasYear, hue: 'orange', icon: 'calendar-day'}),
-    h(Link, {href: question.url, target: '_blank', weight: 'semibold', style: textColor('blue')}, question.title),
+    h(When, {when: question.date, hasYear, icon: 'calendar-day'}),
+    h(Title, question),
     bets.length === 0 && h(Text, {type: 'supporting'}, 'No outcome is priced above 1%'),
     ...bets.slice(0, MAX_OUTCOMES).map(bet => h(Outcome, {key: bet.prompt, bet})),
     rest.length > 0 && h(Collapsible, {trigger: h(Text, {type: 'supporting'}, plural(rest.length, 'more outcome')), defaultIsOpen: false},
@@ -176,15 +184,14 @@ function Month({group}) {
   const {catalysts, questions} = group;
   const hasYear = group.bucket === LATER;
   const hidden = questions.length - shown;
+  // Every catalyst and the first questions, in date order. Both lists are already in date order and the sort is
+  // stable, so on the same day catalysts come first and questions stay most traded first.
+  const cards = [...catalysts, ...questions.slice(0, shown)].sort(byDate);
   return h(VStack, {gap: 4, as: 'section', id: `month-${group.bucket}`},
-    h(Heading, {level: 2, style: textColor('orange')}, fa('calendar-days', 'orange'), ' ', group.label),
-    // Catalysts get their own rows, so a short catalyst is not stretched to the height of a question beside it
-    catalysts.length > 0 && h(Grid, {columns: CARD_COLUMNS, gap: 4},
-      catalysts.map(catalyst => h(Catalyst, {key: catalyst.index, catalyst, hasYear})),
-    ),
-    questions.length > 0 && h(Grid, {columns: CARD_COLUMNS, gap: 4},
-      questions.slice(0, shown).map(question => h(Question, {key: question.id, question, hasYear})),
-    ),
+    h(Heading, {level: 2, style: textColor(DATE_HUE)}, fa('calendar-days', DATE_HUE), ' ', group.label),
+    h(Grid, {columns: CARD_COLUMNS, gap: 4}, cards.map(card => card.isCatalyst
+      ? h(Catalyst, {key: `catalyst-${card.index}`, catalyst: card, hasYear})
+      : h(Question, {key: card.id, question: card, hasYear}))),
     hidden > 0 && h(HStack, {justify: 'center'}, h(Button, {
       label: `Show ${Math.min(hidden, QUESTIONS_PER_PAGE)} more of ${hidden.toLocaleString('en-US')}`,
       variant: 'ghost',
@@ -223,12 +230,13 @@ function App() {
       questions: (report.relevant_predictions ?? []).filter(p => !isPastDue(p)).map(p => ({
         ...p,
         bucket: bucket(p.resolution_date),
+        date: p.resolution_date,
         outcomes: outcomes(p),
         text: [p.title, ...(p.bets ?? []).map(b => b.prompt)].join(' ').toLowerCase(),
-      })).sort((a, b) => (a.resolution_date ?? '').localeCompare(b.resolution_date ?? '') || b.volume_24h - a.volume_24h), // most traded first within a day
+      })).sort((a, b) => byDate(a, b) || b.volume_24h - a.volume_24h), // most traded first within a day
       catalysts: (report.upcoming_catalysts ?? []).map((c, index) => ({
-        ...c, index, bucket: bucket(c.expected_date), text: `${c.title} ${c.when}`.toLowerCase(),
-      })).sort((a, b) => (a.expected_date ?? '').localeCompare(b.expected_date ?? '')),
+        ...c, index, isCatalyst: true, date: c.expected_date, bucket: bucket(c.expected_date), text: `${c.title} ${c.when}`.toLowerCase(),
+      })).sort(byDate),
     };
   }, [report]);
 
