@@ -52,7 +52,8 @@ TAGS = {
     "Geopolitical": ("A conflict or an agreement between countries.", "a war, a military operation, a ceasefire, sanctions, tariffs, a trade agreement."),
     "International": ("The politics of one country that is not the United States.", "a national election in a large foreign economy, a new leader of a foreign country, a foreign law."),
     "Govt": ("The government of the United States.", "the president, the administration, Congress, the Supreme Court, a federal agency, a national election, a government shutdown."),
-    "Other": ("A subject that has no other tag.", "a natural disaster, a pandemic, a milestone of a technology."),
+    "Calamities": ("A disaster that is not a war.", "an earthquake, a hurricane, a tornado, a flood, a wildfire, a pandemic."),
+    "Other": ("A subject that has no other tag.", "a milestone of a technology, a discovery in science."),
 }
 
 EVENTS_MODEL = "openai:gpt-5.1-2025-11-13"

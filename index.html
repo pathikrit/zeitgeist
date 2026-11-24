@@ -40,8 +40,8 @@ import {createElement as h, useEffect, useMemo, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
   Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
-  LayoutHeader, LayoutPanel, Link, MultiSelector, ProgressBar, Slider, Spinner, Text,
-  TextInput, VStack, registerIcons, useMediaQuery,
+  LayoutHeader, LayoutPanel, Link, ProgressBar, Slider, Spinner, Text,
+  TextInput, ToggleButton, ToggleButtonGroup, VStack, registerIcons, useMediaQuery,
 } from '@astryxdesign/core';
 
 const HORIZON_MONTHS = 60;        // the timeline index runs from this month to this many months ahead ...
@@ -62,6 +62,7 @@ const TAGS = {
   Geopolitical: {hue: 'red', icon: 'earth-americas'},
   International: {hue: 'teal', icon: 'flag'},
   Govt: {hue: 'pink', icon: 'landmark-dome'},
+  Calamities: {hue: 'cyan', icon: 'tornado'},
   Other: {hue: 'neutral', icon: 'tag'},
 };
 const DATE_HUE = 'purple';        // Astryx colour names: month headings and card dates ...
@@ -328,11 +329,11 @@ function App() {
       h(HStack, {gap: 4, align: 'center', justify: 'between', wrap: 'wrap'},
         h(Heading, {level: 3, accessibilityLevel: 1}, fa('crystal-ball'), ' Zeitgeist'),
         h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
-          h(MultiSelector, {
-            label: 'Tags', isLabelHidden: true, placeholder: 'Tags', size: 'sm', width: 260, startIcon: fa('tags'),
-            options: Object.keys(TAGS), renderOption: option => h(Tag, {tag: option.value}), // the list doubles as the legend
-            value: tags, onChange: setTags, triggerDisplay: 'badges', hasClear: true, presentation: 'adaptive',
-          }),
+          h(ToggleButtonGroup, {label: 'Tags', type: 'multiple', value: tags, onChange: setTags, size: 'sm'},
+            Object.entries(TAGS).map(([tag, {hue, icon}]) => h(ToggleButton, {
+              key: tag, value: tag, label: tag, icon: fa(icon, hue === 'neutral' ? 'gray' : hue),
+            })),
+          ),
           h(TextInput, {
             type: 'search', label: 'Search', isLabelHidden: true, placeholder: 'Search',
             value: query, onChange: setQuery, startIcon: fa('magnifying-glass'), hasClear: true, size: 'sm', width: 260,
