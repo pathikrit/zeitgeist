@@ -40,7 +40,7 @@ import {createElement as h, useEffect, useMemo, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
   Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
-  LayoutHeader, LayoutPanel, Link, ProgressBar, Slider, Spinner, Text,
+  LayoutHeader, LayoutPanel, Link, Markdown, ProgressBar, Slider, Spinner, Text,
   ToggleButton, ToggleButtonGroup, VStack, registerIcons, useMediaQuery,
 } from '@astryxdesign/core';
 
@@ -48,6 +48,8 @@ const HORIZON_MONTHS = 60;        // the timeline index runs from this month to 
 const LATER = HORIZON_MONTHS + 1; // ... plus one last stop for whatever resolves after that, or has no date
 const JUMP_SETTLE_MS = 200;       // after the index scrolls the timeline, ignore scroll events for this long
 const INDEX_MIN_WIDTH = 720;      // page width in px from which the timeline index is shown
+const MEMO_MIN_WIDTH = 1100;      // page width in px from which the memo is a column beside the cards
+const MEMO_WIDTH = 460;           // px
 const INDEX_TRACK_WIDTH = 20;     // px; the index's labels hang off its track into the rest of the panel
 const YEAR_LABEL_CLEARANCE = 3;   // months around the index's thumb in which a year label would collide with its label
 const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is pressed
@@ -200,6 +202,22 @@ function Month({group}) {
   );
 }
 
+// The memo: the combined one, or the memos of the selected tags in alphabetical order
+function Memo({memos, tags}) {
+  if (!memos) return h(EmptyState, {isCompact: true, icon: fa('file-lines fa-xl'), title: 'No memo yet', description: 'A new one is written every few days.'});
+  const sections = tags.length ? [...tags].sort().map(tag => [tag, memos.tags[tag]]) : [[null, memos.summary]];
+  const openInNewTab = href => { window.open(href, '_blank', 'noopener'); return false; };
+  return h(VStack, {gap: 5},
+    h(Text, {type: 'supporting', weight: 'semibold', style: textColor(DATE_HUE)}, fa('file-lines', DATE_HUE), ' ', day(memos.date)),
+    sections.map(([tag, markdown]) => h(VStack, {key: tag ?? 'summary', gap: 3, as: 'section'},
+      tag && h(HStack, null, h(Tag, {tag})),
+      markdown
+        ? h(Markdown, {density: 'compact', contentWidth: '100%', onLinkClick: openInNewTab}, markdown)
+        : h(Text, {type: 'supporting'}, 'No memo.'),
+    )),
+  );
+}
+
 function App() {
   const [report, setReport] = useState(null);
   const [error, setError] = useState(null);
@@ -208,6 +226,7 @@ function App() {
   const jumpedAt = useRef(0);
   const [tags, setTags] = useState([]); // the tags to show; none means all of them
   const isWide = useMediaQuery(`(min-width: ${INDEX_MIN_WIDTH}px)`); // a phone has no room for the index beside the cards
+  const hasMemoColumn = useMediaQuery(`(min-width: ${MEMO_MIN_WIDTH}px)`); // on a narrower page the memo folds away above the cards
 
   useEffect(() => { loadJson('output.json').then(setReport, setError); }, []);
 
@@ -292,8 +311,10 @@ function App() {
     label: 'Reset', variant: 'ghost', size: 'sm', icon: fa('rotate-left'), isDisabled: tags.length === 0, onClick: () => setTags([]),
   });
 
+  const memo = h(Memo, {memos: report.memos, tags});
+
   return h(Layout, {
-    contentWidth: 1280,
+    contentWidth: 1680,
     header: h(LayoutHeader, {hasDivider: true},
       h(HStack, {gap: 4, align: 'center', justify: 'between', wrap: 'wrap'},
         h(Heading, {level: 3, accessibilityLevel: 1}, fa('crystal-ball'), ' Zeitgeist'),
@@ -314,15 +335,18 @@ function App() {
         valueDisplay: 'none', marks, containerStyle: {height: '100%'}, controlStyle: {height: '100%', flex: 'none', width: INDEX_TRACK_WIDTH},
       }),
     ),
-    content: h(LayoutContent, {label: 'Timeline', ref: timeline}, groups.length === 0
-      ? h(EmptyState, {
-          icon: fa('telescope fa-2xl'),
-          title: 'Nothing has these tags',
-          description: 'Select other tags, or reset to see everything.',
-          actions: reset,
-        })
-      : h(VStack, {gap: 8}, groups.map(group => h(Month, {key: group.bucket, group}))),
-    ),
+    content: h(LayoutContent, {label: 'Timeline', ref: timeline}, h(VStack, {gap: 8},
+      !hasMemoColumn && h(Collapsible, {trigger: 'Memo', defaultIsOpen: false}, memo),
+      groups.length === 0
+        ? h(EmptyState, {
+            icon: fa('telescope fa-2xl'),
+            title: 'Nothing has these tags',
+            description: 'Select other tags, or reset to see everything.',
+            actions: reset,
+          })
+        : groups.map(group => h(Month, {key: group.bucket, group})),
+    )),
+    end: hasMemoColumn && h(LayoutPanel, {width: MEMO_WIDTH, hasDivider: true, role: 'complementary', label: 'Memo'}, memo),
   });
 }
 
