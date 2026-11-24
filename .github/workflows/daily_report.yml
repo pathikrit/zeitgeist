@@ -2,6 +2,15 @@ name: Daily Report
 
 on:
   workflow_dispatch: # enables to manually trigger this job
+    inputs:
+      force_memos:
+        description: Write new memos now, even if the stored ones are recent
+        type: boolean
+        default: false
+      memo_model:
+        description: Model for the memos (empty = MEMO_MODEL in zeitgeist.py)
+        type: string
+        default: ''
   schedule:
     - cron: '0 11 * * *' # Daily at 6am ET (11am UTC during EST)
 
@@ -24,7 +33,7 @@ jobs:
         with:
           python-version-file: ".python-version"
 
-      # The database (cached relevance scores + daily snapshots) lives as an asset on the "data" release
+      # The database (cached relevance scores + daily snapshots + the latest memos) lives as an asset on the "data" release
       - name: Restore database
         shell: bash
         env:
@@ -44,6 +53,8 @@ jobs:
         run: uv run python zeitgeist.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          FORCE_MEMOS: ${{ inputs.force_memos }}
+          MEMO_MODEL: ${{ inputs.memo_model }}
 
       - name: Save database
         env:

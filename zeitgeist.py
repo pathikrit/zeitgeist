@@ -1,19 +1,25 @@
 import asyncio
+from contextlib import closing
 from datetime import date, datetime, timedelta
 import hashlib
 import json
+import operator
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal, NamedTuple, TypedDict
 import os
 import logging as log
 import shutil
 import sqlite3
+import sys
+import tempfile
 from zoneinfo import ZoneInfo
 
 import polars as pl
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 import httpx
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import Send
 
 from mako.lookup import TemplateLookup
 
@@ -42,23 +48,86 @@ MAX_BETS_PER_QUESTION = 20 # only the most likely outcomes are shown to the mode
 DECISIONS_USD_PER_1M_INPUT_TOKENS = 0.10 # uncached; output tokens are free
 NOT_RELEVANT = "Not relevant" # the answer for a prediction that gets no tag
 
-# The tags a relevant prediction or a catalyst can get, in order of priority: the subject of each, and examples.
-# They are part of the prompts (templates/tags.mako), in ASD-STE100 Simplified Technical English.
+class Tag(NamedTuple):
+    subject: str  # what the tag is about
+    examples: str # for the prompt that gives a market its tag
+    focus: str    # what the writer of this tag's memo must research
+
+# The tags a relevant prediction or a catalyst can get, in order of priority.
+# They are part of the prompts (templates/tags.mako and templates/memo_tag.mako), in ASD-STE100 Simplified Technical English.
 TAGS = {
-    "Crypto": ("Crypto assets and the crypto industry.", "the price of Bitcoin or Ethereum, a crypto ETF, a crypto law, a crypto exchange."),
-    "Macro": ("Economic indicators and the policy of central banks.", "PCE, CPI, employment data, GDP, inflation, interest rates, a decision of the Federal Reserve, a recession."),
-    "Commodities": ("The price or the supply of a commodity.", "gold, silver, crude oil, natural gas, gasoline, copper."),
-    "Market": ("A specific company, its stock, or a stock index.", "the price of Nvidia stock, the level of the S&P 500, an earnings report, a merger, an IPO."),
-    "Geopolitical": ("A conflict or an agreement between countries.", "a war, a military operation, a ceasefire, sanctions, tariffs, a trade agreement."),
-    "International": ("The politics of one country that is not the United States.", "a national election in a large foreign economy, a new leader of a foreign country, a foreign law."),
-    "Govt": ("The government of the United States.", "the president, the administration, Congress, the Supreme Court, a federal agency, a national election, a government shutdown."),
-    "Calamities": ("A disaster that is not a war.", "an earthquake, a hurricane, a tornado, a flood, a wildfire, a pandemic."),
-    "Other": ("A subject that has no other tag.", "a milestone of a technology, a discovery in science."),
+    "Crypto": Tag(
+        "Crypto assets and the crypto industry.",
+        "the price of Bitcoin or Ethereum, a crypto ETF, a crypto law, a crypto exchange.",
+        "Research what drives the questions: flows into spot ETFs, pending laws and enforcement in the United States, and events at large exchanges and issuers. "
+        "Include the listed companies that depend on crypto: exchanges, miners, and companies that hold Bitcoin.",
+    ),
+    "Macro": Tag(
+        "Economic indicators and the policy of central banks.",
+        "PCE, CPI, employment data, GDP, inflation, interest rates, a decision of the Federal Reserve, a recession.",
+        "Build the path that the questions imply for inflation, employment, growth and the policy rate, meeting by meeting. "
+        "Compare it with the latest official data and with what the Federal Reserve said last. "
+        "Include bond duration, the yield curve, the dollar and rate-sensitive sectors.",
+    ),
+    "Commodities": Tag(
+        "The price or the supply of a commodity.",
+        "gold, silver, crude oil, natural gas, gasoline, copper.",
+        "Research the supply and the demand behind each price question: decisions of OPEC+, inventories, weather, sanctions and shipping. "
+        "Include the effect on inflation, and on producers, refiners, miners and large consumers such as airlines.",
+    ),
+    "Market": Tag(
+        "A specific company, its stock, or a stock index.",
+        "the price of Nvidia stock, the level of the S&P 500, an earnings report, a merger, an IPO.",
+        "For each company or index, research the event behind the question: the earnings date and what is expected, "
+        "a deal and its path through regulators, an IPO, a change of management. Include competitors, suppliers and the sector.",
+    ),
+    "Geopolitical": Tag(
+        "A conflict or an agreement between countries.",
+        "a war, a military operation, a ceasefire, sanctions, tariffs, a trade agreement.",
+        "For each conflict or negotiation, research its present state, the parties, and the realistic paths to escalation and to settlement. "
+        "Include energy, shipping lanes, defense, exposure to sanctions and safe-haven assets.",
+    ),
+    "International": Tag(
+        "The politics of one country that is not the United States.",
+        "a national election in a large foreign economy, a new leader of a foreign country, a foreign law.",
+        "For each election or change of leader, research each candidate that has a real chance: the party, and the positions on trade, fiscal policy, industry and the currency. "
+        "Include the exchange rate with the dollar and United States companies that do business in that country.",
+    ),
+    "Govt": Tag(
+        "The government of the United States.",
+        "the president, the administration, Congress, the Supreme Court, a federal agency, a national election, a government shutdown.",
+        "For each question about a person, research who the candidates are and what they would do in the post. "
+        "For each question about a law, a ruling or a deadline, research where it stands and what it changes. "
+        "Include taxes, tariffs, the budget, regulation and the sectors that depend on them.",
+    ),
+    "Calamities": Tag(
+        "A disaster that is not a war.",
+        "an earthquake, a hurricane, a tornado, a flood, a wildfire, a pandemic.",
+        "Research the present state and the official forecasts of each event. "
+        "Include insurers and reinsurers, utilities, supply chains, commodity prices and the regions that are exposed.",
+    ),
+    "Other": Tag(
+        "A subject that has no other tag.",
+        "a milestone of a technology, a discovery in science.",
+        "Research what is behind each question and why it can matter to the investor. Include the assets or sectors that it touches.",
+    ),
 }
+
+# Memos: one for each tag and one that combines them, written by a reasoning model (see the graphs at the end)
+RESPONSES_API_URL = "https://api.openai.com/v1/responses"
+MEMO_MODEL = os.getenv("MEMO_MODEL") or "gpt-6.2-astra"
+MEMO_EFFORT = "high" # reasoning effort
+MEMO_INTERVAL_DAYS = 7 # write new memos when the stored ones are this old; 1 = with every daily report
+FORCE_MEMOS = os.getenv("FORCE_MEMOS", "").lower() == "true" # write new memos now, whatever their age
+MEMO_WORDS = {"tag": 300, "summary": 350} # the length limit in each prompt
+MEMO_CONCURRENCY = 3
+MEMO_TIMEOUT_SECONDS = 30 * 60 # research at high effort takes minutes
+MEMO_USD_PER_1M_TOKENS = {"input": 8.00, "output": 40.00} # gpt-6.2-astra; reasoning tokens count as output
+CODEX_BIN = os.getenv("CODEX_BIN") or "codex" # without an OPENAI_API_KEY the local Codex CLI writes the memos (development)
 
 EVENTS_MODEL = "openai:gpt-5.1-2025-11-13"
 
-# SQLite database kept between runs (see the workflow): cached relevance scores + daily snapshots
+# SQLite database kept between runs (see the workflow): cached relevance scores + daily snapshots + the latest memos
 DB_FILE = Path(".data/zeitgeist.db")
 DB_RETENTION_DAYS = 30 # forget markets not seen for this long
 
@@ -69,7 +138,6 @@ load_dotenv()
 log.getLogger().setLevel(log.INFO)
 templates = TemplateLookup(directories=["templates"])
 
-assert "OPENAI_API_KEY" in os.environ, "No OPENAI_API_KEY found; Either add to .env file or run `export OPENAI_API_KEY=???`"
 assert not(IS_PROD and QUICK_TEST), "QUICK_TEST must be False in GitHub Actions"
 
 ########################################################################################################
@@ -181,7 +249,7 @@ RELEVANCE_QUESTION = "Is this prediction market relevant to the investor? If it 
 # a tag well is otherwise called relevant because of the tag
 RELEVANCE_CHOICES = [
     {"value": NOT_RELEVANT, "description": "The result has no very clear effect on the investor."},
-    *({"value": tag, "description": f"The result has a very clear effect on the investor. Subject: {subject}"} for tag, (subject, _) in TAGS.items()),
+    *({"value": name, "description": f"The result has a very clear effect on the investor. Subject: {tag.subject}"} for name, tag in TAGS.items()),
 ]
 # A cached score is only reused while the model and prompt are unchanged (the date in the prompt is ignored)
 PROMPT_HASH = hashlib.sha256("\n".join([
@@ -200,6 +268,7 @@ def open_db() -> sqlite3.Connection:
             market_id TEXT, date TEXT, bets_json TEXT, volume REAL, volume_24h REAL,
             PRIMARY KEY (market_id, date)
         );
+        CREATE TABLE IF NOT EXISTS memos (date TEXT, tag TEXT, markdown TEXT, PRIMARY KEY (date, tag));
     """)
     # Columns that a database created before they existed does not have yet
     existing = {column[1] for column in db.execute("PRAGMA table_info(markets)")}
@@ -241,6 +310,27 @@ def save_snapshots(db: sqlite3.Connection, relevant: pl.DataFrame):
     )
     db.commit()
 
+SUMMARY = "" # the "tag" under which the combined memo is stored
+
+def save_memos(db: sqlite3.Connection, tag_memos: dict[str, str], summary: str | None):
+    """Replace the stored memos with the set written today."""
+    db.execute("DELETE FROM memos")
+    memos = tag_memos | ({SUMMARY: summary} if summary else {})
+    db.executemany("INSERT INTO memos (date, tag, markdown) VALUES (?, ?, ?)", [(today.isoformat(), tag, memo) for tag, memo in memos.items()])
+    db.commit()
+
+def latest_memos(db: sqlite3.Connection) -> dict | None:
+    """The stored memos as they go into output.json, or None if there are none yet."""
+    rows = db.execute("SELECT date, tag, markdown FROM memos").fetchall()
+    if not rows:
+        return None
+    memos = {tag: memo for _, tag, memo in rows}
+    return {"date": rows[0][0], "summary": memos.get(SUMMARY), "tags": {tag: memos[tag] for tag in TAGS if tag in memos}}
+
+def memos_are_due(db: sqlite3.Connection) -> bool:
+    newest = db.execute("SELECT max(date) FROM memos").fetchone()[0]
+    return FORCE_MEMOS or newest is None or newest <= (today - timedelta(days=MEMO_INTERVAL_DAYS)).isoformat()
+
 def prune_db(db: sqlite3.Connection):
     cutoff = (today - timedelta(days=DB_RETENTION_DAYS)).isoformat()
     db.execute("DELETE FROM snapshots WHERE market_id IN (SELECT id FROM markets WHERE last_seen < ?)", (cutoff,))
@@ -249,11 +339,14 @@ def prune_db(db: sqlite3.Connection):
     db.execute("VACUUM")
     log.info(f"Pruned {deleted} markets not seen since {cutoff}")
 
+def top_bets(prediction: dict) -> list[dict]:
+    """The outcomes of a prediction that a model gets to see: the most likely ones."""
+    return sorted(prediction["bets"] or [], key=lambda b: b["probability"], reverse=True)[:MAX_BETS_PER_QUESTION]
+
 def relevance_question(prediction: dict) -> dict:
     """One choice question for the Decisions API; its name is the prediction id so the answer maps back."""
-    bets = sorted(prediction["bets"] or [], key=lambda b: b["probability"], reverse=True)[:MAX_BETS_PER_QUESTION]
     # No odds in the text: the answer should describe the market, not today's prices, so it can be cached
-    outcomes = "; ".join(b["prompt"] for b in bets)
+    outcomes = "; ".join(b["prompt"] for b in top_bets(prediction))
     return {
         "type": "choice",
         "name": prediction["id"],
@@ -272,13 +365,12 @@ def read_answer(answer: dict) -> dict:
         "tag": max(TAGS, key=lambda tag: probability.get(tag, 0.0)),
     }
 
-async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> dict:
-    """POST one batch of questions about RELEVANCE_INPUT to the Decisions API and return its response."""
-    body = {"model": RELEVANCE_MODEL, "input": RELEVANCE_INPUT, "questions": questions}
+async def post_to_openai(client: httpx.AsyncClient, url: str, body: dict) -> dict:
+    """POST to an OpenAI API and return its JSON response; waits and tries again on rate limits and server errors."""
     error = None
     for _ in range(RETRIES):
         try:
-            resp = await client.post(DECISIONS_API_URL, json=body)
+            resp = await client.post(url, json=body)
         except httpx.TransportError as e:
             error = repr(e)
             continue
@@ -291,7 +383,11 @@ async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> dic
         if resp.is_error:
             break
         return resp.json()
-    raise RuntimeError(f"Decisions API request failed: {error}")
+    raise RuntimeError(f"Request to {url} failed: {error}")
+
+async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> dict:
+    """Ask the Decisions API one batch of questions about RELEVANCE_INPUT."""
+    return await post_to_openai(client, DECISIONS_API_URL, {"model": RELEVANCE_MODEL, "input": RELEVANCE_INPUT, "questions": questions})
 
 async def find_relevant_predictions(predictions: pl.DataFrame, db: sqlite3.Connection) -> pl.DataFrame:
     """Tag the predictions not already in the database with the Decisions API; keep those above RELEVANCE_THRESHOLD."""
@@ -347,31 +443,157 @@ class Event(BaseModel):
     tag: Literal[*TAGS] = Field(description="the one tag from <tags> that fits the event best")
     url: str | None = Field(description="web url linking to a page with details about the event - okay to skip if url is not available or too generic")
 
-events_agent = Agent(
-    model=EVENTS_MODEL,
-    output_type=list[Event],
-    system_prompt=templates.get_template("events_prompt.mako").render(today=today, tags=TAGS),
-    model_settings={"tools": [{"type": "web_search", "search_context_size": "high"}]},
-    retries=RETRIES,
-)
-
 async def get_events() -> pl.DataFrame:
+    events_agent = Agent(
+        model=EVENTS_MODEL,
+        output_type=list[Event],
+        system_prompt=templates.get_template("events_prompt.mako").render(today=today, tags=TAGS),
+        model_settings={"tools": [{"type": "web_search", "search_context_size": "high"}]},
+        retries=RETRIES,
+    )
     res = await events_agent.run()
     return pl.DataFrame(res.output)
 
-async def main():
-    predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
+############################################### Memos ####################################################
+
+def memo_input(tag: str, predictions: pl.DataFrame, catalysts: pl.DataFrame) -> dict:
+    """What the writer of one tag's memo reads: the questions and the catalysts with that tag, soonest first."""
+    questions = predictions.filter(pl.col("tag") == tag).sort("resolution_date", nulls_last=True).to_dicts()
+    events = catalysts.filter(pl.col("tag") == tag).sort("expected_date").to_dicts() if "tag" in catalysts.columns else []
+    return {
+        "questions": [
+            {"title": q["title"], "resolves": q["resolution_date"], "url": q["url"],
+             "outcomes": {b["prompt"]: round(b["probability"], 2) for b in top_bets(q)}}
+            for q in questions
+        ],
+        "catalysts": [{"title": e["title"], "when": e["when"], "url": e["url"]} for e in events],
+    }
+
+async def write_with_api(instructions: str, input: str, web_search: bool) -> str:
+    """One answer from MEMO_MODEL through the OpenAI Responses API."""
+    body = {
+        "model": MEMO_MODEL, "reasoning": {"effort": MEMO_EFFORT}, "instructions": instructions, "input": input,
+        "tools": [{"type": "web_search"}] if web_search else [],
+    }
+    async with httpx.AsyncClient(headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"}, timeout=MEMO_TIMEOUT_SECONDS) as client:
+        response = await post_to_openai(client, RESPONSES_API_URL, body)
+    assert response["status"] == "completed", f"Response is {response['status']}: {response.get('incomplete_details') or response.get('error')}"
+    usage = response["usage"]
+    cost = sum(usage[f"{kind}_tokens"] * usd / 1e6 for kind, usd in MEMO_USD_PER_1M_TOKENS.items())
+    log.info(f"{MEMO_MODEL} usage: {usage['input_tokens']:,} input + {usage['output_tokens']:,} output tokens ~ ${cost:.2f}")
+    # The output holds reasoning and web search steps too; the answer is the text of its message(s)
+    return "".join(part["text"] for item in response["output"] if item["type"] == "message" for part in item["content"] if part["type"] == "output_text")
+
+async def write_with_codex(instructions: str, input: str, web_search: bool) -> str:
+    """One answer from MEMO_MODEL through the local Codex CLI, for development on a machine that has no API key."""
+    rules = "Reply with the markdown only. Do not run commands. Do not read or write files." + ("" if web_search else " Do not search the web.")
+    with tempfile.TemporaryDirectory() as folder: # Codex works in an empty folder, not in this repository
+        answer = Path(folder) / "answer.md"
+        codex = await asyncio.create_subprocess_exec(
+            CODEX_BIN, "exec", "--model", MEMO_MODEL, "--config", f'model_reasoning_effort="{MEMO_EFFORT}"', "--sandbox", "read-only",
+            "--ephemeral", "--skip-git-repo-check", "--color", "never", "--cd", folder, "--output-last-message", str(answer), "-",
+            stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE,
+        )
+        _, errors = await asyncio.wait_for(codex.communicate(f"{instructions}\n<input>\n{input}\n</input>\n\n{rules}".encode()), MEMO_TIMEOUT_SECONDS)
+        assert codex.returncode == 0 and answer.exists(), f"codex exec failed: {errors.decode()[-500:]}"
+        return answer.read_text(encoding="utf-8")
+
+memo_writers = asyncio.Semaphore(MEMO_CONCURRENCY)
+
+async def write(instructions: str, input: dict, web_search: bool) -> str:
+    """Markdown from the memo model: through the OpenAI API when there is a key, else through the local Codex CLI."""
+    async with memo_writers:
+        write_with = write_with_api if os.getenv("OPENAI_API_KEY") else write_with_codex
+        return (await write_with(instructions, json.dumps(input, default=str), web_search)).strip()
+
+class MemoState(TypedDict, total=False):
+    predictions: pl.DataFrame # the relevant ones, each with a tag
+    catalysts: pl.DataFrame
+    tag_memos: Annotated[dict[str, str], operator.or_] # every write_tag_memo adds its own
+    summary: str
+
+def tags_to_write(state: MemoState) -> list[Send] | str:
+    """One write_tag_memo for each tag that has questions; straight to the end when no tag has any."""
+    inputs = {tag: memo_input(tag, state["predictions"], state["catalysts"]) for tag in TAGS}
+    return [Send("write_tag_memo", {"tag": tag, "input": input}) for tag, input in inputs.items() if input["questions"]] or END
+
+async def write_tag_memo(task: dict) -> dict:
+    name, tag = task["tag"], TAGS[task["tag"]]
+    log.info(f"Writing the {name} memo from {len(task['input']['questions'])} questions and {len(task['input']['catalysts'])} catalysts ...")
+    instructions = templates.get_template("memo_tag.mako").render(today=today, tag=name, subject=tag.subject, focus=tag.focus, words=MEMO_WORDS["tag"])
+    try:
+        return {"tag_memos": {name: await write(instructions, task["input"], web_search=True)}}
+    except Exception as e: # the other memos and the dashboard do not depend on this one
+        log.error(f"No {name} memo: {e!r}")
+        return {"tag_memos": {}}
+
+async def write_summary(state: MemoState) -> dict:
+    sections = {tag: state["tag_memos"][tag] for tag in TAGS if tag in state["tag_memos"]}
+    if not sections:
+        return {}
+    log.info(f"Writing the summary memo from {len(sections)} tag memos ...")
+    instructions = templates.get_template("memo_summary.mako").render(today=today, tags=list(sections), words=MEMO_WORDS["summary"])
+    try:
+        return {"summary": await write(instructions, sections, web_search=False)}
+    except Exception as e:
+        log.error(f"No summary memo: {e!r}")
+        return {}
+
+memos = StateGraph(MemoState)
+memos.add_node("write_tag_memo", write_tag_memo)
+memos.add_node("write_summary", write_summary)
+memos.add_conditional_edges(START, tags_to_write, ["write_tag_memo", END])
+memos.add_edge("write_tag_memo", "write_summary")
+memos.add_edge("write_summary", END)
+memo_graph = memos.compile()
+
+async def write_memos_for(report_file: Path, tags: list[str]):
+    """Development: write the memos for a saved report (an output.json) and put them into it; `tags` limits which ones."""
+    report = json.loads(report_file.read_text(encoding="utf-8"))
+    predictions = pl.DataFrame(report["relevant_predictions"]).filter(pl.col("tag").is_in(tags or list(TAGS)))
+    state = await memo_graph.ainvoke({"predictions": predictions, "catalysts": pl.DataFrame(report["upcoming_catalysts"])})
+    report["memos"] = {"date": today.isoformat(), "summary": state.get("summary"), "tags": state["tag_memos"]}
+    report_file.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    log.info(f"Wrote {len(state['tag_memos'])} tag memos and {'a' if state.get('summary') else 'no'} summary into {report_file}")
+
+############################################## Pipeline ##################################################
+
+class State(MemoState, total=False):
+    kalshi: pl.DataFrame
+    polymarket: pl.DataFrame
+    memos_due: bool
+
+async def fetch_kalshi(state: State) -> dict:
+    return {"kalshi": await fetch_from_kalshi()}
+
+async def fetch_polymarket(state: State) -> dict:
+    return {"polymarket": await fetch_from_polymarket()}
+
+async def find_catalysts(state: State) -> dict:
+    return {"catalysts": await get_events()}
+
+async def score_and_tag(state: State) -> dict:
+    predictions = pl.concat([state["kalshi"], state["polymarket"]])
     predictions = predictions.unique(subset="id", keep="first", maintain_order=True) # a market can come back on two pages
     log.info(f"Total = {len(predictions)} predictions")
     predictions = predictions.filter(pl.col("volume_24h") > 0)
     log.info(f"After volume filter = {len(predictions)} predictions")
+    with closing(open_db()) as db:
+        return {"predictions": await find_relevant_predictions(predictions, db)}
 
-    db = open_db()
-    relevant_predictions, events = await asyncio.gather(find_relevant_predictions(predictions, db), get_events())
+def check_memos(state: State) -> dict:
+    with closing(open_db()) as db:
+        due = memos_are_due(db)
+    log.info(f"New memos are {'due' if due else f'not due: the stored ones are less than {MEMO_INTERVAL_DAYS} days old'}")
+    return {"memos_due": due}
 
-    save_snapshots(db, relevant_predictions)
-    prune_db(db)
-    db.close()
+def publish(state: State) -> dict:
+    with closing(open_db()) as db:
+        save_snapshots(db, state["predictions"])
+        if state.get("tag_memos"):
+            save_memos(db, state["tag_memos"], state.get("summary"))
+        memos = latest_memos(db)
+        prune_db(db)
 
     output_dir = Path(".reports")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -384,15 +606,37 @@ async def main():
     log.info(f"Writing output to {output_json_file} ...")
     output_data = {
         "date": today.isoformat(),
-        "relevant_predictions": relevant_predictions.to_dicts(),
-        "upcoming_catalysts": events.to_dicts(),
+        "relevant_predictions": state["predictions"].to_dicts(),
+        "upcoming_catalysts": state["catalysts"].to_dicts(),
+        "memos": memos,
     }
     output_json_file.write_text(json.dumps(output_data, indent=2, default=str), encoding="utf-8") # default=str writes dates as YYYY-MM-DD
+    return {}
 
+# The whole report as one graph. See the diagram in the README: print(pipeline.get_graph(xray=1).draw_mermaid())
+steps = StateGraph(State)
+for step in (fetch_kalshi, fetch_polymarket, find_catalysts, score_and_tag, check_memos, publish):
+    steps.add_node(step.__name__, step)
+steps.add_node("write_memos", memo_graph)
+for first in ("fetch_kalshi", "fetch_polymarket", "find_catalysts"):
+    steps.add_edge(START, first)
+steps.add_edge(["fetch_kalshi", "fetch_polymarket"], "score_and_tag")
+steps.add_edge(["score_and_tag", "find_catalysts"], "check_memos")
+steps.add_conditional_edges("check_memos", lambda state: "write_memos" if state["memos_due"] else "publish", ["write_memos", "publish"])
+steps.add_edge("write_memos", "publish")
+steps.add_edge("publish", END)
+pipeline = steps.compile()
+
+async def main():
+    assert os.getenv("OPENAI_API_KEY"), "No OPENAI_API_KEY found; Either add to .env file or run `export OPENAI_API_KEY=???`"
+    await pipeline.ainvoke({})
     log.info("Done!")
     if IS_DEV:
         import webbrowser
-        webbrowser.open(index_file.absolute().as_uri())
+        webbrowser.open(Path(".reports/index.html").absolute().as_uri())
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    if sys.argv[1:2] == ["memos"]: # python zeitgeist.py memos .reports/output.json [Macro Crypto ...]
+        asyncio.run(write_memos_for(Path(sys.argv[2]), sys.argv[3:]))
+    else:
+        asyncio.run(main())

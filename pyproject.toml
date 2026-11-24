@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "dotenv>=0.9.9",
     "httpx>=0.28.1",
+    "langgraph>=1.2.24",
     "mako>=1.3.10",
     "polars>=1.31.0",
     "pydantic-ai>=0.4.3",

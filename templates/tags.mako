@@ -1,8 +1,8 @@
 <%page args="item"/>\
 <tags>
 These are the tags and their subjects:
-% for tag, (subject, examples) in tags.items():
-  - "${tag}": ${subject} Examples: ${examples}
+% for name, tag in tags.items():
+  - "${name}": ${tag.subject} Examples: ${tag.examples}
 % endfor
 
 Obey these rules when you select the tag:
