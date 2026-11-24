@@ -359,38 +359,6 @@ async def get_events() -> pl.DataFrame:
     res = await events_agent.run()
     return pl.DataFrame(res.output)
 
-def generate_embeddings(data: dict) -> dict:
-    """Generate semantic embeddings using fastembed all-MiniLM-L6-v2 (384-dim, L2-normalised).
-
-    Compatible with Xenova/all-MiniLM-L6-v2 served by transformers.js in the browser,
-    so dot-product of a pre-built embedding and a browser-side query embedding equals cosine similarity.
-    """
-    from fastembed import TextEmbedding
-
-    log.info("Loading fastembed model (all-MiniLM-L6-v2) ...")
-    model = TextEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
-
-    def embed(kind: str, texts: list[str]) -> list[list[float]]:
-        log.info(f"Embedding {len(texts)} {kind} ...")
-        return [[round(float(x), 5) for x in emb] for emb in model.embed(texts)]
-
-    result: dict = {}
-
-    # Predictions are keyed by id; catalysts are positional (same order as in output.json)
-    if preds := data.get("relevant_predictions"):
-        texts = [f"{p['title']} {' '.join(b['prompt'] for b in (p.get('bets') or []))}" for p in preds]
-        result["predictions"] = dict(zip((p["id"] for p in preds), embed("predictions", texts)))
-
-    if cats := data.get("upcoming_catalysts"):
-        result["catalysts"] = embed("catalysts", [f"{c['title']} {c.get('when', '')}" for c in cats])
-
-    log.info(
-        f"Embeddings ready: {len(result.get('predictions', {}))} predictions, "
-        f"{len(result.get('catalysts', []))} catalysts"
-    )
-    return result
-
-
 async def main():
     predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
     predictions = predictions.unique(subset="id", keep="first", maintain_order=True) # a market can come back on two pages
@@ -420,11 +388,6 @@ async def main():
         "upcoming_catalysts": events.to_dicts(),
     }
     output_json_file.write_text(json.dumps(output_data, indent=2, default=str), encoding="utf-8") # default=str writes dates as YYYY-MM-DD
-
-    embeddings = generate_embeddings(output_data)
-    embeddings_file = output_dir / "embeddings.json"
-    embeddings_file.write_text(json.dumps(embeddings), encoding="utf-8")
-    log.info(f"Wrote semantic index to {embeddings_file}")
 
     log.info("Done!")
     if IS_DEV:

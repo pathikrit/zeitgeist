@@ -24,12 +24,6 @@ jobs:
         with:
           python-version-file: ".python-version"
 
-      - name: Cache fastembed models
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/fastembed
-          key: fastembed-all-minilm-l6-v2-v1
-
       # The database (cached relevance scores + daily snapshots) lives as an asset on the "data" release
       - name: Restore database
         shell: bash

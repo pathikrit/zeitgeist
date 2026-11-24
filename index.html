@@ -41,7 +41,7 @@ import {createRoot} from 'react-dom/client';
 import {
   Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
   LayoutHeader, LayoutPanel, Link, ProgressBar, Slider, Spinner, Text,
-  TextInput, ToggleButton, ToggleButtonGroup, VStack, registerIcons, useMediaQuery,
+  ToggleButton, ToggleButtonGroup, VStack, registerIcons, useMediaQuery,
 } from '@astryxdesign/core';
 
 const HORIZON_MONTHS = 60;        // the timeline index runs from this month to this many months ahead ...
@@ -70,8 +70,6 @@ const TITLE_HUE = 'blue';         // ... and card titles
 const MAX_OUTCOMES = 4;           // shown per question; the rest sit behind "N more outcomes"
 const MIN_PROBABILITY = 0.01;
 const NEAR_CERTAIN = 0.98;
-const SEMANTIC_THRESHOLD = 0.20;  // cosine similarity between the search text and a question for a semantic match
-const SEMANTIC_DELAY_MS = 350;
 
 // ── Icons: Font Awesome duotone everywhere, including the ones Astryx draws inside its own components ──
 // `hue` is one of Astryx's colour names (blue, orange, purple, ...); without it the icon takes the text colour
@@ -110,26 +108,6 @@ function outcomes(question) {
   // A ladder ("above 3%", "above 3.25%", ...) has many near-certain rungs; only the least likely of them is informative
   const nearCertain = bets.filter(b => b.probability >= NEAR_CERTAIN).length;
   return nearCertain > 3 ? bets.slice(nearCertain - 1) : bets;
-}
-
-// ── Semantic search: the report ships an embedding per question and catalyst (all-MiniLM-L6-v2); the same model
-//    runs in the browser on the search text, so a dot product is the cosine similarity ──
-let embedder, embeddings;
-async function semanticMatches(query) {
-  embedder ??= import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2')
-    .then(({pipeline, env}) => {
-      env.allowLocalModels = false; // the model comes from the Hugging Face hub, not from this site
-      return pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-    });
-  embeddings ??= loadJson('embeddings.json');
-  const [embed, vectors] = await Promise.all([embedder, embeddings]);
-  const queryVector = (await embed(query, {pooling: 'mean', normalize: true})).data;
-  const isNear = vector => vector.reduce((sum, x, i) => sum + x * queryVector[i], 0) >= SEMANTIC_THRESHOLD;
-  return {
-    query,
-    questions: new Set(Object.entries(vectors.predictions ?? {}).filter(([, vector]) => isNear(vector)).map(([id]) => id)),
-    catalysts: new Set((vectors.catalysts ?? []).flatMap((vector, index) => isNear(vector) ? [index] : [])),
-  };
 }
 
 // The report is next to this page once published; from the repository root it is under .reports/
@@ -228,19 +206,10 @@ function App() {
   const [month, setMonth] = useState(0); // where the timeline index points, in months from now
   const timeline = useRef(null);
   const jumpedAt = useRef(0);
-  const [query, setQuery] = useState('');
   const [tags, setTags] = useState([]); // the tags to show; none means all of them
-  const [semantic, setSemantic] = useState(null);
   const isWide = useMediaQuery(`(min-width: ${INDEX_MIN_WIDTH}px)`); // a phone has no room for the index beside the cards
 
   useEffect(() => { loadJson('output.json').then(setReport, setError); }, []);
-
-  // Keyword matches show at once; semantic matches join them once the model has answered
-  useEffect(() => {
-    if (!query.trim()) return;
-    const timer = setTimeout(() => semanticMatches(query).then(setSemantic, e => console.warn('Semantic search unavailable:', e)), SEMANTIC_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [query]);
 
   const items = useMemo(() => {
     if (!report) return null;
@@ -254,31 +223,27 @@ function App() {
         bucket: bucket(p.resolution_date),
         date: p.resolution_date,
         outcomes: outcomes(p),
-        text: [p.title, ...(p.bets ?? []).map(b => b.prompt)].join(' ').toLowerCase(),
       })).sort((a, b) => byDate(a, b) || b.volume_24h - a.volume_24h), // most traded first within a day
       catalysts: (report.upcoming_catalysts ?? []).map((c, index) => ({
-        ...c, index, isCatalyst: true, date: c.expected_date, bucket: bucket(c.expected_date), text: `${c.title} ${c.when}`.toLowerCase(),
+        ...c, index, isCatalyst: true, date: c.expected_date, bucket: bucket(c.expected_date),
       })).sort(byDate),
     };
   }, [report]);
 
   const groups = useMemo(() => {
     if (!items) return [];
-    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-    const near = semantic?.query === query ? semantic : null;
-    const matches = (item, isNear) => (!tags.length || tags.includes(item.tag))
-      && (!terms.length || terms.every(term => item.text.includes(term)) || isNear);
     const byBucket = new Map();
-    const add = (kind, item) => {
-      if (!byBucket.has(item.bucket)) byBucket.set(item.bucket, {bucket: item.bucket, questions: [], catalysts: []});
-      byBucket.get(item.bucket)[kind].push(item);
-    };
-    for (const q of items.questions) if (matches(q, near?.questions.has(q.id))) add('questions', q);
-    for (const c of items.catalysts) if (matches(c, near?.catalysts.has(c.index))) add('catalysts', c);
+    for (const kind of ['questions', 'catalysts']) {
+      for (const item of items[kind]) {
+        if (tags.length && !tags.includes(item.tag)) continue;
+        if (!byBucket.has(item.bucket)) byBucket.set(item.bucket, {bucket: item.bucket, questions: [], catalysts: []});
+        byBucket.get(item.bucket)[kind].push(item);
+      }
+    }
     return [...byBucket.values()].sort((a, b) => a.bucket - b.bucket).map(group => ({
       ...group, label: group.bucket === LATER ? 'Later' : longMonth(items.thisMonth + group.bucket),
     }));
-  }, [items, query, tags, semantic]);
+  }, [items, tags]);
 
   // Scrolling the timeline moves the index to the month being read ...
   useEffect(() => {
@@ -290,7 +255,7 @@ function App() {
       const reading = groups.findLast(group => document.getElementById(`month-${group.bucket}`).getBoundingClientRect().top <= readingLine);
       setMonth((reading ?? groups[0])?.bucket ?? 0);
     };
-    onScroll(); // the content just changed (first load, a search), so the month being read may have too
+    onScroll(); // the content just changed (first load, other tags), so the month being read may have too
     scroller.addEventListener('scroll', onScroll, {passive: true});
     return () => scroller.removeEventListener('scroll', onScroll);
   }, [groups]);
@@ -323,6 +288,10 @@ function App() {
       .map(value => ({value: LATER - value, label: Math.abs(value - month) > YEAR_LABEL_CLEARANCE ? String((items.thisMonth + value) / 12) : undefined})),
   ];
 
+  const reset = h(Button, {
+    label: 'Reset', variant: 'ghost', size: 'sm', icon: fa('rotate-left'), isDisabled: tags.length === 0, onClick: () => setTags([]),
+  });
+
   return h(Layout, {
     contentWidth: 1280,
     header: h(LayoutHeader, {hasDivider: true},
@@ -334,10 +303,7 @@ function App() {
               key: tag, value: tag, label: tag, icon: fa(icon, hue === 'neutral' ? 'gray' : hue),
             })),
           ),
-          h(TextInput, {
-            type: 'search', label: 'Search', isLabelHidden: true, placeholder: 'Search',
-            value: query, onChange: setQuery, startIcon: fa('magnifying-glass'), hasClear: true, size: 'sm', width: 260,
-          }),
+          reset,
         ),
       ),
     ),
@@ -351,8 +317,9 @@ function App() {
     content: h(LayoutContent, {label: 'Timeline', ref: timeline}, groups.length === 0
       ? h(EmptyState, {
           icon: fa('telescope fa-2xl'),
-          title: 'No matches',
-          description: 'Try a broader search.',
+          title: 'Nothing has these tags',
+          description: 'Select other tags, or reset to see everything.',
+          actions: reset,
         })
       : h(VStack, {gap: 8}, groups.map(group => h(Month, {key: group.bucket, group}))),
     ),
