@@ -317,6 +317,8 @@ const PAGE_SIZE = 10;
 const COLLAPSE_THRESHOLD   = 3;
 const HIGH_CERTAINTY       = 0.98;
 const LOW_CERTAINTY        = 0.02;
+const CONSENSUS_CERTAINTY  = 0.95; // a single answer above this (all others below CONSENSUS_REST_MAX) is consensus
+const CONSENSUS_REST_MAX   = 0.50;
 const BAR_HIGH_THRESHOLD   = 0.65;
 const BAR_LOW_THRESHOLD    = 0.25;
 const MIN_BET_PROBABILITY  = 0.01;
@@ -475,7 +477,7 @@ function makeBets(p) {
 
 function makeConsensusBets(p) {
   const highBets = (p.bets || [])
-    .filter(b => b.probability >= HIGH_CERTAINTY)
+    .filter(b => b.probability > CONSENSUS_CERTAINTY)
     .sort((a, b) => a.probability - b.probability); // ascending: lowest p first
 
   if (highBets.length > COLLAPSE_THRESHOLD) {
@@ -485,7 +487,7 @@ function makeConsensusBets(p) {
     frag.appendChild(makeBet(shown, { fullWidth: true }));
     frag.appendChild(makeOtherToggle(
       `cons-other-${p.id}`,
-      `Others \u003E98% (${collapsed.length})`,
+      `Others \u003E95% (${collapsed.length})`,
       collapsed.map(b => makeBet(b, { fullWidth: true })),
     ));
     return frag;
@@ -977,9 +979,13 @@ $('pred-search').addEventListener('input', function () {
 // ── Data loading ──────────────────────────────────────────────────────────────
 function isConsensus(p) {
   const bets = (p.bets || []).filter(b => b.probability > 0);
-  return bets.length > 0
-    && bets.some(b => b.probability >= HIGH_CERTAINTY)
+  // Exactly one answer above 95% with every other answer below 50% ...
+  const single = bets.filter(b => b.probability > CONSENSUS_CERTAINTY).length === 1
+    && bets.every(b => b.probability > CONSENSUS_CERTAINTY || b.probability < CONSENSUS_REST_MAX);
+  // ... or every answer is either near-certain or near-impossible (e.g. several rungs of a ladder at 99%)
+  const settled = bets.some(b => b.probability >= HIGH_CERTAINTY)
     && bets.every(b => b.probability >= HIGH_CERTAINTY || b.probability < LOW_CERTAINTY);
+  return single || settled;
 }
 
 fetch('output.json')
