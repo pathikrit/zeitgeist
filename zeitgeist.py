@@ -8,6 +8,7 @@ import logging as log
 import re
 import shutil
 import sqlite3
+from zoneinfo import ZoneInfo
 
 import polars as pl
 from pydantic import BaseModel, Field
@@ -98,6 +99,13 @@ async def sleep_if_rate_limit(response: httpx.Response) -> bool:
     await asyncio.sleep(RATE_LIMIT_WAIT_SECONDS)
     return True
 
+def to_date(timestamp: str | None) -> date | None:
+    """Calendar date of an ISO timestamp in US Eastern time, which is what both platforms set deadlines in
+    (a "by December 31" market ends at 2027-01-01T04:59:00Z)."""
+    if not timestamp:
+        return None
+    return datetime.fromisoformat(timestamp).astimezone(ZoneInfo("America/New_York")).date()
+
 async def fetch_from_kalshi() -> pl.DataFrame:
     LIMIT = 100
     API_URL = "https://api.elections.kalshi.com/trade-api/v2"
@@ -113,6 +121,8 @@ async def fetch_from_kalshi() -> pl.DataFrame:
             "title": e["title"],
             "bets": bets,
             "url": f"https://kalshi.com/markets/{e['series_ticker']}",
+            # An event's markets can resolve on different dates; keep the last, when the whole question is settled
+            "resolution_date": to_date(max((m.get("expected_expiration_time") or "" for m in e["markets"]), default=None)),
             "volume": sum(float(m.get("volume_fp") or 0) for m in e["markets"]),
             "volume_24h": sum(float(m.get("volume_24h_fp") or 0) for m in e["markets"]),
         }
@@ -149,6 +159,7 @@ async def fetch_from_polymarket() -> pl.DataFrame:
             "title": p["question"],
             "bets": bets,
             "url": f"https://polymarket.com/event/{p['slug']}",
+            "resolution_date": to_date(p.get("endDate")),
             "volume": p.get("volumeNum") or 0,
             "volume_24h": p.get("volume24hr") or 0,
         }
@@ -223,13 +234,15 @@ def open_db() -> sqlite3.Connection:
     db.executescript("""
         CREATE TABLE IF NOT EXISTS markets (
             id TEXT PRIMARY KEY, source TEXT, title TEXT, url TEXT,
-            relevance REAL, prompt_hash TEXT, first_seen TEXT, last_seen TEXT
+            relevance REAL, prompt_hash TEXT, first_seen TEXT, last_seen TEXT, resolution_date DATE
         );
         CREATE TABLE IF NOT EXISTS snapshots (
             market_id TEXT, date TEXT, bets_json TEXT, volume REAL, volume_24h REAL,
             PRIMARY KEY (market_id, date)
         );
     """)
+    if "resolution_date" not in [column[1] for column in db.execute("PRAGMA table_info(markets)")]:
+        db.execute("ALTER TABLE markets ADD COLUMN resolution_date DATE") # database created before this column existed
     return db
 
 def cached_scores(db: sqlite3.Connection) -> dict[str, float]:
@@ -240,16 +253,18 @@ def save_scores(db: sqlite3.Connection, predictions: pl.DataFrame, scores: dict[
     """Upsert every scored market seen today, so tomorrow's run can skip it."""
     db.executemany(
         """
-        INSERT INTO markets (id, source, title, url, relevance, prompt_hash, first_seen, last_seen)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO markets (id, source, title, url, relevance, prompt_hash, first_seen, last_seen, resolution_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT (id) DO UPDATE SET
             title = excluded.title, url = excluded.url, relevance = excluded.relevance,
-            prompt_hash = excluded.prompt_hash, last_seen = excluded.last_seen
+            prompt_hash = excluded.prompt_hash, last_seen = excluded.last_seen,
+            resolution_date = excluded.resolution_date
         """,
         [
             (p["id"], "kalshi" if p["id"].startswith("k-") else "polymarket", p["title"], p["url"],
-             scores[p["id"]], PROMPT_HASH, today.isoformat(), today.isoformat())
-            for p in predictions.select("id", "title", "url").to_dicts() if p["id"] in scores
+             scores[p["id"]], PROMPT_HASH, today.isoformat(), today.isoformat(),
+             p["resolution_date"] and p["resolution_date"].isoformat())
+            for p in predictions.select("id", "title", "url", "resolution_date").to_dicts() if p["id"] in scores
         ],
     )
     db.commit()
@@ -509,7 +524,7 @@ async def main():
     log.info(f"Writing output to {output_json_file} ...")
     output_data = {
         "date": today.isoformat(),
-        "relevant_predictions": relevant_predictions.to_dicts(),
+        "relevant_predictions": relevant_predictions.with_columns(pl.col("resolution_date").cast(pl.String)).to_dicts(),
         "upcoming_catalysts": events.to_dicts(),
         "news_headlines": news.to_dicts() if news is not None else None,
         "fred_data": fred_data.to_dicts() if fred_data is not None else None,

@@ -9,7 +9,7 @@ Daily macro dashboard for an equities investor: prediction markets -> LLM releva
 
 ## Database
 `zeitgeist.db` (SQLite) is stored as an asset on the [`data` release](https://github.com/pathikrit/zeitgeist/releases/tag/data); the daily job downloads it, updates it and uploads it again.
-- `markets`: every traded market seen in the last 30 days with its relevance score
+- `markets`: every traded market seen in the last 30 days with its relevance score and resolution date
 - `snapshots`: daily odds and volume of the relevant markets
 
 ## Today's Dashboard
