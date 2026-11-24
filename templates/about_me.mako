@@ -1,22 +1,26 @@
-<about_me>
-I am an American equities investor and I am interested in topics
-that would impact the market in the relatively short term or could change how I invest
-Besides publicly listed equities, I can have exposure to broad indices (e.g. $SPY and $QQQ)
-sectors (e.g. defense: $XAR, healthcare: $XLV) and alternatives like
-gold, energy, commodities, crypto, bonds, TIPS, REITs, mortgage-backed securities etc
-through ETFs/vehicles like $IAU, $DBC, $BTC, $ZROZ, $TIPZ, $VNQ etc
-so pay particular attention to macroeconomic themes
-Some examples of things that are LIKELY to impact my investments:
-  - Short term macroeconomic indicators like GDP, unemployment, CPI, trade deficit etc.
-  - Public or private companies suing each other or M&A activities
-  - Foreign politics that would affect USD rates with major international currencies like JPY, CNY, EUR etc. Only major economies!
-  - EV/climate legislation and goals in short term (<5 years)
-  - US policies and outlook on debt, budget, tax laws, tariffs, healthcare, energy
-  - General major geopolitical events that can happen near future (<2 years)
-  - Specific major public companies mentioned like Tesla, Apple, Nvidia etc
-  - Major natural disasters, pandemics or crisis with high (>50%) probabilities
-FYI: today's date is ${today.strftime('%d-%b-%Y')}
-General instructions:
-  - Don't restrict yourself or fixate on only the tickers or themes mentioned above
-    since these are just examples I used to give you a general idea of how I can invest
-</about_me>
+<investor>
+The investor lives in the United States and buys public equities.
+The investor wants to know about events that can change the markets in the near term.
+The investor also wants to know about events that can change the investment strategy.
+
+The investor can have positions in these assets:
+  - Public equities, for example Tesla, Apple and Nvidia.
+  - Broad indices, for example $SPY and $QQQ.
+  - Sectors, for example defense ($XAR) and healthcare ($XLV).
+  - Gold ($IAU), energy and other commodities ($DBC), and crypto ($BTC).
+  - Bonds ($ZROZ), TIPS ($TIPZ), REITs ($VNQ) and mortgage-backed securities.
+Macroeconomic subjects are very important to the investor.
+
+These subjects usually have an effect on the investments of the investor:
+  - Macroeconomic indicators for the near term, for example GDP, unemployment, CPI and the trade deficit.
+  - Legal actions between companies, and mergers and acquisitions. The companies can be public or private.
+  - Politics in a large foreign economy that can change the exchange rate of USD with JPY, CNY, EUR or a different major currency.
+  - Laws and targets for electric vehicles and the climate in the next 5 years.
+  - The policy of the United States on debt, the budget, taxes, tariffs, healthcare and energy.
+  - Large geopolitical events that can occur in the next 2 years.
+  - Large public companies, for example Tesla, Apple and Nvidia.
+  - Large natural disasters, pandemics and crises that have a probability of more than 50%.
+The tickers and the subjects in these lists are only examples. Do not limit the analysis to these examples.
+
+The date today is ${today.strftime('%d-%b-%Y')}.
+</investor>
