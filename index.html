@@ -367,6 +367,7 @@ function App() {
   if (!items) return h(Center, {height: '100%'}, h(Spinner, {size: 'xl', label: 'Loading the report'}));
 
   const memo = h(Memo, {memos: report.memos, tag});
+  const tagsInUse = new Set([...items.questions, ...items.catalysts].map(item => item.tag)); // a tag that nothing has gets no chip
 
   return h(Layout, {
     contentWidth: 1680,
@@ -376,7 +377,7 @@ function App() {
         // One tag at a time; "All" is the default, and pressing the selected tag again goes back to it
         h(ToggleButtonGroup, {label: 'Tag', type: 'single', value: tag, onChange: value => setTag(value ?? ALL), size: 'sm'},
           h(ToggleButton, {value: ALL, label: ALL, icon: fa('layer-group')}),
-          Object.entries(TAGS).map(([name, {hue, icon}]) => h(ToggleButton, {
+          Object.entries(TAGS).filter(([name]) => tagsInUse.has(name)).map(([name, {hue, icon}]) => h(ToggleButton, {
             key: name, value: name, label: name, icon: fa(icon, hue === 'neutral' ? 'gray' : hue),
           })),
         ),
@@ -388,11 +389,7 @@ function App() {
     content: h(LayoutContent, {label: 'Timeline', ref: timeline}, h(VStack, {gap: 8},
       !hasMemoColumn && h(Collapsible, {trigger: 'Memo', defaultIsOpen: false}, memo),
       groups.length === 0
-        ? h(EmptyState, {
-            icon: fa('telescope fa-2xl'),
-            title: 'Nothing has this tag',
-            actions: h(Button, {label: `Show ${ALL.toLowerCase()}`, variant: 'secondary', size: 'sm', icon: fa('layer-group'), onClick: () => setTag(ALL)}),
-          })
+        ? h(EmptyState, {icon: fa('telescope fa-2xl'), title: 'Nothing to show'})
         : groups.map(group => h(Month, {key: group.bucket, group, maxColumns: hasMemoColumn ? 2 : 3})),
     )),
     end: hasMemoColumn && h(LayoutPanel, {
