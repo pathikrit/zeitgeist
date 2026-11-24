@@ -40,7 +40,7 @@ import {createElement as h, useEffect, useMemo, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
   Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
-  LayoutHeader, LayoutPanel, Link, ProgressBar, SegmentedControl, SegmentedControlItem, Slider, Spinner, Text,
+  LayoutHeader, LayoutPanel, Link, ProgressBar, Slider, Spinner, Text,
   TextInput, VStack, registerIcons,
 } from '@astryxdesign/core';
 
@@ -53,9 +53,6 @@ const QUESTIONS_PER_PAGE = 24;
 const MAX_OUTCOMES = 4;           // shown per question; the rest sit behind "N more outcomes"
 const MIN_PROBABILITY = 0.01;
 const NEAR_CERTAIN = 0.98;
-const NEAR_IMPOSSIBLE = 0.02;
-const CONSENSUS_CERTAINTY = 0.95; // a single answer above this (all others below CONSENSUS_REST_MAX) is consensus
-const CONSENSUS_REST_MAX = 0.50;
 const SEMANTIC_THRESHOLD = 0.20;  // cosine similarity between the search text and a question for a semantic match
 const SEMANTIC_DELAY_MS = 350;
 
@@ -87,17 +84,6 @@ const isDate = text => /^\d{4}-\d{2}-\d{2}$/.test(text);
 const plural = (count, noun) => `${count.toLocaleString('en-US')} ${noun}${count === 1 ? '' : 's'}`;
 
 // ── Questions ──
-function isConsensus(question) {
-  const bets = (question.bets ?? []).filter(b => b.probability > 0);
-  // Exactly one answer above 95% with every other answer below 50% ...
-  const single = bets.filter(b => b.probability > CONSENSUS_CERTAINTY).length === 1
-    && bets.every(b => b.probability > CONSENSUS_CERTAINTY || b.probability < CONSENSUS_REST_MAX);
-  // ... or every answer is either near-certain or near-impossible (e.g. several rungs of a ladder at 99%)
-  const settled = bets.some(b => b.probability >= NEAR_CERTAIN)
-    && bets.every(b => b.probability >= NEAR_CERTAIN || b.probability < NEAR_IMPOSSIBLE);
-  return single || settled;
-}
-
 // The outcomes worth showing, most likely first
 function outcomes(question) {
   let bets = (question.bets ?? []).filter(b => b.probability > MIN_PROBABILITY).sort((a, b) => b.probability - a.probability);
@@ -212,7 +198,6 @@ function App() {
   const [month, setMonth] = useState(0); // where the timeline index points, in months from now
   const timeline = useRef(null);
   const jumpedAt = useRef(0);
-  const [show, setShow] = useState('all');
   const [query, setQuery] = useState('');
   const [semantic, setSemantic] = useState(null);
 
@@ -236,7 +221,6 @@ function App() {
         ...p,
         bucket: bucket(p.resolution_date),
         outcomes: outcomes(p),
-        isConsensus: isConsensus(p),
         text: [p.title, ...(p.bets ?? []).map(b => b.prompt)].join(' ').toLowerCase(),
       })).sort((a, b) => (a.resolution_date ?? '').localeCompare(b.resolution_date ?? '') || b.volume_24h - a.volume_24h), // most traded first within a day
       catalysts: (report.upcoming_catalysts ?? []).map((c, index) => ({
@@ -255,14 +239,12 @@ function App() {
       if (!byBucket.has(item.bucket)) byBucket.set(item.bucket, {bucket: item.bucket, questions: [], catalysts: []});
       byBucket.get(item.bucket)[kind].push(item);
     };
-    for (const q of items.questions) {
-      if ((show === 'all' || (show === 'consensus') === q.isConsensus) && matches(q, near?.questions.has(q.id))) add('questions', q);
-    }
+    for (const q of items.questions) if (matches(q, near?.questions.has(q.id))) add('questions', q);
     for (const c of items.catalysts) if (matches(c, near?.catalysts.has(c.index))) add('catalysts', c);
     return [...byBucket.values()].sort((a, b) => a.bucket - b.bucket).map(group => ({
       ...group, label: group.bucket === LATER ? 'Later' : longMonth(items.thisMonth + group.bucket),
     }));
-  }, [items, show, query, semantic]);
+  }, [items, query, semantic]);
 
   // Scrolling the timeline moves the index to the month being read ...
   useEffect(() => {
@@ -311,17 +293,10 @@ function App() {
     header: h(LayoutHeader, {hasDivider: true},
       h(HStack, {gap: 4, align: 'center', justify: 'between', wrap: 'wrap'},
         h(Heading, {level: 3, accessibilityLevel: 1}, fa('crystal-ball'), ' Zeitgeist'),
-        h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
-          h(SegmentedControl, {label: 'Which questions to show', value: show, onChange: setShow, size: 'sm'},
-            h(SegmentedControlItem, {value: 'all', label: 'All'}),
-            h(SegmentedControlItem, {value: 'contested', label: 'Contested', icon: fa('scale-unbalanced')}),
-            h(SegmentedControlItem, {value: 'consensus', label: 'Consensus', icon: fa('circle-check')}),
-          ),
-          h(TextInput, {
-            type: 'search', label: 'Search', isLabelHidden: true, placeholder: 'Search questions and catalysts',
-            value: query, onChange: setQuery, startIcon: fa('magnifying-glass'), hasClear: true, size: 'sm', width: 300,
-          }),
-        ),
+        h(TextInput, {
+          type: 'search', label: 'Search', isLabelHidden: true, placeholder: 'Search questions and catalysts',
+          value: query, onChange: setQuery, startIcon: fa('magnifying-glass'), hasClear: true, size: 'sm', width: 300,
+        }),
       ),
     ),
     start: h(LayoutPanel, {width: 136, isScrollable: false, role: 'navigation', label: 'Timeline index'},
