@@ -274,8 +274,9 @@ function App() {
     const onScroll = () => {
       if (performance.now() - jumpedAt.current < JUMP_SETTLE_MS) return; // the index itself scrolled here
       const readingLine = scroller.getBoundingClientRect().top + scroller.clientHeight / 3;
-      const reading = groups.findLast(group => document.getElementById(`month-${group.bucket}`).getBoundingClientRect().top <= readingLine);
-      setMonth((reading ?? groups[0])?.bucket ?? 0);
+      // At the very top the first month is the one being read, however short it is
+      const reading = scroller.scrollTop > 0 && groups.findLast(group => document.getElementById(`month-${group.bucket}`).getBoundingClientRect().top <= readingLine);
+      setMonth((reading || groups[0])?.bucket ?? 0);
     };
     onScroll(); // the content just changed (first load, a different tag), so the month being read may have too
     scroller.addEventListener('scroll', onScroll, {passive: true});
