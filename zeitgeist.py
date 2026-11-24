@@ -29,17 +29,16 @@ QUICK_TEST = IS_DEV # If True, run quickly on first few predictions; useful for 
 RATE_LIMIT_WAIT_SECONDS = 10
 RETRIES = 3
 
-# Relevance filter and tags: OpenAI Decisions API, one choice question per prediction
+# Relevance filter and tags: OpenAI Decisions API, two questions per prediction (a predicate and a choice)
 # https://developers.openai.com/api/docs/guides/decisions
 DECISIONS_API_URL = "https://api.openai.com/v1/decisions"
 RELEVANCE_MODEL = "gpt-6-luna" # the only model the Decisions API supports
-DECISIONS_BATCH_SIZE = 400 # API maximum questions per request
+DECISIONS_MAX_QUESTIONS = 400 # API maximum questions per request
 DECISIONS_CONCURRENCY = 4
 DECISIONS_TIMEOUT_SECONDS = 120
 RELEVANCE_THRESHOLD = 0.5 # keep predictions at or above this probability of being relevant
-NOT_RELEVANT = "Not relevant" # the answer for a prediction that gets no tag
 
-# The tags a relevant prediction or a catalyst can get, in order of priority, each with its subject.
+# The tags a prediction or a catalyst can get, in order of priority, each with its subject.
 # The subjects are part of the prompts (templates/tags.mako), in ASD-STE100 Simplified Technical English.
 TAGS = {
     "Crypto": "Crypto assets and the crypto industry. Examples: the price of Bitcoin or Ethereum, a crypto ETF, a crypto law, a crypto exchange.",
@@ -171,13 +170,16 @@ async def fetch_from_polymarket() -> pl.DataFrame:
 
 def relevance_input(day: date) -> str:
     """What every question of a Decisions API request shares: the investor, the relevance rules and the tags."""
-    return templates.get_template("relevance_input.mako").render(today=day, tags=TAGS, not_relevant=NOT_RELEVANT)
+    return templates.get_template("relevance_input.mako").render(today=day, tags=TAGS)
 
 RELEVANCE_INPUT = relevance_input(today)
-RELEVANCE_QUESTION = "Select the answer for this prediction market."
-RELEVANCE_CHOICES = [{"value": answer} for answer in [*TAGS, NOT_RELEVANT]] # their meaning is in RELEVANCE_INPUT
+# The two questions asked about each prediction, by the key of the score they give
+QUESTIONS = {
+    "relevance": {"type": "predicate", "instructions": "Is it very clear that the result of this prediction market will change the investments of the investor?"},
+    "tag": {"type": "choice", "instructions": "Which tag does this prediction market get?", "choices": [{"value": tag} for tag in TAGS]},
+}
 # A cached score is only reused while the model and prompt are unchanged (the date in the prompt is ignored)
-PROMPT_HASH = hashlib.sha256("\n".join([RELEVANCE_MODEL, relevance_input(date(2000, 1, 1)), RELEVANCE_QUESTION]).encode()).hexdigest()[:16]
+PROMPT_HASH = hashlib.sha256("\n".join([RELEVANCE_MODEL, relevance_input(date(2000, 1, 1)), json.dumps(QUESTIONS)]).encode()).hexdigest()[:16]
 
 def open_db() -> sqlite3.Connection:
     DB_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -240,25 +242,25 @@ def prune_db(db: sqlite3.Connection):
     db.execute("VACUUM")
     log.info(f"Pruned {deleted} markets not seen since {cutoff}")
 
-def relevance_question(prediction: dict) -> dict:
-    """One choice question for the Decisions API; its name is the prediction id so the answer maps back."""
+def relevance_questions(prediction: dict) -> list[dict]:
+    """The questions about one prediction for the Decisions API; each name holds the prediction id so its answer maps back."""
     bets = sorted(prediction["bets"] or [], key=lambda b: b["probability"], reverse=True)[:MAX_BETS_PER_QUESTION]
-    # No odds in the text: the score should describe the market, not today's prices, so it can be cached
-    outcomes = "; ".join(b["prompt"] for b in bets)
-    return {
-        "type": "choice",
-        "name": prediction["id"],
-        "instructions": f"{RELEVANCE_QUESTION}\nTitle: {prediction['title']}\nOutcomes: {outcomes}",
-        "choices": RELEVANCE_CHOICES,
-    }
+    # No odds in the text: the answers should describe the market, not today's prices, so they can be cached
+    market = f"Title: {prediction['title']}\nOutcomes: {'; '.join(b['prompt'] for b in bets)}"
+    return [
+        {**question, "name": f"{prediction['id']}|{key}", "instructions": f"{question['instructions']}\n{market}"}
+        for key, question in QUESTIONS.items()
+    ]
 
-def read_answer(answer: dict) -> dict:
-    """A choice answer has a probability for each choice: relevance is the chance that any tag applies, and the tag is the likeliest one."""
-    probability = {p["value"]: p["probability"] for p in answer["probabilities"]}
-    return {
-        "relevance": sum(probability.get(tag, 0.0) for tag in TAGS),
-        "tag": max(TAGS, key=lambda tag: probability.get(tag, 0.0)),
-    }
+def read_answers(answers: list[dict]) -> dict[str, dict]:
+    """The relevance and the tag of each prediction, by prediction id, from the answers to relevance_questions()."""
+    scores = {}
+    for answer in answers:
+        id, key = answer["name"].rsplit("|", 1)
+        # A question the model declines to answer comes back as type "refusal": not relevant, or no tag
+        value = {"predicate": answer.get("probability"), "choice": answer.get("choice"), "refusal": None}[answer["type"]]
+        scores.setdefault(id, {})[key] = 0.0 if key == "relevance" and value is None else value
+    return {id: {"relevance": score["relevance"], "tag": score.get("tag")} for id, score in scores.items() if "relevance" in score}
 
 async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> dict:
     """POST one batch of questions about RELEVANCE_INPUT to the Decisions API and return its response."""
@@ -294,13 +296,12 @@ async def find_relevant_predictions(predictions: pl.DataFrame, db: sqlite3.Conne
         async with semaphore:
             log.info(f"Asking Decisions API about batch {i} ({len(batch)} predictions) ...")
             try:
-                decision = await ask_decisions(client, [relevance_question(p) for p in batch.to_dicts()])
+                decision = await ask_decisions(client, [q for p in batch.to_dicts() for q in relevance_questions(p)])
             except Exception as e:
                 log.error(f"Error in relevance batch {i}: {e}")
                 return {}
         input_tokens += (decision.get("usage") or {}).get("input_tokens", 0)
-        # A question the model declines to answer comes back as type "refusal"; it counts as not relevant
-        scores = {a["name"]: read_answer(a) if a["type"] == "choice" else {"relevance": 0.0, "tag": None} for a in decision["answers"]}
+        scores = read_answers(decision["answers"])
         if len(scores) < len(batch):
             log.warning(f"Batch {i}: {len(batch) - len(scores)} of {len(batch)} predictions got no answer")
         return scores
@@ -311,7 +312,7 @@ async def find_relevant_predictions(predictions: pl.DataFrame, db: sqlite3.Conne
     ) as client:
         results = await asyncio.gather(*[
             process_batch(i, batch, client)
-            for i, batch in enumerate(to_score.select("id", "title", "bets").iter_slices(DECISIONS_BATCH_SIZE))
+            for i, batch in enumerate(to_score.select("id", "title", "bets").iter_slices(DECISIONS_MAX_QUESTIONS // len(QUESTIONS)))
         ])
 
     new_scores = {id: score for batch_scores in results for id, score in batch_scores.items()}
@@ -382,6 +383,7 @@ def generate_embeddings(data: dict) -> dict:
 
 async def main():
     predictions = pl.concat(await asyncio.gather(fetch_from_kalshi(), fetch_from_polymarket()))
+    predictions = predictions.unique(subset="id", keep="first", maintain_order=True) # a market can come back on two pages
     log.info(f"Total = {len(predictions)} predictions")
     predictions = predictions.filter(pl.col("volume_24h") > 0)
     log.info(f"After volume filter = {len(predictions)} predictions")

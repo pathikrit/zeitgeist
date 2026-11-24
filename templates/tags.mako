@@ -1,6 +1,6 @@
 <%page args="item"/>\
 <tags>
-A relevant ${item} gets one tag. These are the tags and their subjects:
+Each ${item} gets one tag. These are the tags and their subjects:
 % for tag, subject in tags.items():
   - "${tag}": ${subject}
 % endfor

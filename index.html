@@ -39,8 +39,8 @@
 import {createElement as h, useEffect, useMemo, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
-  Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
-  LayoutHeader, LayoutPanel, Link, ProgressBar, Slider, Spinner, Text,
+  Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
+  LayoutHeader, LayoutPanel, Link, MultiSelector, ProgressBar, Slider, Spinner, Text,
   TextInput, VStack, registerIcons, useMediaQuery,
 } from '@astryxdesign/core';
 
@@ -53,6 +53,17 @@ const YEAR_LABEL_CLEARANCE = 3;   // months around the index's thumb in which a 
 const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is pressed
 const QUESTIONS_PER_PAGE = 24;
 const CARD_COLUMNS = {minWidth: 320, max: 3};
+// The tags the report gives to questions and catalysts (TAGS in zeitgeist.py), each with a Badge colour and an icon
+const TAGS = {
+  Crypto: {hue: 'orange', icon: 'bitcoin-sign'},
+  Macro: {hue: 'blue', icon: 'chart-line'},
+  Commodities: {hue: 'yellow', icon: 'coins'},
+  Market: {hue: 'green', icon: 'arrow-trend-up'},
+  Geopolitical: {hue: 'red', icon: 'earth-americas'},
+  International: {hue: 'teal', icon: 'flag'},
+  Govt: {hue: 'pink', icon: 'landmark-dome'},
+  Other: {hue: 'neutral', icon: 'tag'},
+};
 const DATE_HUE = 'purple';        // Astryx colour names: month headings and card dates ...
 const TITLE_HUE = 'blue';         // ... and card titles
 const MAX_OUTCOMES = 4;           // shown per question; the rest sit behind "N more outcomes"
@@ -151,6 +162,15 @@ function When({when, hasYear, icon}) {
     fa(icon, DATE_HUE), ' ', !when ? 'No date' : !isDate(when) ? when : hasYear ? day(when) : dayOfMonth(when));
 }
 
+function Tag({tag}) {
+  return TAGS[tag] ? h(Badge, {label: tag, variant: TAGS[tag].hue, icon: fa(TAGS[tag].icon)}) : null;
+}
+
+// The top line of a card: when, and which tag
+function CardHeader({item, when, hasYear, icon}) {
+  return h(HStack, {gap: 2, align: 'center', justify: 'between'}, h(When, {when, hasYear, icon}), h(Tag, {tag: item.tag}));
+}
+
 function Title({title, url}) {
   const look = {weight: 'semibold', style: textColor(TITLE_HUE)};
   return url ? h(Link, {href: url, target: '_blank', ...look}, title) : h(Text, look, title);
@@ -160,7 +180,7 @@ function Title({title, url}) {
 // ("late January 2027") is shown as written
 function Catalyst({catalyst, hasYear}) {
   return h(Card, null, h(VStack, {gap: 3},
-    h(When, {when: isDate(catalyst.when) ? catalyst.date : catalyst.when, hasYear, icon: 'bolt'}),
+    h(CardHeader, {item: catalyst, when: isDate(catalyst.when) ? catalyst.date : catalyst.when, hasYear, icon: 'bolt'}),
     h(Title, catalyst),
   ));
 }
@@ -169,7 +189,7 @@ function Question({question, hasYear}) {
   const bets = question.outcomes;
   const rest = bets.slice(MAX_OUTCOMES);
   return h(Card, null, h(VStack, {gap: 3},
-    h(When, {when: question.date, hasYear, icon: 'calendar-day'}),
+    h(CardHeader, {item: question, when: question.date, hasYear, icon: 'calendar-day'}),
     h(Title, question),
     bets.length === 0 && h(Text, {type: 'supporting'}, 'No outcome is priced above 1%'),
     ...bets.slice(0, MAX_OUTCOMES).map(bet => h(Outcome, {key: bet.prompt, bet})),
@@ -208,6 +228,7 @@ function App() {
   const timeline = useRef(null);
   const jumpedAt = useRef(0);
   const [query, setQuery] = useState('');
+  const [tags, setTags] = useState([]); // the tags to show; none means all of them
   const [semantic, setSemantic] = useState(null);
   const isWide = useMediaQuery(`(min-width: ${INDEX_MIN_WIDTH}px)`); // a phone has no room for the index beside the cards
 
@@ -244,7 +265,8 @@ function App() {
     if (!items) return [];
     const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
     const near = semantic?.query === query ? semantic : null;
-    const matches = (item, isNear) => !terms.length || terms.every(term => item.text.includes(term)) || isNear;
+    const matches = (item, isNear) => (!tags.length || tags.includes(item.tag))
+      && (!terms.length || terms.every(term => item.text.includes(term)) || isNear);
     const byBucket = new Map();
     const add = (kind, item) => {
       if (!byBucket.has(item.bucket)) byBucket.set(item.bucket, {bucket: item.bucket, questions: [], catalysts: []});
@@ -255,7 +277,7 @@ function App() {
     return [...byBucket.values()].sort((a, b) => a.bucket - b.bucket).map(group => ({
       ...group, label: group.bucket === LATER ? 'Later' : longMonth(items.thisMonth + group.bucket),
     }));
-  }, [items, query, semantic]);
+  }, [items, query, tags, semantic]);
 
   // Scrolling the timeline moves the index to the month being read ...
   useEffect(() => {
@@ -305,10 +327,17 @@ function App() {
     header: h(LayoutHeader, {hasDivider: true},
       h(HStack, {gap: 4, align: 'center', justify: 'between', wrap: 'wrap'},
         h(Heading, {level: 3, accessibilityLevel: 1}, fa('crystal-ball'), ' Zeitgeist'),
-        h(TextInput, {
-          type: 'search', label: 'Search', isLabelHidden: true, placeholder: 'Search',
-          value: query, onChange: setQuery, startIcon: fa('magnifying-glass'), hasClear: true, size: 'sm', width: 300,
-        }),
+        h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
+          h(MultiSelector, {
+            label: 'Tags', isLabelHidden: true, placeholder: 'Tags', size: 'sm', width: 260, startIcon: fa('tags'),
+            options: Object.keys(TAGS), renderOption: option => h(Tag, {tag: option.value}), // the list doubles as the legend
+            value: tags, onChange: setTags, triggerDisplay: 'badges', hasClear: true, presentation: 'adaptive',
+          }),
+          h(TextInput, {
+            type: 'search', label: 'Search', isLabelHidden: true, placeholder: 'Search',
+            value: query, onChange: setQuery, startIcon: fa('magnifying-glass'), hasClear: true, size: 'sm', width: 260,
+          }),
+        ),
       ),
     ),
     start: isWide && h(LayoutPanel, {width: 112, isScrollable: false, role: 'navigation', label: 'Timeline index'},
