@@ -56,18 +56,20 @@ const YEAR_LABEL_CLEARANCE = 3;   // months around the index's thumb in which a 
 const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is pressed
 const QUESTIONS_PER_PAGE = 24;
 const CARD_MIN_WIDTH = 320;       // px; a narrower page gets fewer columns of cards
-// The tags the report gives to questions and catalysts (TAGS in zeitgeist.py), each with a Badge colour and an icon
+// The tags the report gives to questions and catalysts (TAGS in zeitgeist.py), each with a Badge colour and an icon.
+// The tag bar shows them in this order: alphabetical, with Other last.
 const TAGS = {
-  Crypto: {hue: 'orange', icon: 'bitcoin-sign'},
-  Macro: {hue: 'blue', icon: 'chart-line'},
-  Commodities: {hue: 'yellow', icon: 'coins'},
-  Market: {hue: 'green', icon: 'arrow-trend-up'},
-  Geopolitical: {hue: 'red', icon: 'earth-americas'},
-  International: {hue: 'teal', icon: 'flag'},
-  Govt: {hue: 'pink', icon: 'landmark-dome'},
   Calamities: {hue: 'cyan', icon: 'tornado'},
+  Commodities: {hue: 'yellow', icon: 'coins'},
+  Crypto: {hue: 'orange', icon: 'bitcoin-sign'},
+  Geopolitical: {hue: 'red', icon: 'earth-americas'},
+  Govt: {hue: 'pink', icon: 'landmark-dome'},
+  International: {hue: 'teal', icon: 'flag'},
+  Macro: {hue: 'blue', icon: 'chart-line'},
+  Market: {hue: 'green', icon: 'arrow-trend-up'},
   Other: {hue: 'neutral', icon: 'tag'},
 };
+const ALL = 'All';                // the choice in the tag bar that shows every tag
 const DATE_HUE = 'purple';        // Astryx colour names: month headings and card dates ...
 const TITLE_HUE = 'blue';         // ... and card titles
 const MAX_OUTCOMES = 4;           // shown per question; the rest sit behind "N more outcomes"
@@ -203,19 +205,19 @@ function Month({group, maxColumns}) {
   );
 }
 
-// The memo: the combined one, or the memos of the selected tags in alphabetical order
-function Memo({memos, tags}) {
+// The memo: the combined one, or the memo of the selected tag
+function Memo({memos, tag}) {
   if (!memos) return h(EmptyState, {isCompact: true, icon: fa('file-lines fa-xl'), title: 'No memo yet', description: 'A new one is written every few days.'});
-  const sections = tags.length ? [...tags].sort().map(tag => [tag, memos.tags[tag]]) : [[null, memos.summary]];
+  const markdown = tag === ALL ? memos.summary : memos.tags[tag];
   const openInNewTab = href => { window.open(href, '_blank', 'noopener'); return false; };
-  return h(VStack, {gap: 5},
-    h(Text, {type: 'supporting', weight: 'semibold', style: textColor(DATE_HUE)}, fa('file-lines', DATE_HUE), ' ', day(memos.date)),
-    sections.map(([tag, markdown]) => h(VStack, {key: tag ?? 'summary', gap: 3, as: 'section'},
-      tag && h(HStack, null, h(Tag, {tag})),
-      markdown
-        ? h(Markdown, {density: 'compact', contentWidth: '100%', onLinkClick: openInNewTab}, markdown)
-        : h(Text, {type: 'supporting'}, 'No memo.'),
-    )),
+  return h(VStack, {gap: 4},
+    h(HStack, {gap: 3, align: 'center'},
+      h(Text, {type: 'supporting', weight: 'semibold', style: textColor(DATE_HUE)}, fa('file-lines', DATE_HUE), ' ', day(memos.date)),
+      h(Tag, {tag}),
+    ),
+    markdown
+      ? h(Markdown, {density: 'compact', contentWidth: '100%', onLinkClick: openInNewTab}, markdown)
+      : h(Text, {type: 'supporting'}, 'No memo.'),
   );
 }
 
@@ -225,7 +227,7 @@ function App() {
   const [month, setMonth] = useState(0); // where the timeline index points, in months from now
   const timeline = useRef(null);
   const jumpedAt = useRef(0);
-  const [tags, setTags] = useState([]); // the tags to show; none means all of them
+  const [tag, setTag] = useState(ALL); // the one tag to show, or all of them
   const isWide = useMediaQuery(`(min-width: ${INDEX_MIN_WIDTH}px)`); // a phone has no room for the index beside the cards
   const hasMemoColumn = useMediaQuery(`(min-width: ${MEMO_MIN_WIDTH}px)`); // on a narrower page the memo folds away above the cards
 
@@ -255,7 +257,7 @@ function App() {
     const byBucket = new Map();
     for (const kind of ['questions', 'catalysts']) {
       for (const item of items[kind]) {
-        if (tags.length && !tags.includes(item.tag)) continue;
+        if (tag !== ALL && item.tag !== tag) continue;
         if (!byBucket.has(item.bucket)) byBucket.set(item.bucket, {bucket: item.bucket, questions: [], catalysts: []});
         byBucket.get(item.bucket)[kind].push(item);
       }
@@ -263,7 +265,7 @@ function App() {
     return [...byBucket.values()].sort((a, b) => a.bucket - b.bucket).map(group => ({
       ...group, label: group.bucket === LATER ? 'Later' : longMonth(items.thisMonth + group.bucket),
     }));
-  }, [items, tags]);
+  }, [items, tag]);
 
   // Scrolling the timeline moves the index to the month being read ...
   useEffect(() => {
@@ -275,7 +277,7 @@ function App() {
       const reading = groups.findLast(group => document.getElementById(`month-${group.bucket}`).getBoundingClientRect().top <= readingLine);
       setMonth((reading ?? groups[0])?.bucket ?? 0);
     };
-    onScroll(); // the content just changed (first load, other tags), so the month being read may have too
+    onScroll(); // the content just changed (first load, a different tag), so the month being read may have too
     scroller.addEventListener('scroll', onScroll, {passive: true});
     return () => scroller.removeEventListener('scroll', onScroll);
   }, [groups]);
@@ -308,24 +310,19 @@ function App() {
       .map(value => ({value: LATER - value, label: Math.abs(value - month) > YEAR_LABEL_CLEARANCE ? String((items.thisMonth + value) / 12) : undefined})),
   ];
 
-  const reset = h(Button, {
-    label: 'Reset', variant: 'ghost', size: 'sm', icon: fa('rotate-left'), isDisabled: tags.length === 0, onClick: () => setTags([]),
-  });
-
-  const memo = h(Memo, {memos: report.memos, tags});
+  const memo = h(Memo, {memos: report.memos, tag});
 
   return h(Layout, {
     contentWidth: 1680,
     header: h(LayoutHeader, {hasDivider: true},
       h(HStack, {gap: 4, align: 'center', justify: 'between', wrap: 'wrap'},
         h(Heading, {level: 3, accessibilityLevel: 1}, fa('crystal-ball'), ' Zeitgeist'),
-        h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
-          h(ToggleButtonGroup, {label: 'Tags', type: 'multiple', value: tags, onChange: setTags, size: 'sm'},
-            Object.entries(TAGS).map(([tag, {hue, icon}]) => h(ToggleButton, {
-              key: tag, value: tag, label: tag, icon: fa(icon, hue === 'neutral' ? 'gray' : hue),
-            })),
-          ),
-          reset,
+        // One tag at a time; "All" is the default, and pressing the selected tag again goes back to it
+        h(ToggleButtonGroup, {label: 'Tag', type: 'single', value: tag, onChange: value => setTag(value ?? ALL), size: 'sm'},
+          h(ToggleButton, {value: ALL, label: ALL, icon: fa('layer-group')}),
+          Object.entries(TAGS).map(([name, {hue, icon}]) => h(ToggleButton, {
+            key: name, value: name, label: name, icon: fa(icon, hue === 'neutral' ? 'gray' : hue),
+          })),
         ),
       ),
     ),
@@ -341,9 +338,8 @@ function App() {
       groups.length === 0
         ? h(EmptyState, {
             icon: fa('telescope fa-2xl'),
-            title: 'Nothing has these tags',
-            description: 'Select other tags, or reset to see everything.',
-            actions: reset,
+            title: 'Nothing has this tag',
+            actions: h(Button, {label: `Show ${ALL.toLowerCase()}`, variant: 'secondary', size: 'sm', icon: fa('layer-group'), onClick: () => setTag(ALL)}),
           })
         : groups.map(group => h(Month, {key: group.bucket, group, maxColumns: hasMemoColumn ? 2 : 3})),
     )),
