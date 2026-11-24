@@ -2,9 +2,8 @@
 Daily forward-looking dashboard for an equities investor: prediction markets -> LLM relevance filter -> timeline of what resolves when
 
 1. Fetch every open market from Kalshi and Polymarket
-2. Ask the OpenAI [Decisions API](https://developers.openai.com/api/docs/guides/decisions) two questions per market, in one request per 200 markets:
-   - Is it relevant to the investor described in `templates/about_me.mako`? Markets with a probability of at least 50% are kept
-   - Which tag fits it: Crypto, Macro, Commodities, Market, Geopolitical, International, Govt or Other?
+2. Ask the OpenAI [Decisions API](https://developers.openai.com/api/docs/guides/decisions) one question per market: is it relevant to the investor described in `templates/about_me.mako`, and if so which tag fits it (Crypto, Macro, Commodities, Market, Geopolitical, International, Govt or Other)?
+   - The answer has a probability for each choice. A market is kept when the tags together are at least as likely as "Not relevant", and gets its most likely tag
    - Answers are cached in a SQLite database, so each run only asks about markets it has not seen (or all of them again if the prompt changes)
    - The prompts in `templates/` are written in ASD-STE100 Simplified Technical English
 3. Add upcoming catalysts, each with an expected date and a tag
