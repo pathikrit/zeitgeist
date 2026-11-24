@@ -140,13 +140,12 @@ function Outcome({bet, isLeading}) {
   });
 }
 
-function Question({question, reportDate}) {
+function Question({question}) {
   const {resolution_date: resolves, outcomes: bets} = question;
   const rest = bets.slice(MAX_OUTCOMES);
   return h(Card, null, h(VStack, {gap: 3},
     h(HStack, {gap: 2, align: 'center', wrap: 'wrap'},
       h(Badge, {label: resolves ? day(resolves) : 'No end date', icon: fa('calendar-day')}),
-      resolves && resolves < reportDate && h(Badge, {label: 'Past due', variant: 'warning', icon: fa('hourglass-end')}),
       question.isConsensus && h(Badge, {label: 'Consensus', variant: 'success', icon: fa('circle-check')}),
     ),
     h(Link, {href: question.url, target: '_blank', weight: 'semibold'}, question.title),
@@ -159,7 +158,7 @@ function Question({question, reportDate}) {
   ));
 }
 
-function Month({group, reportDate}) {
+function Month({group}) {
   const [shown, setShown] = useState(QUESTIONS_PER_MONTH);
   const {catalysts, questions} = group;
   const hidden = questions.length - shown;
@@ -179,7 +178,7 @@ function Month({group, reportDate}) {
       }))),
     ),
     questions.length > 0 && h(Grid, {columns: {minWidth: 320, max: 3}, gap: 4},
-      questions.slice(0, shown).map(question => h(Question, {key: question.id, question, reportDate})),
+      questions.slice(0, shown).map(question => h(Question, {key: question.id, question})),
     ),
     hidden > 0 && h(HStack, {justify: 'center'}, h(Button, {
       label: `Show ${Math.min(hidden, QUESTIONS_PER_PAGE)} more of ${hidden.toLocaleString('en-US')}`,
@@ -212,10 +211,11 @@ function App() {
   const items = useMemo(() => {
     if (!report) return null;
     const thisMonth = monthNumber(report.date);
-    const bucket = iso => iso ? Math.min(Math.max(monthNumber(iso) - thisMonth, 0), LATER) : LATER; // past due counts as this month
+    const bucket = iso => iso ? Math.min(Math.max(monthNumber(iso) - thisMonth, 0), LATER) : LATER;
+    const isPastDue = p => p.resolution_date && p.resolution_date < report.date; // still open on the platform, but no longer ahead of us
     return {
       thisMonth,
-      questions: (report.relevant_predictions ?? []).map(p => ({
+      questions: (report.relevant_predictions ?? []).filter(p => !isPastDue(p)).map(p => ({
         ...p,
         bucket: bucket(p.resolution_date),
         source: p.id.startsWith('k-') ? 'Kalshi' : 'Polymarket',
@@ -321,7 +321,7 @@ function App() {
           title: 'No matches',
           description: 'Try a broader search.',
         })
-      : h(VStack, {gap: 8}, groups.map(group => h(Month, {key: group.bucket, group, reportDate: report.date}))),
+      : h(VStack, {gap: 8}, groups.map(group => h(Month, {key: group.bucket, group}))),
     ),
   });
 }
