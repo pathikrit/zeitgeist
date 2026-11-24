@@ -57,16 +57,16 @@ const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is presse
 const QUESTIONS_PER_PAGE = 24;
 const CARD_MIN_WIDTH = 320;       // px; a narrower page gets fewer columns of cards
 // The tags the report gives to questions and catalysts (TAGS in zeitgeist.py), each with a Badge colour and an icon.
-// The tag bar shows them in this order: alphabetical, with Other last.
+// The tag bar shows them in this order.
 const TAGS = {
-  Calamities: {hue: 'cyan', icon: 'tornado'},
-  Commodities: {hue: 'yellow', icon: 'coins'},
-  Crypto: {hue: 'orange', icon: 'bitcoin-sign'},
   Geopolitical: {hue: 'red', icon: 'earth-americas'},
   Govt: {hue: 'pink', icon: 'landmark-dome'},
-  International: {hue: 'teal', icon: 'flag'},
-  Macro: {hue: 'blue', icon: 'chart-line'},
   Market: {hue: 'green', icon: 'arrow-trend-up'},
+  Macro: {hue: 'blue', icon: 'chart-line'},
+  Commodities: {hue: 'yellow', icon: 'coins'},
+  Crypto: {hue: 'orange', icon: 'bitcoin-sign'},
+  International: {hue: 'teal', icon: 'flag'},
+  Calamities: {hue: 'cyan', icon: 'tornado'},
   Other: {hue: 'neutral', icon: 'tag'},
 };
 const ALL = 'All';                // the choice in the tag bar that shows every tag
