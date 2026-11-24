@@ -48,13 +48,14 @@ const HORIZON_MONTHS = 60;        // the timeline index runs from this month to 
 const LATER = HORIZON_MONTHS + 1; // ... plus one last stop for whatever resolves after that, or has no date
 const JUMP_SETTLE_MS = 200;       // after the index scrolls the timeline, ignore scroll events for this long
 const INDEX_MIN_WIDTH = 720;      // page width in px from which the timeline index is shown
-const MEMO_MIN_WIDTH = 1100;      // page width in px from which the memo is a column beside the cards
-const MEMO_WIDTH = 460;           // px
+const INDEX_WIDTH = 112;          // px, the timeline index panel
+const CARDS_WIDTH = 760;          // px, the cards beside the memo: room for two columns; the memo takes the rest
+const MEMO_MIN_WIDTH = 1300;      // page width in px from which the memo is a column beside the cards
 const INDEX_TRACK_WIDTH = 20;     // px; the index's labels hang off its track into the rest of the panel
 const YEAR_LABEL_CLEARANCE = 3;   // months around the index's thumb in which a year label would collide with its label
 const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is pressed
 const QUESTIONS_PER_PAGE = 24;
-const CARD_COLUMNS = {minWidth: 320, max: 3};
+const CARD_MIN_WIDTH = 320;       // px; a narrower page gets fewer columns of cards
 // The tags the report gives to questions and catalysts (TAGS in zeitgeist.py), each with a Badge colour and an icon
 const TAGS = {
   Crypto: {hue: 'orange', icon: 'bitcoin-sign'},
@@ -180,7 +181,7 @@ function Question({question, hasYear}) {
   ));
 }
 
-function Month({group}) {
+function Month({group, maxColumns}) {
   const [shown, setShown] = useState(QUESTIONS_PER_MONTH);
   const {catalysts, questions} = group;
   const hasYear = group.bucket === LATER;
@@ -190,7 +191,7 @@ function Month({group}) {
   const cards = [...catalysts, ...questions.slice(0, shown)].sort(byDate);
   return h(VStack, {gap: 4, as: 'section', id: `month-${group.bucket}`},
     h(Heading, {level: 2, style: textColor(DATE_HUE)}, fa('calendar-days', DATE_HUE), ' ', group.label),
-    h(Grid, {columns: CARD_COLUMNS, gap: 4}, cards.map(card => card.isCatalyst
+    h(Grid, {columns: {minWidth: CARD_MIN_WIDTH, max: maxColumns}, gap: 4}, cards.map(card => card.isCatalyst
       ? h(Catalyst, {key: `catalyst-${card.index}`, catalyst: card, hasYear})
       : h(Question, {key: card.id, question: card, hasYear}))),
     hidden > 0 && h(HStack, {justify: 'center'}, h(Button, {
@@ -328,7 +329,7 @@ function App() {
         ),
       ),
     ),
-    start: isWide && h(LayoutPanel, {width: 112, isScrollable: false, role: 'navigation', label: 'Timeline index'},
+    start: isWide && h(LayoutPanel, {width: INDEX_WIDTH, isScrollable: false, role: 'navigation', label: 'Timeline index'},
       h(Slider, {
         label: 'Jump to month', isLabelHidden: true, orientation: 'vertical', min: 0, max: LATER, step: 1,
         value: LATER - month, onChange: value => jumpTo(LATER - value), formatValue: value => monthLabel(LATER - value),
@@ -344,9 +345,11 @@ function App() {
             description: 'Select other tags, or reset to see everything.',
             actions: reset,
           })
-        : groups.map(group => h(Month, {key: group.bucket, group})),
+        : groups.map(group => h(Month, {key: group.bucket, group, maxColumns: hasMemoColumn ? 2 : 3})),
     )),
-    end: hasMemoColumn && h(LayoutPanel, {width: MEMO_WIDTH, hasDivider: true, role: 'complementary', label: 'Memo'}, memo),
+    end: hasMemoColumn && h(LayoutPanel, {
+      width: `calc(100% - ${INDEX_WIDTH + CARDS_WIDTH}px)`, hasDivider: true, role: 'complementary', label: 'Memo',
+    }, memo),
   });
 }
 
