@@ -84,7 +84,6 @@ const shortMonth = number => utc({month: 'short', year: 'numeric'}).format(month
 const day = iso => utc({month: 'short', day: 'numeric', year: 'numeric'}).format(new Date(iso));
 const dayOfMonth = iso => utc({month: 'short', day: 'numeric'}).format(new Date(iso));
 const isDate = text => /^\d{4}-\d{2}-\d{2}$/.test(text);
-const compact = new Intl.NumberFormat('en-US', {notation: 'compact', maximumFractionDigits: 1});
 const plural = (count, noun) => `${count.toLocaleString('en-US')} ${noun}${count === 1 ? '' : 's'}`;
 
 // ── Questions ──
@@ -171,7 +170,6 @@ function Question({question, hasYear}) {
     rest.length > 0 && h(Collapsible, {trigger: h(Text, {type: 'supporting'}, plural(rest.length, 'more outcome')), defaultIsOpen: false},
       h(VStack, {gap: 3, paddingBlockStart: 3}, rest.map(bet => h(Outcome, {key: bet.prompt, bet}))),
     ),
-    h(Text, {type: 'supporting'}, fa('chart-simple'), ` ${compact.format(question.volume_24h)} traded in 24h on ${question.source}`),
   ));
 }
 
@@ -235,7 +233,6 @@ function App() {
       questions: (report.relevant_predictions ?? []).filter(p => !isPastDue(p)).map(p => ({
         ...p,
         bucket: bucket(p.resolution_date),
-        source: p.id.startsWith('k-') ? 'Kalshi' : 'Polymarket',
         outcomes: outcomes(p),
         isConsensus: isConsensus(p),
         text: [p.title, ...(p.bets ?? []).map(b => b.prompt)].join(' ').toLowerCase(),
