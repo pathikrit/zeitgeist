@@ -29,29 +29,31 @@ QUICK_TEST = IS_DEV # If True, run quickly on first few predictions; useful for 
 RATE_LIMIT_WAIT_SECONDS = 10
 RETRIES = 3
 
-# Relevance filter and tags: OpenAI Decisions API, two questions per prediction (a predicate and a choice)
+# Relevance filter and tags: OpenAI Decisions API, one choice question per prediction
 # https://developers.openai.com/api/docs/guides/decisions
 DECISIONS_API_URL = "https://api.openai.com/v1/decisions"
 RELEVANCE_MODEL = "gpt-6-luna" # the only model the Decisions API supports
-DECISIONS_MAX_QUESTIONS = 400 # API maximum questions per request
+DECISIONS_BATCH_SIZE = 400 # API maximum questions per request
 DECISIONS_CONCURRENCY = 4
 DECISIONS_TIMEOUT_SECONDS = 120
 RELEVANCE_THRESHOLD = 0.5 # keep predictions at or above this probability of being relevant
 
-# The tags a prediction or a catalyst can get, in order of priority, each with its subject.
-# The subjects are part of the prompts (templates/tags.mako), in ASD-STE100 Simplified Technical English.
-TAGS = {
-    "Crypto": "Crypto assets and the crypto industry. Examples: the price of Bitcoin or Ethereum, a crypto ETF, a crypto law, a crypto exchange.",
-    "Macro": "Economic indicators and the policy of central banks. Examples: PCE, CPI, employment data, GDP, inflation, interest rates, a decision of the Federal Reserve, a recession.",
-    "Commodities": "The price or the supply of a commodity. Examples: gold, silver, crude oil, natural gas, gasoline, copper.",
-    "Market": "A specific company, its stock, or a stock index. Examples: the price of Nvidia stock, the level of the S&P 500, an earnings report, a merger, an IPO.",
-    "Geopolitical": "A conflict or an agreement between countries. Examples: a war, a military operation, a ceasefire, sanctions, tariffs, a trade agreement.",
-    "International": "The politics of one country that is not the United States. Examples: an election in a foreign country, a new leader of a foreign country, a foreign law.",
-    "Govt": "The government of the United States. Examples: the president, the administration, Congress, the Supreme Court, a federal agency, a United States election, a government shutdown.",
-    "Other": "A subject that has no other tag. Examples: a natural disaster, a pandemic, a milestone of a technology.",
-}
 MAX_BETS_PER_QUESTION = 20 # only the most likely outcomes are shown to the model
 DECISIONS_USD_PER_1M_INPUT_TOKENS = 0.10 # uncached; output tokens are free
+NOT_RELEVANT = "Not relevant" # the answer for a prediction that gets no tag
+
+# The tags a relevant prediction or a catalyst can get, in order of priority: the subject of each, and examples.
+# They are part of the prompts (templates/tags.mako), in ASD-STE100 Simplified Technical English.
+TAGS = {
+    "Crypto": ("Crypto assets and the crypto industry.", "the price of Bitcoin or Ethereum, a crypto ETF, a crypto law, a crypto exchange."),
+    "Macro": ("Economic indicators and the policy of central banks.", "PCE, CPI, employment data, GDP, inflation, interest rates, a decision of the Federal Reserve, a recession."),
+    "Commodities": ("The price or the supply of a commodity.", "gold, silver, crude oil, natural gas, gasoline, copper."),
+    "Market": ("A specific company, its stock, or a stock index.", "the price of Nvidia stock, the level of the S&P 500, an earnings report, a merger, an IPO."),
+    "Geopolitical": ("A conflict or an agreement between countries.", "a war, a military operation, a ceasefire, sanctions, tariffs, a trade agreement."),
+    "International": ("The politics of one country that is not the United States.", "a national election in a large foreign economy, a new leader of a foreign country, a foreign law."),
+    "Govt": ("The government of the United States.", "the president, the administration, Congress, the Supreme Court, a federal agency, a national election, a government shutdown."),
+    "Other": ("A subject that has no other tag.", "a natural disaster, a pandemic, a milestone of a technology."),
+}
 
 EVENTS_MODEL = "openai:gpt-5.1-2025-11-13"
 
@@ -170,16 +172,20 @@ async def fetch_from_polymarket() -> pl.DataFrame:
 
 def relevance_input(day: date) -> str:
     """What every question of a Decisions API request shares: the investor, the relevance rules and the tags."""
-    return templates.get_template("relevance_input.mako").render(today=day, tags=TAGS)
+    return templates.get_template("relevance_input.mako").render(today=day, tags=TAGS, not_relevant=NOT_RELEVANT)
 
 RELEVANCE_INPUT = relevance_input(today)
-# The two questions asked about each prediction, by the key of the score they give
-QUESTIONS = {
-    "relevance": {"type": "predicate", "instructions": "Does the result of this prediction market have a very clear effect on the investor?"},
-    "tag": {"type": "choice", "instructions": "Which tag does this prediction market get?", "choices": [{"value": tag} for tag in TAGS]},
-}
+RELEVANCE_QUESTION = "Is this prediction market relevant to the investor? If it is relevant, which tag does it get?"
+# "Not relevant" comes first, and each tag says again that it is only for a relevant market: a market that fits
+# a tag well is otherwise called relevant because of the tag
+RELEVANCE_CHOICES = [
+    {"value": NOT_RELEVANT, "description": "The result has no very clear effect on the investor."},
+    *({"value": tag, "description": f"The result has a very clear effect on the investor. Subject: {subject}"} for tag, (subject, _) in TAGS.items()),
+]
 # A cached score is only reused while the model and prompt are unchanged (the date in the prompt is ignored)
-PROMPT_HASH = hashlib.sha256("\n".join([RELEVANCE_MODEL, relevance_input(date(2000, 1, 1)), json.dumps(QUESTIONS)]).encode()).hexdigest()[:16]
+PROMPT_HASH = hashlib.sha256("\n".join([
+    RELEVANCE_MODEL, relevance_input(date(2000, 1, 1)), RELEVANCE_QUESTION, json.dumps(RELEVANCE_CHOICES),
+]).encode()).hexdigest()[:16]
 
 def open_db() -> sqlite3.Connection:
     DB_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -242,25 +248,28 @@ def prune_db(db: sqlite3.Connection):
     db.execute("VACUUM")
     log.info(f"Pruned {deleted} markets not seen since {cutoff}")
 
-def relevance_questions(prediction: dict) -> list[dict]:
-    """The questions about one prediction for the Decisions API; each name holds the prediction id so its answer maps back."""
+def relevance_question(prediction: dict) -> dict:
+    """One choice question for the Decisions API; its name is the prediction id so the answer maps back."""
     bets = sorted(prediction["bets"] or [], key=lambda b: b["probability"], reverse=True)[:MAX_BETS_PER_QUESTION]
-    # No odds in the text: the answers should describe the market, not today's prices, so they can be cached
-    market = f"Title: {prediction['title']}\nOutcomes: {'; '.join(b['prompt'] for b in bets)}"
-    return [
-        {**question, "name": f"{prediction['id']}|{key}", "instructions": f"{question['instructions']}\n{market}"}
-        for key, question in QUESTIONS.items()
-    ]
+    # No odds in the text: the answer should describe the market, not today's prices, so it can be cached
+    outcomes = "; ".join(b["prompt"] for b in bets)
+    return {
+        "type": "choice",
+        "name": prediction["id"],
+        "instructions": f"{RELEVANCE_QUESTION}\nTitle: {prediction['title']}\nOutcomes: {outcomes}",
+        "choices": RELEVANCE_CHOICES,
+    }
 
-def read_answers(answers: list[dict]) -> dict[str, dict]:
-    """The relevance and the tag of each prediction, by prediction id, from the answers to relevance_questions()."""
-    scores = {}
-    for answer in answers:
-        id, key = answer["name"].rsplit("|", 1)
-        # A question the model declines to answer comes back as type "refusal": not relevant, or no tag
-        value = {"predicate": answer.get("probability"), "choice": answer.get("choice"), "refusal": None}[answer["type"]]
-        scores.setdefault(id, {})[key] = 0.0 if key == "relevance" and value is None else value
-    return {id: {"relevance": score["relevance"], "tag": score.get("tag")} for id, score in scores.items() if "relevance" in score}
+def read_answer(answer: dict) -> dict:
+    """The relevance and the tag of a prediction, from the answer to its relevance_question()."""
+    if answer["type"] != "choice": # a question the model declines to answer comes back as type "refusal"
+        return {"relevance": 0.0, "tag": None}
+    # A choice answer has a probability for each choice: relevance is the chance that any tag applies, and the tag is the likeliest one
+    probability = {p["value"]: p["probability"] for p in answer["probabilities"]}
+    return {
+        "relevance": sum(probability.get(tag, 0.0) for tag in TAGS),
+        "tag": max(TAGS, key=lambda tag: probability.get(tag, 0.0)),
+    }
 
 async def ask_decisions(client: httpx.AsyncClient, questions: list[dict]) -> dict:
     """POST one batch of questions about RELEVANCE_INPUT to the Decisions API and return its response."""
@@ -296,12 +305,12 @@ async def find_relevant_predictions(predictions: pl.DataFrame, db: sqlite3.Conne
         async with semaphore:
             log.info(f"Asking Decisions API about batch {i} ({len(batch)} predictions) ...")
             try:
-                decision = await ask_decisions(client, [q for p in batch.to_dicts() for q in relevance_questions(p)])
+                decision = await ask_decisions(client, [relevance_question(p) for p in batch.to_dicts()])
             except Exception as e:
                 log.error(f"Error in relevance batch {i}: {e}")
                 return {}
         input_tokens += (decision.get("usage") or {}).get("input_tokens", 0)
-        scores = read_answers(decision["answers"])
+        scores = {answer["name"]: read_answer(answer) for answer in decision["answers"]}
         if len(scores) < len(batch):
             log.warning(f"Batch {i}: {len(batch) - len(scores)} of {len(batch)} predictions got no answer")
         return scores
@@ -312,7 +321,7 @@ async def find_relevant_predictions(predictions: pl.DataFrame, db: sqlite3.Conne
     ) as client:
         results = await asyncio.gather(*[
             process_batch(i, batch, client)
-            for i, batch in enumerate(to_score.select("id", "title", "bets").iter_slices(DECISIONS_MAX_QUESTIONS // len(QUESTIONS)))
+            for i, batch in enumerate(to_score.select("id", "title", "bets").iter_slices(DECISIONS_BATCH_SIZE))
         ])
 
     new_scores = {id: score for batch_scores in results for id, score in batch_scores.items()}

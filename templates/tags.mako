@@ -1,8 +1,8 @@
 <%page args="item"/>\
 <tags>
-Each ${item} gets one tag. These are the tags and their subjects:
-% for tag, subject in tags.items():
-  - "${tag}": ${subject}
+These are the tags and their subjects:
+% for tag, (subject, examples) in tags.items():
+  - "${tag}": ${subject} Examples: ${examples}
 % endfor
 
 Obey these rules when you select the tag:
