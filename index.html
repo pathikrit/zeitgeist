@@ -39,7 +39,7 @@
 import {createElement as h, useEffect, useMemo, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
-  Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
+  Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
   LayoutHeader, LayoutPanel, Link, ProgressBar, Slider, Spinner, Text,
   TextInput, VStack, registerIcons,
 } from '@astryxdesign/core';
@@ -174,11 +174,7 @@ function Month({group}) {
   const hasYear = group.bucket === LATER;
   const hidden = questions.length - shown;
   return h(VStack, {gap: 4, as: 'section', id: `month-${group.bucket}`},
-    h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
-      h(Heading, {level: 2, style: textColor('orange')}, fa('calendar-days', 'orange'), ' ', group.label),
-      questions.length > 0 && h(Badge, {label: plural(questions.length, 'question'), variant: 'blue', icon: fa('scale-balanced')}),
-      catalysts.length > 0 && h(Badge, {label: plural(catalysts.length, 'catalyst'), variant: 'purple', icon: fa('bolt')}),
-    ),
+    h(Heading, {level: 2, style: textColor('orange')}, fa('calendar-days', 'orange'), ' ', group.label),
     h(Grid, {columns: {minWidth: 320, max: 3}, gap: 4},
       catalysts.map(catalyst => h(Catalyst, {key: `catalyst-${catalyst.index}`, catalyst, hasYear})),
       questions.slice(0, shown).map(question => h(Question, {key: question.id, question, hasYear})),
