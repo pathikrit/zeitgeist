@@ -40,37 +40,41 @@ import {createElement as h, useEffect, useMemo, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
   Badge, Banner, Button, Card, Center, Collapsible, EmptyState, Grid, Heading, HStack, Layout, LayoutContent,
-  LayoutHeader, LayoutPanel, Link, MultiSelector, ProgressBar, Slider, Spinner, Text,
-  TextInput, VStack, registerIcons, useMediaQuery,
+  LayoutHeader, LayoutPanel, Link, Markdown, ProgressBar, Slider, Spinner, Text,
+  ToggleButton, ToggleButtonGroup, VStack, registerIcons, useMediaQuery,
 } from '@astryxdesign/core';
 
 const HORIZON_MONTHS = 60;        // the timeline index runs from this month to this many months ahead ...
 const LATER = HORIZON_MONTHS + 1; // ... plus one last stop for whatever resolves after that, or has no date
 const JUMP_SETTLE_MS = 200;       // after the index scrolls the timeline, ignore scroll events for this long
 const INDEX_MIN_WIDTH = 720;      // page width in px from which the timeline index is shown
+const INDEX_WIDTH = 112;          // px, the timeline index panel
+const CARDS_WIDTH = 760;          // px, the cards beside the memo: room for two columns; the memo takes the rest
+const MEMO_MIN_WIDTH = 1300;      // page width in px from which the memo is a column beside the cards
 const INDEX_TRACK_WIDTH = 20;     // px; the index's labels hang off its track into the rest of the panel
 const YEAR_LABEL_CLEARANCE = 3;   // months around the index's thumb in which a year label would collide with its label
 const QUESTIONS_PER_MONTH = 6;    // shown per month until "Show more" is pressed
 const QUESTIONS_PER_PAGE = 24;
-const CARD_COLUMNS = {minWidth: 320, max: 3};
-// The tags the report gives to questions and catalysts (TAGS in zeitgeist.py), each with a Badge colour and an icon
+const CARD_MIN_WIDTH = 320;       // px; a narrower page gets fewer columns of cards
+// The tags the report gives to questions and catalysts (TAGS in zeitgeist.py), each with a Badge colour and an icon.
+// The tag bar shows them in this order: alphabetical, with Other last.
 const TAGS = {
-  Crypto: {hue: 'orange', icon: 'bitcoin-sign'},
-  Macro: {hue: 'blue', icon: 'chart-line'},
+  Calamities: {hue: 'cyan', icon: 'tornado'},
   Commodities: {hue: 'yellow', icon: 'coins'},
-  Market: {hue: 'green', icon: 'arrow-trend-up'},
+  Crypto: {hue: 'orange', icon: 'bitcoin-sign'},
   Geopolitical: {hue: 'red', icon: 'earth-americas'},
-  International: {hue: 'teal', icon: 'flag'},
   Govt: {hue: 'pink', icon: 'landmark-dome'},
+  International: {hue: 'teal', icon: 'flag'},
+  Macro: {hue: 'blue', icon: 'chart-line'},
+  Market: {hue: 'green', icon: 'arrow-trend-up'},
   Other: {hue: 'neutral', icon: 'tag'},
 };
+const ALL = 'All';                // the choice in the tag bar that shows every tag
 const DATE_HUE = 'purple';        // Astryx colour names: month headings and card dates ...
 const TITLE_HUE = 'blue';         // ... and card titles
 const MAX_OUTCOMES = 4;           // shown per question; the rest sit behind "N more outcomes"
 const MIN_PROBABILITY = 0.01;
 const NEAR_CERTAIN = 0.98;
-const SEMANTIC_THRESHOLD = 0.20;  // cosine similarity between the search text and a question for a semantic match
-const SEMANTIC_DELAY_MS = 350;
 
 // ── Icons: Font Awesome duotone everywhere, including the ones Astryx draws inside its own components ──
 // `hue` is one of Astryx's colour names (blue, orange, purple, ...); without it the icon takes the text colour
@@ -109,26 +113,6 @@ function outcomes(question) {
   // A ladder ("above 3%", "above 3.25%", ...) has many near-certain rungs; only the least likely of them is informative
   const nearCertain = bets.filter(b => b.probability >= NEAR_CERTAIN).length;
   return nearCertain > 3 ? bets.slice(nearCertain - 1) : bets;
-}
-
-// ── Semantic search: the report ships an embedding per question and catalyst (all-MiniLM-L6-v2); the same model
-//    runs in the browser on the search text, so a dot product is the cosine similarity ──
-let embedder, embeddings;
-async function semanticMatches(query) {
-  embedder ??= import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2')
-    .then(({pipeline, env}) => {
-      env.allowLocalModels = false; // the model comes from the Hugging Face hub, not from this site
-      return pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-    });
-  embeddings ??= loadJson('embeddings.json');
-  const [embed, vectors] = await Promise.all([embedder, embeddings]);
-  const queryVector = (await embed(query, {pooling: 'mean', normalize: true})).data;
-  const isNear = vector => vector.reduce((sum, x, i) => sum + x * queryVector[i], 0) >= SEMANTIC_THRESHOLD;
-  return {
-    query,
-    questions: new Set(Object.entries(vectors.predictions ?? {}).filter(([, vector]) => isNear(vector)).map(([id]) => id)),
-    catalysts: new Set((vectors.catalysts ?? []).flatMap((vector, index) => isNear(vector) ? [index] : [])),
-  };
 }
 
 // The report is next to this page once published; from the repository root it is under .reports/
@@ -199,7 +183,7 @@ function Question({question, hasYear}) {
   ));
 }
 
-function Month({group}) {
+function Month({group, maxColumns}) {
   const [shown, setShown] = useState(QUESTIONS_PER_MONTH);
   const {catalysts, questions} = group;
   const hasYear = group.bucket === LATER;
@@ -209,7 +193,7 @@ function Month({group}) {
   const cards = [...catalysts, ...questions.slice(0, shown)].sort(byDate);
   return h(VStack, {gap: 4, as: 'section', id: `month-${group.bucket}`},
     h(Heading, {level: 2, style: textColor(DATE_HUE)}, fa('calendar-days', DATE_HUE), ' ', group.label),
-    h(Grid, {columns: CARD_COLUMNS, gap: 4}, cards.map(card => card.isCatalyst
+    h(Grid, {columns: {minWidth: CARD_MIN_WIDTH, max: maxColumns}, gap: 4}, cards.map(card => card.isCatalyst
       ? h(Catalyst, {key: `catalyst-${card.index}`, catalyst: card, hasYear})
       : h(Question, {key: card.id, question: card, hasYear}))),
     hidden > 0 && h(HStack, {justify: 'center'}, h(Button, {
@@ -221,25 +205,33 @@ function Month({group}) {
   );
 }
 
+// The memo: the combined one, or the memo of the selected tag
+function Memo({memos, tag}) {
+  if (!memos) return h(EmptyState, {isCompact: true, icon: fa('file-lines fa-xl'), title: 'No memo yet', description: 'A new one is written every few days.'});
+  const markdown = tag === ALL ? memos.summary : memos.tags[tag];
+  const openInNewTab = href => { window.open(href, '_blank', 'noopener'); return false; };
+  return h(VStack, {gap: 4},
+    h(HStack, {gap: 3, align: 'center'},
+      h(Text, {type: 'supporting', weight: 'semibold', style: textColor(DATE_HUE)}, fa('file-lines', DATE_HUE), ' ', day(memos.date)),
+      h(Tag, {tag}),
+    ),
+    markdown
+      ? h(Markdown, {density: 'compact', contentWidth: '100%', onLinkClick: openInNewTab}, markdown)
+      : h(Text, {type: 'supporting'}, 'No memo.'),
+  );
+}
+
 function App() {
   const [report, setReport] = useState(null);
   const [error, setError] = useState(null);
   const [month, setMonth] = useState(0); // where the timeline index points, in months from now
   const timeline = useRef(null);
   const jumpedAt = useRef(0);
-  const [query, setQuery] = useState('');
-  const [tags, setTags] = useState([]); // the tags to show; none means all of them
-  const [semantic, setSemantic] = useState(null);
+  const [tag, setTag] = useState(ALL); // the one tag to show, or all of them
   const isWide = useMediaQuery(`(min-width: ${INDEX_MIN_WIDTH}px)`); // a phone has no room for the index beside the cards
+  const hasMemoColumn = useMediaQuery(`(min-width: ${MEMO_MIN_WIDTH}px)`); // on a narrower page the memo folds away above the cards
 
   useEffect(() => { loadJson('output.json').then(setReport, setError); }, []);
-
-  // Keyword matches show at once; semantic matches join them once the model has answered
-  useEffect(() => {
-    if (!query.trim()) return;
-    const timer = setTimeout(() => semanticMatches(query).then(setSemantic, e => console.warn('Semantic search unavailable:', e)), SEMANTIC_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [query]);
 
   const items = useMemo(() => {
     if (!report) return null;
@@ -253,31 +245,27 @@ function App() {
         bucket: bucket(p.resolution_date),
         date: p.resolution_date,
         outcomes: outcomes(p),
-        text: [p.title, ...(p.bets ?? []).map(b => b.prompt)].join(' ').toLowerCase(),
       })).sort((a, b) => byDate(a, b) || b.volume_24h - a.volume_24h), // most traded first within a day
       catalysts: (report.upcoming_catalysts ?? []).map((c, index) => ({
-        ...c, index, isCatalyst: true, date: c.expected_date, bucket: bucket(c.expected_date), text: `${c.title} ${c.when}`.toLowerCase(),
+        ...c, index, isCatalyst: true, date: c.expected_date, bucket: bucket(c.expected_date),
       })).sort(byDate),
     };
   }, [report]);
 
   const groups = useMemo(() => {
     if (!items) return [];
-    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-    const near = semantic?.query === query ? semantic : null;
-    const matches = (item, isNear) => (!tags.length || tags.includes(item.tag))
-      && (!terms.length || terms.every(term => item.text.includes(term)) || isNear);
     const byBucket = new Map();
-    const add = (kind, item) => {
-      if (!byBucket.has(item.bucket)) byBucket.set(item.bucket, {bucket: item.bucket, questions: [], catalysts: []});
-      byBucket.get(item.bucket)[kind].push(item);
-    };
-    for (const q of items.questions) if (matches(q, near?.questions.has(q.id))) add('questions', q);
-    for (const c of items.catalysts) if (matches(c, near?.catalysts.has(c.index))) add('catalysts', c);
+    for (const kind of ['questions', 'catalysts']) {
+      for (const item of items[kind]) {
+        if (tag !== ALL && item.tag !== tag) continue;
+        if (!byBucket.has(item.bucket)) byBucket.set(item.bucket, {bucket: item.bucket, questions: [], catalysts: []});
+        byBucket.get(item.bucket)[kind].push(item);
+      }
+    }
     return [...byBucket.values()].sort((a, b) => a.bucket - b.bucket).map(group => ({
       ...group, label: group.bucket === LATER ? 'Later' : longMonth(items.thisMonth + group.bucket),
     }));
-  }, [items, query, tags, semantic]);
+  }, [items, tag]);
 
   // Scrolling the timeline moves the index to the month being read ...
   useEffect(() => {
@@ -286,10 +274,11 @@ function App() {
     const onScroll = () => {
       if (performance.now() - jumpedAt.current < JUMP_SETTLE_MS) return; // the index itself scrolled here
       const readingLine = scroller.getBoundingClientRect().top + scroller.clientHeight / 3;
-      const reading = groups.findLast(group => document.getElementById(`month-${group.bucket}`).getBoundingClientRect().top <= readingLine);
-      setMonth((reading ?? groups[0])?.bucket ?? 0);
+      // At the very top the first month is the one being read, however short it is
+      const reading = scroller.scrollTop > 0 && groups.findLast(group => document.getElementById(`month-${group.bucket}`).getBoundingClientRect().top <= readingLine);
+      setMonth((reading || groups[0])?.bucket ?? 0);
     };
-    onScroll(); // the content just changed (first load, a search), so the month being read may have too
+    onScroll(); // the content just changed (first load, a different tag), so the month being read may have too
     scroller.addEventListener('scroll', onScroll, {passive: true});
     return () => scroller.removeEventListener('scroll', onScroll);
   }, [groups]);
@@ -322,39 +311,42 @@ function App() {
       .map(value => ({value: LATER - value, label: Math.abs(value - month) > YEAR_LABEL_CLEARANCE ? String((items.thisMonth + value) / 12) : undefined})),
   ];
 
+  const memo = h(Memo, {memos: report.memos, tag});
+
   return h(Layout, {
-    contentWidth: 1280,
+    contentWidth: 1680,
     header: h(LayoutHeader, {hasDivider: true},
       h(HStack, {gap: 4, align: 'center', justify: 'between', wrap: 'wrap'},
         h(Heading, {level: 3, accessibilityLevel: 1}, fa('crystal-ball'), ' Zeitgeist'),
-        h(HStack, {gap: 3, align: 'center', wrap: 'wrap'},
-          h(MultiSelector, {
-            label: 'Tags', isLabelHidden: true, placeholder: 'Tags', size: 'sm', width: 260, startIcon: fa('tags'),
-            options: Object.keys(TAGS), renderOption: option => h(Tag, {tag: option.value}), // the list doubles as the legend
-            value: tags, onChange: setTags, triggerDisplay: 'badges', hasClear: true, presentation: 'adaptive',
-          }),
-          h(TextInput, {
-            type: 'search', label: 'Search', isLabelHidden: true, placeholder: 'Search',
-            value: query, onChange: setQuery, startIcon: fa('magnifying-glass'), hasClear: true, size: 'sm', width: 260,
-          }),
+        // One tag at a time; "All" is the default, and pressing the selected tag again goes back to it
+        h(ToggleButtonGroup, {label: 'Tag', type: 'single', value: tag, onChange: value => setTag(value ?? ALL), size: 'sm'},
+          h(ToggleButton, {value: ALL, label: ALL, icon: fa('layer-group')}),
+          Object.entries(TAGS).map(([name, {hue, icon}]) => h(ToggleButton, {
+            key: name, value: name, label: name, icon: fa(icon, hue === 'neutral' ? 'gray' : hue),
+          })),
         ),
       ),
     ),
-    start: isWide && h(LayoutPanel, {width: 112, isScrollable: false, role: 'navigation', label: 'Timeline index'},
+    start: isWide && h(LayoutPanel, {width: INDEX_WIDTH, isScrollable: false, role: 'navigation', label: 'Timeline index'},
       h(Slider, {
         label: 'Jump to month', isLabelHidden: true, orientation: 'vertical', min: 0, max: LATER, step: 1,
         value: LATER - month, onChange: value => jumpTo(LATER - value), formatValue: value => monthLabel(LATER - value),
         valueDisplay: 'none', marks, containerStyle: {height: '100%'}, controlStyle: {height: '100%', flex: 'none', width: INDEX_TRACK_WIDTH},
       }),
     ),
-    content: h(LayoutContent, {label: 'Timeline', ref: timeline}, groups.length === 0
-      ? h(EmptyState, {
-          icon: fa('telescope fa-2xl'),
-          title: 'No matches',
-          description: 'Try a broader search.',
-        })
-      : h(VStack, {gap: 8}, groups.map(group => h(Month, {key: group.bucket, group}))),
-    ),
+    content: h(LayoutContent, {label: 'Timeline', ref: timeline}, h(VStack, {gap: 8},
+      !hasMemoColumn && h(Collapsible, {trigger: 'Memo', defaultIsOpen: false}, memo),
+      groups.length === 0
+        ? h(EmptyState, {
+            icon: fa('telescope fa-2xl'),
+            title: 'Nothing has this tag',
+            actions: h(Button, {label: `Show ${ALL.toLowerCase()}`, variant: 'secondary', size: 'sm', icon: fa('layer-group'), onClick: () => setTag(ALL)}),
+          })
+        : groups.map(group => h(Month, {key: group.bucket, group, maxColumns: hasMemoColumn ? 2 : 3})),
+    )),
+    end: hasMemoColumn && h(LayoutPanel, {
+      width: `calc(100% - ${INDEX_WIDTH + CARDS_WIDTH}px)`, hasDivider: true, role: 'complementary', label: 'Memo',
+    }, memo),
   });
 }
 
